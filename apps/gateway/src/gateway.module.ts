@@ -4,9 +4,6 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
 import { AuthGatewayController } from './auth.gateway.controller';
 import { CommonModule } from 'libs/common/src';
 import { ConfigModule } from 'libs/common/src/modules/config.module';
-
-import { APP_PIPE } from '@nestjs/core';
-import CustomZodValidationPipe from 'libs/common/src/pipes/custom-zod-validation.pipe';
 import { AUTH_SERVICE, MANAGER_SERVICE, MEDIA_SERVICE, PROVIDER_SERVICE } from 'libs/common/src/constants/service-name.constant';
 import { ManagerGatewayController } from './manager.gateway.controller';
 import { MediaGatewayController } from './media.gateway.controller';
@@ -48,12 +45,6 @@ import { MediaGatewayController } from './media.gateway.controller';
     ]),
   ],
   controllers: [AuthGatewayController, ManagerGatewayController, MediaGatewayController],
-  providers: [
-    {
-      provide: APP_PIPE,
-      useClass: CustomZodValidationPipe
-
-    }
-  ]
+  providers: []
 })
 export class AppModule { }
