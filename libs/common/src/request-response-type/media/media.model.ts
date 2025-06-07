@@ -6,6 +6,4 @@ export const PresignedUploadFileBodySchema = z
         filesize: z.number().max(1 * 1024 * 1024),
     })
     .strict()
-
-
 export type PresignedUploadFileBodyType = z.infer<typeof PresignedUploadFileBodySchema>
