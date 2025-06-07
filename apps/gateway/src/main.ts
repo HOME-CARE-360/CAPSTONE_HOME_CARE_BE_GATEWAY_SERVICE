@@ -1,5 +1,5 @@
 import { NestFactory } from '@nestjs/core'; import { ConfigService } from '@nestjs/config';
-import { setApp } from './app';
+
 import { AppModule } from './gateway.module';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger'
 import { patchNestJsSwagger } from 'nestjs-zod';
@@ -29,6 +29,5 @@ async function bootstrap() {
   })
   await app.listen(configService.getOrThrow('GATEWAY_HTTP_PORT') || 3000);
   console.log(`🚀 App listening on port ${process.env.GATEWAY_HTTP_PORT as string}`);
-  setApp(app);
 }
 bootstrap()
