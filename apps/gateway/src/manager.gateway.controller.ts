@@ -16,6 +16,8 @@ export class ManagerGatewayController {
     @ZodSerializerDto(MessageResDTO)
     async changeStatusProvider(@Body() body: UpdateStatusProviderBodyDTO) {
         try {
+            console.log("vao roi");
+
             return await lastValueFrom(this.authClient.send({ cmd: 'change-status-provider' }, body));
         } catch (error) {
             console.log(error);
