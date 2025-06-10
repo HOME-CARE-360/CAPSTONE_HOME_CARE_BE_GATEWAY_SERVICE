@@ -1,11 +1,12 @@
-import { Injectable, CanActivate, ExecutionContext, UnauthorizedException, HttpException } from '@nestjs/common';
+import { Injectable, CanActivate, ExecutionContext, HttpException } from '@nestjs/common';
 
 import { Reflector } from '@nestjs/core';
 import { AUTH_TYPE_KEY, AuthTypeDecoratorPayload } from '../decorator/auth.decorator';
 import { AccessTokenGuard } from './access-token.guard';
 import { AuthType, ConditionGuard } from '../constants/auth.constant';
 import { PaymentAPIKeyGuard } from './api-key.guard';
-
+import { UnauthorizedAccessException } from '../errors/share-auth.error';
+import { RpcException } from "@nestjs/microservices";
 @Injectable()
 export class AuthenticationGuard implements CanActivate {
     private authTypeGuardMap: Record<string, CanActivate>;
@@ -50,9 +51,9 @@ export class AuthenticationGuard implements CanActivate {
         }
 
         if (lastError instanceof HttpException) {
-            throw lastError
+            throw new RpcException(lastError)
         }
-        throw new UnauthorizedException()
+        throw UnauthorizedAccessException
     }
 
     private async handleAndCondition(guards: CanActivate[], context: ExecutionContext) {
@@ -60,13 +61,13 @@ export class AuthenticationGuard implements CanActivate {
         for (const guard of guards) {
             try {
                 if (!(await guard.canActivate(context))) {
-                    throw new UnauthorizedException()
+                    throw UnauthorizedAccessException
                 }
             } catch (error) {
                 if (error instanceof HttpException) {
-                    throw error
+                    throw new RpcException(error)
                 }
-                throw new UnauthorizedException()
+                throw UnauthorizedAccessException
             }
         }
         return true

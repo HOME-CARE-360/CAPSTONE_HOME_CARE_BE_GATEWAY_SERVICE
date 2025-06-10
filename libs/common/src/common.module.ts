@@ -38,11 +38,11 @@ const sharedServices = [
 @Module({
   providers: [
     ...sharedServices,
-    // AccessTokenGuard,
-    // {
-    //   provide: APP_GUARD,
-    //   useClass: AuthenticationGuard,
-    // },
+    AccessTokenGuard,
+    {
+      provide: APP_GUARD,
+      useClass: AuthenticationGuard,
+    },
   ],
   exports: sharedServices,
   imports: [JwtModule],

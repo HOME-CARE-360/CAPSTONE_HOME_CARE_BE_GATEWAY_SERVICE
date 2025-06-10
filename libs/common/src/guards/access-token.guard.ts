@@ -1,9 +1,10 @@
-import { Injectable, CanActivate, ExecutionContext, UnauthorizedException, ForbiddenException } from '@nestjs/common';
+import { Injectable, CanActivate, ExecutionContext, } from '@nestjs/common';
 import { TokenService } from '../services/token.service';
 import { REQUEST_USER_KEY } from '../constants/auth.constant';
 import { AccessTokenPayload } from '../types/jwt.type';
 import { PrismaService } from '../services/prisma.service';
 import { HTTPMethod } from '@prisma/client';
+import { ForbiddenExceptionRpc, InvalidAccessTokenException, MissingAccessTokenException } from '../errors/share-auth.error';
 
 @Injectable()
 export class AccessTokenGuard implements CanActivate {
@@ -28,13 +29,13 @@ export class AccessTokenGuard implements CanActivate {
             request[REQUEST_USER_KEY] = decodedAccessToken
             return decodedAccessToken
         } catch {
-            throw new UnauthorizedException('Error.InvalidAccessToken')
+            throw InvalidAccessTokenException
         }
     }
     private extractAccessTokenFromHeader(request: any): string {
         const accessToken = request.headers.authorization?.split(' ')[1]
         if (!accessToken) {
-            throw new UnauthorizedException('Error.MissingAccessToken')
+            throw MissingAccessTokenException
         }
         return accessToken
     }
@@ -56,12 +57,12 @@ export class AccessTokenGuard implements CanActivate {
                     }
                 }
             }
-        }).catch(() => { throw new ForbiddenException() })
+        }).catch(() => { throw ForbiddenExceptionRpc })
         console.log(rolesWithPerms);
 
         const allPerms = rolesWithPerms.flatMap(r => r.permissions)
         if (allPerms.length === 0) {
-            throw new ForbiddenException()
+            throw ForbiddenExceptionRpc
         }
     }
 

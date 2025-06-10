@@ -8,6 +8,7 @@ import {
 import { PrismaService } from '../services/prisma.service';
 import { REQUEST_USER_KEY } from '../constants/auth.constant';
 import { AccessTokenPayload } from '../types/jwt.type';
+import { ProviderNotVerifiedException, ServiceProviderNotFoundException } from '../errors/share-provider.error';
 
 @Injectable()
 export class VerifiedProviderGuard implements CanActivate {
@@ -21,7 +22,7 @@ export class VerifiedProviderGuard implements CanActivate {
         const providerId = user.providerId;
 
         if (!providerId) {
-            throw new ForbiddenException('Missing provider identifier');
+            throw ServiceProviderNotFoundException;
         }
 
         const provider = await this.prisma.serviceProvider.findUnique({
@@ -30,10 +31,10 @@ export class VerifiedProviderGuard implements CanActivate {
         });
 
         if (!provider) {
-            throw new ForbiddenException('ServiceProvider not found');
+            throw ServiceProviderNotFoundException;
         }
         if (!provider.verificationStatus) {
-            throw new ForbiddenException('Your provider account is not verified');
+            throw ProviderNotVerifiedException;
         }
 
         return true;
