@@ -1,4 +1,4 @@
-import { Body, Controller, Inject, Post } from "@nestjs/common";
+import { Body, Controller, Inject, Patch, Post } from "@nestjs/common";
 import { ClientProxy } from "@nestjs/microservices";
 import { UpdateStatusProviderBodyDTO } from "libs/common/src/request-response-type/manager/managers.dto";
 import { handleZodError } from "libs/common/helpers";
@@ -12,7 +12,7 @@ export class ManagerGatewayController {
     constructor(
         @Inject(MANAGER_SERVICE) private readonly authClient: ClientProxy
     ) { }
-    @Post('change-status-provider')
+    @Patch('change-status-provider')
     @ZodSerializerDto(MessageResDTO)
     async changeStatusProvider(@Body() body: UpdateStatusProviderBodyDTO) {
         try {
