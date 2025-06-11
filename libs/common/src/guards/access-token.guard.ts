@@ -43,6 +43,12 @@ export class AccessTokenGuard implements CanActivate {
         const roleIds = decodedAccessToken.roles.map((item) => item.id)
         const path = req.route.path
         const method = req.method as keyof typeof HTTPMethod
+        console.log(roleIds);
+        console.log(path);
+        console.log(method);
+
+
+
         const rolesWithPerms = await this.prismaService.role.findMany({
             where: {
                 id: { in: roleIds },

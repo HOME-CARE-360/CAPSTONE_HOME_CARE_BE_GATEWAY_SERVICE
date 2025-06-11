@@ -6,7 +6,6 @@ import { AccessTokenGuard } from './access-token.guard';
 import { AuthType, ConditionGuard } from '../constants/auth.constant';
 import { PaymentAPIKeyGuard } from './api-key.guard';
 import { UnauthorizedAccessException } from '../errors/share-auth.error';
-import { RpcException } from "@nestjs/microservices";
 @Injectable()
 export class AuthenticationGuard implements CanActivate {
     private authTypeGuardMap: Record<string, CanActivate>;
