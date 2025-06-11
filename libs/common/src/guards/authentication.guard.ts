@@ -51,7 +51,7 @@ export class AuthenticationGuard implements CanActivate {
         }
 
         if (lastError instanceof HttpException) {
-            throw new RpcException(lastError)
+            throw lastError
         }
         throw UnauthorizedAccessException
     }
@@ -65,7 +65,7 @@ export class AuthenticationGuard implements CanActivate {
                 }
             } catch (error) {
                 if (error instanceof HttpException) {
-                    throw new RpcException(error)
+                    throw error
                 }
                 throw UnauthorizedAccessException
             }
