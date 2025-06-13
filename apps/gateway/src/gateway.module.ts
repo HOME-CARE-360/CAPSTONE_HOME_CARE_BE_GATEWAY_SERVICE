@@ -10,7 +10,7 @@ import { MediaGatewayController } from './media.gateway.controller';
 import { APP_PIPE } from '@nestjs/core';
 import CustomZodValidationPipe from 'libs/common/src/pipes/custom-zod-validation.pipe';
 import { ManageServicesGatewayController } from './provider-gateway-controller/manage-services-controller';
-import { ManageStaffGatewayController } from './provider-gateway-controller/manager-staffs-ccontroller';
+import { ManageStaffGatewayController } from './provider-gateway-controller/manager-staffs-controller';
 
 @Module({
   imports: [CommonModule, ConfigModule,

@@ -15,7 +15,6 @@ import { handleZodError } from 'libs/common/helpers';
 import { CreateStaffBodyDTO, GetStaffsQueryDTO } from 'libs/common/src/request-response-type/provider/manage-staff/manage-staff.dto';
 import { ApiQuery } from '@nestjs/swagger';
 import { OrderBy, SortBy } from 'libs/common/src/constants/others.constant';
-import { GetServicesForProviderQueryDTO, GetServicesForProviderResDTO } from 'libs/common/src/request-response-type/service/services.dto';
 
 
 
@@ -71,10 +70,7 @@ export class ManageStaffGatewayController {
             return await lastValueFrom(this.providerClient.send({ cmd: 'get-list-staff' }, { query, providerID }));
         } catch (error) {
             console.log(error);
-
             handleZodError(error)
-
-
         }
         // }
         // @Patch("/update-service")
