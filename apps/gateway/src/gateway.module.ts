@@ -4,13 +4,14 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
 import { AuthGatewayController } from './auth.gateway.controller';
 import { CommonModule } from 'libs/common/src';
 import { ConfigModule } from 'libs/common/src/modules/config.module';
-import { AUTH_SERVICE, MANAGER_SERVICE, MEDIA_SERVICE, PROVIDER_SERVICE } from 'libs/common/src/constants/service-name.constant';
+import { AUTH_SERVICE, MANAGER_SERVICE, MEDIA_SERVICE, PROVIDER_SERVICE, SERVICE_SERVICE } from 'libs/common/src/constants/service-name.constant';
 import { ManagerGatewayController } from './manager.gateway.controller';
 import { MediaGatewayController } from './media.gateway.controller';
 import { APP_PIPE } from '@nestjs/core';
 import CustomZodValidationPipe from 'libs/common/src/pipes/custom-zod-validation.pipe';
 import { ManageServicesGatewayController } from './provider-gateway-controller/manage-services-controller';
 import { ManageStaffGatewayController } from './provider-gateway-controller/manager-staffs-controller';
+import { ServiceGatewayController } from './service.gateway.controller';
 
 @Module({
   imports: [CommonModule, ConfigModule,
@@ -45,10 +46,18 @@ import { ManageStaffGatewayController } from './provider-gateway-controller/mana
           host: process.env.PROVIDER_HOST || 'localhost',
           port: parseInt(process.env.PROVIDER_TCP_PORT || '3008'),
         },
+      },
+      {
+        name: SERVICE_SERVICE,
+        transport: Transport.TCP,
+        options: {
+          host: process.env.SERVICE_HOST || 'localhost',
+          port: parseInt(process.env.SERVICE_TCP_PORT || '3008'),
+        },
       }
     ]),
   ],
-  controllers: [AuthGatewayController, ManagerGatewayController, MediaGatewayController, ManageServicesGatewayController, ManageStaffGatewayController],
+  controllers: [AuthGatewayController, ManagerGatewayController, MediaGatewayController, ManageServicesGatewayController, ManageStaffGatewayController, ServiceGatewayController],
   providers: [{
     provide: APP_PIPE,
     useClass: CustomZodValidationPipe
