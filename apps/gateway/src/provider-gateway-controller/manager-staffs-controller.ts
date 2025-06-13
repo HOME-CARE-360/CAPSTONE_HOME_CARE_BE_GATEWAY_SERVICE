@@ -1,9 +1,5 @@
-import { Body, Controller, Get, Inject, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
-
+import { Body, Controller, Get, Inject, Post, Query, UseGuards } from '@nestjs/common';
 import { ZodSerializerDto } from 'nestjs-zod';
-
-
-
 import { VerifiedProviderGuard } from 'libs/common/src/guards/verified-provider.guard';
 import { ActiveUser } from 'libs/common/src/decorator/active-user.decorator';
 import { AccessTokenPayload } from 'libs/common/src/types/jwt.type';
@@ -13,11 +9,8 @@ import { ClientProxy } from '@nestjs/microservices';
 import { lastValueFrom } from 'rxjs';
 import { handleZodError } from 'libs/common/helpers';
 import { CreateStaffBodyDTO, GetStaffsQueryDTO } from 'libs/common/src/request-response-type/provider/manage-staff/manage-staff.dto';
-import { ApiQuery } from '@nestjs/swagger';
-import { OrderBy, SortBy } from 'libs/common/src/constants/others.constant';
-
-
-
+import { ApiQuery } from '@nestjs/swagger'
+import { OrderBy, SortBy } from 'libs/common/src/constants/others.constant'
 @Controller('manage-staffs')
 @UseGuards(VerifiedProviderGuard)
 export class ManageStaffGatewayController {
@@ -29,11 +22,7 @@ export class ManageStaffGatewayController {
         try {
             return await lastValueFrom(this.providerClient.send({ cmd: 'create-staff' }, { body, providerID: user.providerId as number }));
         } catch (error) {
-            console.log(error);
-
             handleZodError(error)
-
-
         }
     }
     @Get("list-staff")
@@ -64,8 +53,10 @@ export class ManageStaffGatewayController {
         example: SortBy.CreatedAt,
     })
     @ZodSerializerDto(GetStaffsQueryDTO)
-    async list(@Query() query: GetStaffsQueryDTO, @ActiveUser("userId") providerID: number) {
+    async list(@Query() query: GetStaffsQueryDTO, @ActiveUser("providerId") providerID: number) {
         console.log(providerID);
+        console.log(query);
+
         try {
             return await lastValueFrom(this.providerClient.send({ cmd: 'get-list-staff' }, { query, providerID }));
         } catch (error) {
