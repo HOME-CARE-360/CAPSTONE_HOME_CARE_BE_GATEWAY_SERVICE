@@ -23,7 +23,7 @@ import { CreateStaffBodyDTO } from 'libs/common/src/request-response-type/provid
 @UseGuards(VerifiedProviderGuard)
 export class ManageStaffGatewayController {
     constructor(@Inject(PROVIDER_SERVICE) private readonly providerClient: ClientProxy) { }
-    @Post("/create-staff")
+    @Post("create-staff")
 
     @ZodSerializerDto(MessageResDTO)
     async createService(@Body() body: CreateStaffBodyDTO, @ActiveUser() user: AccessTokenPayload) {
