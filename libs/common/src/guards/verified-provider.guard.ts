@@ -3,7 +3,6 @@ import {
     Injectable,
     CanActivate,
     ExecutionContext,
-    ForbiddenException,
 } from '@nestjs/common';
 import { PrismaService } from '../services/prisma.service';
 import { REQUEST_USER_KEY } from '../constants/auth.constant';

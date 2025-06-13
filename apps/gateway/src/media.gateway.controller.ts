@@ -8,7 +8,7 @@ import { ZodSerializerDto } from "nestjs-zod";
 import { lastValueFrom } from "rxjs";
 import { PresignedUploadFileBodyDTO } from "libs/common/src/request-response-type/media/media.dto";
 
-@Controller('media')
+@Controller('medias')
 export class MediaGatewayController {
     constructor(
         @Inject(MEDIA_SERVICE) private readonly mediaClient: ClientProxy

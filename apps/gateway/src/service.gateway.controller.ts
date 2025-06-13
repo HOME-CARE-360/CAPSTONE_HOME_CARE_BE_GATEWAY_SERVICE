@@ -9,7 +9,7 @@ import { OrderBy, SortBy } from "libs/common/src/constants/others.constant";
 import { IsPublic } from "libs/common/src/decorator/auth.decorator";
 import { DeleteServicesParamDTO, GetServiceResDTO, GetServicesQueryDTO, GetServicesResDTO } from "libs/common/src/request-response-type/service/services.dto";
 
-@Controller('managers')
+@Controller('services')
 export class ServiceGatewayController {
     constructor(
         @Inject(SERVICE_SERVICE) private readonly serviceClient: ClientProxy
