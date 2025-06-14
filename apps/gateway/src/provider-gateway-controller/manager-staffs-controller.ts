@@ -22,6 +22,9 @@ export class ManageStaffGatewayController {
         try {
             return await lastValueFrom(this.providerClient.send({ cmd: 'create-staff' }, { body, providerID: user.providerId as number }));
         } catch (error) {
+            console.log("ne");
+            console.log(error);
+
             handleZodError(error)
         }
     }
