@@ -55,6 +55,7 @@ export class ServiceGatewayController {
     @ZodSerializerDto(GetServicesResDTO)
     async getListService(@Query() query: GetServicesQueryDTO) {
         try {
+            console.log(query);
 
             return await lastValueFrom(this.serviceClient.send({ cmd: 'get-list-service' }, { query }));
         } catch (error) {
