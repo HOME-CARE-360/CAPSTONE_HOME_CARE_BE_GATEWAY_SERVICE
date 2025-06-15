@@ -47,7 +47,7 @@ export class ServiceGatewayController {
         name: 'sortBy',
         required: false,
         enum: SortBy,
-        description: 'Sort field: CreatedAt, Price, or Discount',
+        description: 'Sort field: CreatedAt',
         example: SortBy.CreatedAt,
     })
     @IsPublic()

@@ -12,6 +12,7 @@ import CustomZodValidationPipe from 'libs/common/src/pipes/custom-zod-validation
 import { ManageServicesGatewayController } from './provider-gateway-controller/manage-services-controller';
 import { ManageStaffGatewayController } from './provider-gateway-controller/manager-staffs-controller';
 import { ServiceGatewayController } from './service.gateway.controller';
+import { CategoryGatewayController } from './category.gateway.controller';
 
 @Module({
   imports: [CommonModule, ConfigModule,
@@ -57,7 +58,7 @@ import { ServiceGatewayController } from './service.gateway.controller';
       }
     ]),
   ],
-  controllers: [AuthGatewayController, ManagerGatewayController, MediaGatewayController, ManageServicesGatewayController, ManageStaffGatewayController, ServiceGatewayController],
+  controllers: [AuthGatewayController, ManagerGatewayController, MediaGatewayController, ManageServicesGatewayController, ManageStaffGatewayController, ServiceGatewayController, CategoryGatewayController],
   providers: [{
     provide: APP_PIPE,
     useClass: CustomZodValidationPipe
