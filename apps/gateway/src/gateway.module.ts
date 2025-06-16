@@ -14,6 +14,7 @@ import { ManageStaffGatewayController } from './provider-gateway-controller/mana
 import { ServiceGatewayController } from './service.gateway.controller';
 import { CategoryGatewayController } from './category.gateway.controller';
 import { UserGatewayController } from './user.gateway.controller';
+import { RawTcpClientService } from 'libs/common/src/tcp/raw-tcp-client.service';
 
 @Module({
   imports: [CommonModule, ConfigModule,
@@ -70,7 +71,15 @@ import { UserGatewayController } from './user.gateway.controller';
   controllers: [AuthGatewayController, ManagerGatewayController, MediaGatewayController, ManageServicesGatewayController, ManageStaffGatewayController, ServiceGatewayController, CategoryGatewayController, UserGatewayController],
   providers: [{
     provide: APP_PIPE,
-    useClass: CustomZodValidationPipe
-  }]
+    useClass: CustomZodValidationPipe,
+
+  }, {
+    provide: USER_SERVICE,
+    useFactory: () => {
+      const host = process.env.USER_HOST || 'localhost';
+      const port = parseInt(process.env.USER_TCP_PORT || '4000');
+      return new RawTcpClientService(host, port);
+    },
+  },]
 })
 export class AppModule { }

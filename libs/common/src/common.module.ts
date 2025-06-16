@@ -31,7 +31,8 @@ const sharedServices = [
   S3Service,
   ShareStaffRepository,
   SharedCategoryRepository,
-  SharedUserRepository
+  SharedUserRepository,
+
 
 ]
 
