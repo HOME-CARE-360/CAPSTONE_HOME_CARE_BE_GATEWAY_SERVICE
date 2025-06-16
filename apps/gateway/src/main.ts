@@ -7,6 +7,7 @@ import { patchNestJsSwagger } from 'nestjs-zod';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
+  app.enableCors({})
   patchNestJsSwagger()
   const config = new DocumentBuilder()
     .setTitle('Home Care 360 API')
