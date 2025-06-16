@@ -1,4 +1,4 @@
-import { Body, Controller, Inject, Param, Patch, Post } from "@nestjs/common";
+import { Body, Controller, Delete, Inject, Param, Patch, Post } from "@nestjs/common";
 import { ClientProxy } from "@nestjs/microservices";
 import { UpdateStatusProviderBodyDTO } from "libs/common/src/request-response-type/manager/managers.dto";
 import { handleZodError } from "libs/common/helpers";
@@ -51,6 +51,16 @@ export class ManagerGatewayController {
 
 
         }
+    }
+    @Delete('delete-category/:categoryId')
+    @ZodSerializerDto(MessageResDTO)
+    async deleteCategory(@Param("categoryId") categoryId: number, @ActiveUser("userId") userId: number) {
+        try {
+            return await lastValueFrom(this.authClient.send({ cmd: 'delete-category' }, { userId, categoryId }));
+        } catch (error) {
+            handleZodError(error)
 
+
+        }
     }
 }
