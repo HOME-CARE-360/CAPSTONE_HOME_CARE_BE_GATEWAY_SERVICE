@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Inject, Query } from "@nestjs/common";
+import { Controller, Get, Inject, Query } from "@nestjs/common";
 import { ClientProxy } from "@nestjs/microservices";
 import { handleZodError } from "libs/common/helpers";
 import { SERVICE_SERVICE } from "libs/common/src/constants/service-name.constant";
@@ -6,8 +6,7 @@ import { ZodSerializerDto } from "nestjs-zod";
 import { lastValueFrom } from "rxjs";
 import { ApiQuery } from "@nestjs/swagger";
 import { IsPublic } from "libs/common/src/decorator/auth.decorator";
-import { CreateCategoryBodyDTO, GetListCategoryQueryDTO, GetListCategoryResDTO } from "libs/common/src/request-response-type/category/category.dto";
-import { MessageResDTO } from "libs/common/src/dtos/response.dto";
+import { GetListCategoryQueryDTO, GetListCategoryResDTO } from "libs/common/src/request-response-type/category/category.dto";
 import { OrderBy, SortBy } from "libs/common/src/constants/others.constant";
 
 @Controller('categories')
@@ -43,17 +42,5 @@ export class CategoryGatewayController {
 
         }
 
-    }
-    @IsPublic()
-    @Get("create-category")
-    @ZodSerializerDto(MessageResDTO)
-    async getDetailService(@Body() body: CreateCategoryBodyDTO) {
-        try {
-            return await lastValueFrom(this.serviceClient.send({ cmd: 'create-category' }, { body }));
-        } catch (error) {
-            handleZodError(error)
-
-
-        }
     }
 }

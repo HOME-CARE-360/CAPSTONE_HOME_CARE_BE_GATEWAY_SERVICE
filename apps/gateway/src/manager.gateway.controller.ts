@@ -1,4 +1,4 @@
-import { Body, Controller, Inject, Patch, Post } from "@nestjs/common";
+import { Body, Controller, Inject, Param, Patch, Post } from "@nestjs/common";
 import { ClientProxy } from "@nestjs/microservices";
 import { UpdateStatusProviderBodyDTO } from "libs/common/src/request-response-type/manager/managers.dto";
 import { handleZodError } from "libs/common/helpers";
@@ -34,6 +34,18 @@ export class ManagerGatewayController {
     async createCategory(@Body() body: CreateCategoryBodyDTO, @ActiveUser("userId") userId: number) {
         try {
             return await lastValueFrom(this.authClient.send({ cmd: 'create-category' }, { body, userId }));
+        } catch (error) {
+            handleZodError(error)
+
+
+        }
+
+    }
+    @Patch('update-category/:categoryId')
+    @ZodSerializerDto(MessageResDTO)
+    async updateCategory(@Param("categoryId") categoryId: number, @Body() body: CreateCategoryBodyDTO, @ActiveUser("userId") userId: number) {
+        try {
+            return await lastValueFrom(this.authClient.send({ cmd: 'update-category' }, { body, userId, categoryId }));
         } catch (error) {
             handleZodError(error)
 
