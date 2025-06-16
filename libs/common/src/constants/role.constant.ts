@@ -3,7 +3,7 @@ export const RoleName = {
     ServiceProvider: "SERVICE PROVIDER",
     Staff: "STAFF",
     Admin: 'ADMIN',
-
+    Manager: 'MANAGER'
 } as const
 
 export const HTTPMethod = {

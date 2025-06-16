@@ -57,7 +57,8 @@ async function bootstrap() {
     const allPerms = await prisma.permission.findMany({ where: { deletedAt: null } })
 
     // 4) Định nghĩa module cho từng role
-    const AdminModules: string[] = []  // mảng rỗng = cấp hết
+    const AdminModules: string[] = []
+    const ManagerModules: string[] = []
     const CustomerModules = [
         'AUTH', 'SERVICES', 'SERVICEPACKAGES',
         'BOOKINGS', 'CHATMESSAGES', 'REWARDS',
@@ -85,6 +86,7 @@ async function bootstrap() {
 
     // 5) Cập nhật từng role
     await Promise.all([
+        updateRole(RoleName.Manager, pick(ManagerModules), prisma),
         updateRole(RoleName.Admin, pick(AdminModules), prisma),
         updateRole(RoleName.Customer, pick(CustomerModules), prisma),
         updateRole(RoleName.ServiceProvider, pick(ServiceProviderModules), prisma),

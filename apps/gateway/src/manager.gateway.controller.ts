@@ -7,7 +7,7 @@ import { MessageResDTO } from "libs/common/src/dtos/response.dto";
 import { ZodSerializerDto } from "nestjs-zod";
 import { lastValueFrom } from "rxjs";
 import { ActiveUser } from "libs/common/src/decorator/active-user.decorator";
-import { CreateCategoryBodyDTO } from "libs/common/src/request-response-type/category/category.dto";
+import { CreateCategoryBodyDTO, UpdateCategoryQueryDTO } from "libs/common/src/request-response-type/category/category.dto";
 
 @Controller('managers')
 export class ManagerGatewayController {
@@ -43,9 +43,9 @@ export class ManagerGatewayController {
     }
     @Patch('update-category/:categoryId')
     @ZodSerializerDto(MessageResDTO)
-    async updateCategory(@Param("categoryId") categoryId: number, @Body() body: CreateCategoryBodyDTO, @ActiveUser("userId") userId: number) {
+    async updateCategory(@Param("categoryId") params: UpdateCategoryQueryDTO, @Body() body: CreateCategoryBodyDTO, @ActiveUser("userId") userId: number) {
         try {
-            return await lastValueFrom(this.authClient.send({ cmd: 'update-category' }, { body, userId, categoryId }));
+            return await lastValueFrom(this.authClient.send({ cmd: 'update-category' }, { body, userId, categoryId: params.categoryId }));
         } catch (error) {
             handleZodError(error)
 
@@ -54,9 +54,9 @@ export class ManagerGatewayController {
     }
     @Delete('delete-category/:categoryId')
     @ZodSerializerDto(MessageResDTO)
-    async deleteCategory(@Param("categoryId") categoryId: number, @ActiveUser("userId") userId: number) {
+    async deleteCategory(@Param("categoryId") params: UpdateCategoryQueryDTO, @ActiveUser("userId") userId: number) {
         try {
-            return await lastValueFrom(this.authClient.send({ cmd: 'delete-category' }, { userId, categoryId }));
+            return await lastValueFrom(this.authClient.send({ cmd: 'delete-category' }, { userId, categoryId: params.categoryId }));
         } catch (error) {
             handleZodError(error)
 
