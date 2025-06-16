@@ -13,6 +13,7 @@ import { ManageServicesGatewayController } from './provider-gateway-controller/m
 import { ManageStaffGatewayController } from './provider-gateway-controller/manager-staffs-controller';
 import { ServiceGatewayController } from './service.gateway.controller';
 import { CategoryGatewayController } from './category.gateway.controller';
+import { UserGatewayController } from './user.gateway.controller';
 
 @Module({
   imports: [CommonModule, ConfigModule,
@@ -58,7 +59,7 @@ import { CategoryGatewayController } from './category.gateway.controller';
       }
     ]),
   ],
-  controllers: [AuthGatewayController, ManagerGatewayController, MediaGatewayController, ManageServicesGatewayController, ManageStaffGatewayController, ServiceGatewayController, CategoryGatewayController],
+  controllers: [AuthGatewayController, ManagerGatewayController, MediaGatewayController, ManageServicesGatewayController, ManageStaffGatewayController, ServiceGatewayController, CategoryGatewayController, UserGatewayController],
   providers: [{
     provide: APP_PIPE,
     useClass: CustomZodValidationPipe
