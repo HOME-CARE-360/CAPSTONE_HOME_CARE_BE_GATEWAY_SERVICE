@@ -2,6 +2,7 @@ import { Body, Controller, Get, Inject, Param, Patch } from "@nestjs/common";
 import { handleZodError } from "libs/common/helpers";
 import { USER_SERVICE } from "libs/common/src/constants/service-name.constant";
 import { ActiveUser } from "libs/common/src/decorator/active-user.decorator";
+import { ChangePasswordDTO, UpdateUserAndCustomerProfileDTO } from "libs/common/src/request-response-type/customer/customer.dto";
 import { ChangePasswordDto, UpdateCustomerProfileDto } from "libs/common/src/request-response-type/customer/customer.model";
 
 import { GetCustomerInformationParamsDTO } from "libs/common/src/request-response-type/user/user.dto";
@@ -22,7 +23,7 @@ export class UserGatewayController {
     }
 
     @Patch('update-customer-information')
-    async updateCustomer(@Body() body: UpdateCustomerProfileDto, @ActiveUser("userId") userId: number) {
+    async updateCustomer(@Body() body: UpdateUserAndCustomerProfileDTO, @ActiveUser("userId") userId: number) {
         try {
             return await this.userRawTcpClient.send({ type: 'UPDATE_CUSTOMER', data: { ...body }, userId })
         } catch (error) {
@@ -30,7 +31,7 @@ export class UserGatewayController {
         }
     }
     @Patch('change-password')
-    async changePassword(@Body() body: ChangePasswordDto, @ActiveUser("userId") userId: number) {
+    async changePassword(@Body() body: ChangePasswordDTO, @ActiveUser("userId") userId: number) {
         try {
             return await this.userRawTcpClient.send({ type: 'CHANGE-PASSWORD', data: { ...body }, userId })
         } catch (error) {
