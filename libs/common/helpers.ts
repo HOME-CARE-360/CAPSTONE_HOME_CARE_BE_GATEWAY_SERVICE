@@ -56,7 +56,7 @@ export const adjustDateToWeekday = (startDate: Date, day: WeekDay): Date => {
 export function handleZodError(error: any): ErrorResponse {
     if (error.response) {
 
-        const status = error.status ? error.status : error.statusCode
+        const status = error.status ? error.status : error.response.statusCode
         throw new HttpException(error.response, status)
     }
 

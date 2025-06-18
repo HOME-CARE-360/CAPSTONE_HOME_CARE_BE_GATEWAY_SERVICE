@@ -59,8 +59,6 @@ export class ManagerGatewayController {
             return await lastValueFrom(this.authClient.send({ cmd: 'delete-category' }, { userId, categoryId: params.categoryId }));
         } catch (error) {
             handleZodError(error)
-
-
         }
     }
 }

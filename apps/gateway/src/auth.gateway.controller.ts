@@ -41,6 +41,7 @@ export class AuthGatewayController {
         }
 
     }
+
     @ApiBody({ type: SendOTPBodyDTO })
     @IsPublic()
     @Post('otp')
@@ -100,7 +101,7 @@ export class AuthGatewayController {
     async logout(@Body() body: LogoutBodyDTO) {
         try {
             return await lastValueFrom(
-                this.authClient.send({ cmd: 'logout' }, body.refreshToken)
+                this.authClient.send({ cmd: 'logout' }, { refreshToken: body.refreshToken })
             );
         } catch (error) {
             console.log(error);
