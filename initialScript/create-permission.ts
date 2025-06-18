@@ -60,7 +60,7 @@ async function bootstrap() {
     const AdminModules: string[] = []
     const ManagerModules: string[] = []
     const CustomerModules = [
-        'AUTH', 'SERVICES', 'SERVICEPACKAGES',
+        'AUTH', 'SERVICES', 'SERVICEPACKAGES', "USERS",
         'BOOKINGS', 'CHATMESSAGES', 'REWARDS',
         'PACKAGERECOMMENDATIONS', 'CUSTOMERPROFILE'
     ]

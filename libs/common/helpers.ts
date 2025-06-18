@@ -57,7 +57,9 @@ export function handleZodError(error: any): ErrorResponse {
     console.log(error);
 
     if (error.response) {
-        throw new HttpException(error.response, error.statusCode)
+        console.log("hi1");
+
+        throw new HttpException(error.response, error.status)
     }
 
     throw new HttpException("Internal server error", HttpStatus.INTERNAL_SERVER_ERROR)
