@@ -29,7 +29,7 @@ export class ManageServicesGatewayController {
         console.log(user);
 
         try {
-            return await lastValueFrom(this.providerClient.send({ cmd: "create-service" }, { body, userId: user.userId, providerId: user.providerId as number }));
+            return await lastValueFrom(this.providerClient.send({ cmd: "create-service" }, { body, userID: user.userId, providerId: user.providerId as number }));
         } catch (error) {
             console.log(error);
 
