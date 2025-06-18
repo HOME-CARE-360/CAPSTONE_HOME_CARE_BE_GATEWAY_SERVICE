@@ -27,7 +27,7 @@ export class ManageServicesGatewayController {
     @ZodSerializerDto(CreateServicesBodyDTO)
     async createService(@Body() body: CreateServicesBodyDTO, @ActiveUser() user: AccessTokenPayload) {
         try {
-            return await lastValueFrom(this.providerClient.send({ cmd: '/create-service' }, { body, userId: user.userId, providerId: user.providerId as number }));
+            return await lastValueFrom(this.providerClient.send({ cmd: "create-service" }, { body, userId: user.userId, providerId: user.providerId as number }));
         } catch (error) {
             console.log(error);
 
