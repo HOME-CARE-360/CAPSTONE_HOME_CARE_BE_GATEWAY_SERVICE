@@ -33,8 +33,12 @@ export class UserGatewayController {
     @Patch('change-password')
     async changePassword(@Body() body: ChangePasswordDTO, @ActiveUser("userId") userId: number) {
         try {
-            return await this.userRawTcpClient.send({ type: 'CHANGE_PASSWORD', data: { ...body }, userId })
+            const data = await this.userRawTcpClient.send({ type: 'CHANGE_PASSWORD', data: { ...body }, userId })
+            console.log(data);
+            return data
         } catch (error) {
+            console.log("hi");
+
             console.log(error);
 
             handleZodError(error)
