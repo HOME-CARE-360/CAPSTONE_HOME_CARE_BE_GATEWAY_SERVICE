@@ -70,7 +70,7 @@ export class ServiceGatewayController {
     @ZodSerializerDto(GetServiceResDTO)
     async getDetailService(@Param() serviceID: DeleteServicesParamDTO) {
         try {
-            return await lastValueFrom(this.serviceClient.send({ cmd: 'detail' }, { serviceID }));
+            return await lastValueFrom(this.serviceClient.send({ cmd: 'detail' }, { serviceID: serviceID.serviceId }));
         } catch (error) {
             handleZodError(error)
 
