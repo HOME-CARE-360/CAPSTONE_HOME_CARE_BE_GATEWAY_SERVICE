@@ -1,20 +1,22 @@
-import { Body, Controller, Get, Inject, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Inject, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { ZodSerializerDto } from 'nestjs-zod';
 import { VerifiedProviderGuard } from 'libs/common/src/guards/verified-provider.guard';
 import { ActiveUser } from 'libs/common/src/decorator/active-user.decorator';
 import { AccessTokenPayload } from 'libs/common/src/types/jwt.type';
 import { MessageResDTO } from 'libs/common/src/dtos/response.dto';
-import { PROVIDER_SERVICE } from 'libs/common/src/constants/service-name.constant';
+import { PROVIDER_SERVICE, USER_SERVICE } from 'libs/common/src/constants/service-name.constant';
 import { ClientProxy } from '@nestjs/microservices';
 import { lastValueFrom } from 'rxjs';
 import { handleZodError } from 'libs/common/helpers';
 import { CreateStaffBodyDTO, GetStaffsQueryDTO } from 'libs/common/src/request-response-type/provider/manage-staff/manage-staff.dto';
 import { ApiQuery } from '@nestjs/swagger'
 import { OrderBy, SortBy } from 'libs/common/src/constants/others.constant'
+import { RawTcpClientService } from 'libs/common/src/tcp/raw-tcp-client.service';
+import { UpdateUserAndStaffProfileDTO } from 'libs/common/src/request-response-type/staff/staff.dto';
 @Controller('manage-staffs')
 @UseGuards(VerifiedProviderGuard)
 export class ManageStaffGatewayController {
-    constructor(@Inject(PROVIDER_SERVICE) private readonly providerClient: ClientProxy) { }
+    constructor(@Inject(PROVIDER_SERVICE) private readonly providerClient: ClientProxy, @Inject(USER_SERVICE) private readonly userRawTcpClient: RawTcpClientService) { }
     @Post("create-staff")
 
     @ZodSerializerDto(MessageResDTO)
@@ -108,6 +110,25 @@ export class ManageStaffGatewayController {
         // }
 
     }
-
+    @Get('get-staff-information')
+    async getStaffInformation(@ActiveUser("userId") userId: number) {
+        try {
+            const data = await this.userRawTcpClient.send({ type: 'GET_STAFF', userId })
+            console.log(data);
+            return data
+        } catch (error) {
+            handleZodError(error)
+        }
+    }
+    @Patch('update-staff-information')
+    async getUserInformation(@Body() body: UpdateUserAndStaffProfileDTO, @ActiveUser("userId") userId: number) {
+        try {
+            const data = await this.userRawTcpClient.send({ type: 'UPDATE_STAFF', userId, data: { ...body } })
+            console.log(data);
+            return data
+        } catch (error) {
+            handleZodError(error)
+        }
+    }
 
 }
