@@ -7,7 +7,7 @@ export const ServiceRequestSchema = z.object({
     customerId: z.number(),
     providerId: z.number(),
     note: z.string().nullable().optional(),
-    preferredDate: z.date(),
+    preferredDate: z.coerce.date(),
     location: z.string().max(500),
     categoryId: z.number(),
     status: z.enum([RequestStatus.BOOKED, RequestStatus.ESTIMATED, RequestStatus.IN_PROGRESS, RequestStatus.REJECTED, RequestStatus.PENDING]),
