@@ -11,28 +11,28 @@ import { RawTcpClientService } from "libs/common/src/tcp/raw-tcp-client.service"
 export class PublicGatewayController {
     constructor(
         @Inject(USER_SERVICE) private readonly userRawTcpClient: RawTcpClientService) { }
-    @Get('get-staff-information/:userId')
-    async getStaffInformation(@ActiveUser("userId") userId: number) {
+    @Get('get-staff-information/:staffId')
+    async getStaffInformation(@Param("staffId") staffId: number) {
         try {
-            const data = await this.userRawTcpClient.send({ type: 'GET_STAFF', userId })
+            const data = await this.userRawTcpClient.send({ type: 'GET_STAFF', staffId })
             console.log(data);
             return data
         } catch (error) {
             handleZodError(error)
         }
     }
-    @Get('get-customer-information/:userId')
-    async changeStatusProvider(@Param() params: GetCustomerInformationParamsDTO) {
+    @Get('get-customer-information/:customerId')
+    async changeStatusProvider(@Param("customerId") customerId: number) {
         try {
-            return await this.userRawTcpClient.send({ type: 'GET_CUSTOMER', userId: params.userId, })
+            return await this.userRawTcpClient.send({ type: 'GET_CUSTOMER', customerId })
         } catch (error) {
             handleZodError(error)
         }
 
-    } @Get('get-service-provider-information/:userId')
-    async getServiceProviderInformation(@Param() { userId }: { userId: string }) {
+    } @Get('get-service-provider-information/:providerId')
+    async getServiceProviderInformation(@Param("providerId") providerId: number) {
         try {
-            const data = await this.userRawTcpClient.send({ type: 'GET_SERVICE_PROVIDER', userId })
+            const data = await this.userRawTcpClient.send({ type: 'GET_SERVICE_PROVIDER', providerId })
             console.log(data);
             return data
         } catch (error) {
