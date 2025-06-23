@@ -110,16 +110,7 @@ export class ManageStaffGatewayController {
         // }
 
     }
-    @Get('get-staff-information')
-    async getStaffInformation(@ActiveUser("userId") userId: number) {
-        try {
-            const data = await this.userRawTcpClient.send({ type: 'GET_STAFF', userId })
-            console.log(data);
-            return data
-        } catch (error) {
-            handleZodError(error)
-        }
-    }
+
     @Patch('update-staff-information')
     async getUserInformation(@Body() body: UpdateUserAndStaffProfileDTO, @ActiveUser("userId") userId: number) {
         try {

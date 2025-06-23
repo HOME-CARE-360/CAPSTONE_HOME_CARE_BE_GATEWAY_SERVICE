@@ -16,6 +16,7 @@ import { CategoryGatewayController } from './category.gateway.controller';
 import { UserGatewayController } from './user.gateway.controller';
 import { RawTcpClientService } from 'libs/common/src/tcp/raw-tcp-client.service';
 import { BookingsGatewayController } from './booking.gateway.controller';
+import { PublicGatewayController } from './public.gateway.controller';
 
 @Module({
   imports: [CommonModule, ConfigModule,
@@ -56,7 +57,7 @@ import { BookingsGatewayController } from './booking.gateway.controller';
         transport: Transport.TCP,
         options: {
           host: process.env.SERVICE_HOST || 'localhost',
-          port: parseInt(process.env.SERVICE_TCP_PORT || '3008'),
+          port: parseInt(process.env.SERVICE_TCP_PORT || '3010'),
         },
       },
       {
@@ -72,12 +73,12 @@ import { BookingsGatewayController } from './booking.gateway.controller';
         transport: Transport.TCP,
         options: {
           host: process.env.BOOKING_HOST || 'localhost',
-          port: parseInt(process.env.BOOKING_TCP_PORT || '3010'),
+          port: parseInt(process.env.BOOKING_TCP_PORT || '3012'),
         },
       }
     ]),
   ],
-  controllers: [AuthGatewayController, ManagerGatewayController, MediaGatewayController, ManageServicesGatewayController, ManageStaffGatewayController, ServiceGatewayController, CategoryGatewayController, UserGatewayController, BookingsGatewayController],
+  controllers: [AuthGatewayController, ManagerGatewayController, MediaGatewayController, ManageServicesGatewayController, ManageStaffGatewayController, ServiceGatewayController, CategoryGatewayController, UserGatewayController, BookingsGatewayController, PublicGatewayController],
   providers: [{
     provide: APP_PIPE,
     useClass: CustomZodValidationPipe,
