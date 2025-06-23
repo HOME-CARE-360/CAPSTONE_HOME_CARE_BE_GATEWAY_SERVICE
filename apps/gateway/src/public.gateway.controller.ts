@@ -3,7 +3,6 @@ import { handleZodError } from "libs/common/helpers";
 import { USER_SERVICE } from "libs/common/src/constants/service-name.constant";
 import { ActiveUser } from "libs/common/src/decorator/active-user.decorator";
 import { ChangePasswordDTO } from "libs/common/src/request-response-type/customer/customer.dto";
-import { GetCustomerInformationParamsDTO } from "libs/common/src/request-response-type/user/user.dto";
 
 import { RawTcpClientService } from "libs/common/src/tcp/raw-tcp-client.service";
 
@@ -14,7 +13,7 @@ export class PublicGatewayController {
     @Get('get-staff-information/:staffId')
     async getStaffInformation(@Param("staffId") staffId: number) {
         try {
-            const data = await this.userRawTcpClient.send({ type: 'GET_STAFF', staffId })
+            const data = await this.userRawTcpClient.send({ type: 'GET_STAFF', staffId: Number(staffId) })
             console.log(data);
             return data
         } catch (error) {
@@ -24,7 +23,7 @@ export class PublicGatewayController {
     @Get('get-customer-information/:customerId')
     async changeStatusProvider(@Param("customerId") customerId: number) {
         try {
-            return await this.userRawTcpClient.send({ type: 'GET_CUSTOMER', customerId })
+            return await this.userRawTcpClient.send({ type: 'GET_CUSTOMER', customerId: Number(customerId) })
         } catch (error) {
             handleZodError(error)
         }
@@ -32,7 +31,7 @@ export class PublicGatewayController {
     } @Get('get-service-provider-information/:providerId')
     async getServiceProviderInformation(@Param("providerId") providerId: number) {
         try {
-            const data = await this.userRawTcpClient.send({ type: 'GET_SERVICE_PROVIDER', providerId })
+            const data = await this.userRawTcpClient.send({ type: 'GET_SERVICE_PROVIDER', providerId: Number(providerId) })
             console.log(data);
             return data
         } catch (error) {
