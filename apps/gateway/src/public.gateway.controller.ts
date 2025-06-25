@@ -5,6 +5,7 @@ import { ActiveUser } from "libs/common/src/decorator/active-user.decorator";
 import { ChangePasswordDTO } from "libs/common/src/request-response-type/customer/customer.dto";
 
 import { RawTcpClientService } from "libs/common/src/tcp/raw-tcp-client.service";
+import { AccessTokenPayload } from "libs/common/src/types/jwt.type";
 
 @Controller('publics')
 export class PublicGatewayController {
@@ -45,10 +46,17 @@ export class PublicGatewayController {
             console.log(data);
             return data
         } catch (error) {
-            console.log("hi");
-
-            console.log(error);
-
+            handleZodError(error)
+        }
+    }
+    @Get('get-me')
+    async getMe(@ActiveUser() user: AccessTokenPayload) {
+        const keyName = (user.customerId && 'customerId' || user.providerId && "providerId" || user.staffProviderId && "staffId") as string
+        const value = user.customerId || user.providerId || user.staffProviderId
+        try {
+            const data = await this.userRawTcpClient.send({ type: 'GET_ME', [keyName]: value })
+            return data
+        } catch (error) {
             handleZodError(error)
         }
     }

@@ -67,7 +67,7 @@ async function bootstrap() {
     const ServiceProviderModules = [
         "PUBLICS",
         'AUTH', 'SERVICES', 'BOOKINGS',
-        'SCHEDULE', 'STAFFSCHEDULECATEGORY', 'MANAGE-STAFFS', 'MANAGE-SERVICES',
+        'SCHEDULE', 'STAFFSCHEDULECATEGORY', 'MANAGE-STAFFS', 'MANAGE-SERVICES', 'MANAGE-BOOKINGS',
         'CHATMESSAGES', 'REWARDS', "WORK_SHIFT_TEMPLATE"
     ]
     const StaffModules = ["PUBLICS",
