@@ -17,6 +17,7 @@ import { UserGatewayController } from './user.gateway.controller';
 import { RawTcpClientService } from 'libs/common/src/tcp/raw-tcp-client.service';
 import { BookingsGatewayController } from './booking.gateway.controller';
 import { PublicGatewayController } from './public.gateway.controller';
+import { ManageBookingsGatewayController } from './provider-gateway-controller/manage-bookings-controller';
 
 @Module({
   imports: [CommonModule, ConfigModule,
@@ -78,7 +79,7 @@ import { PublicGatewayController } from './public.gateway.controller';
       }
     ]),
   ],
-  controllers: [AuthGatewayController, ManagerGatewayController, MediaGatewayController, ManageServicesGatewayController, ManageStaffGatewayController, ServiceGatewayController, CategoryGatewayController, UserGatewayController, BookingsGatewayController, PublicGatewayController],
+  controllers: [AuthGatewayController, ManagerGatewayController, MediaGatewayController, ManageServicesGatewayController, ManageStaffGatewayController, ServiceGatewayController, CategoryGatewayController, UserGatewayController, BookingsGatewayController, PublicGatewayController, ManageBookingsGatewayController],
   providers: [{
     provide: APP_PIPE,
     useClass: CustomZodValidationPipe,
