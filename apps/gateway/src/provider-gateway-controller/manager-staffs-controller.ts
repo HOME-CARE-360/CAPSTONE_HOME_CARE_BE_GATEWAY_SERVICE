@@ -121,5 +121,13 @@ export class ManageStaffGatewayController {
             handleZodError(error)
         }
     }
+    @Get('get-available-staff')
+    async getAvailableStaff(@Query() query: GetStaffsQueryDTO, @ActiveUser("providerId") providerID: number) {
+        try {
+            return await lastValueFrom(this.providerClient.send({ cmd: 'available-staff' }, { query, providerID }));
+        } catch (error) {
+            handleZodError(error)
+        }
+    }
 
 }
