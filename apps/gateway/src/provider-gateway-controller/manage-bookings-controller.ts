@@ -9,7 +9,8 @@ import { ClientProxy } from '@nestjs/microservices';
 import { lastValueFrom } from 'rxjs';
 import { handleZodError } from 'libs/common/helpers';
 import { GetServicesRequestQueryDTO } from 'libs/common/src/request-response-type/booking/booking.dto';
-import { Controller, Get, Inject, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Inject, Post, Query, UseGuards } from '@nestjs/common';
+import { AssignStaffToBookingBodyDTO } from 'libs/common/src/request-response-type/bookings/booking.dto';
 
 
 
@@ -48,6 +49,18 @@ export class ManageBookingsGatewayController {
     async list(@Query() data: GetServicesRequestQueryDTO, @ActiveUser("providerId") providerID: number) {
         try {
             return await lastValueFrom(this.providerClient.send({ cmd: 'get-request-service' }, { data, providerID }));
+        } catch (error) {
+            console.log(error);
+
+            handleZodError(error)
+
+
+        }
+    }
+    @Post("assign-staff-to-booking")
+    async assignStaffToBooking(@Body() data: AssignStaffToBookingBodyDTO, @ActiveUser("providerId") providerID: number) {
+        try {
+            return await lastValueFrom(this.providerClient.send({ cmd: 'assign-staff-to-booking' }, { data, providerID }));
         } catch (error) {
             console.log(error);
 

@@ -1,25 +1,7 @@
-import { z } from "zod";
-
-import { PaymentMethod, RequestStatus } from "@prisma/client";
-import { ServiceRequestSchema } from "../../models/shared-service-request.model";
-import { BookingSchema } from "../../models/shared-booking.model";
-import { OrderBy, SortByServiceRequest } from "../../constants/others.constant";
-
-export const CreateServiceRequestBodySchema = ServiceRequestSchema.omit({
-    updatedAt: true,
-    createdAt: true,
-    status: true,
-    id: true,
-
-}).extend({
-    paymentMethod: z.enum([PaymentMethod.BANK_TRANSFER, PaymentMethod.CREDIT_CARD])
-}).strict()
-export const CreateBookingBodySchema = BookingSchema.omit({
-    updatedAt: true,
-    createdAt: true,
-    id: true
-}).strict()
-
+import { z } from "zod"
+import { OrderBy, SortByServiceRequest } from "../../constants/others.constant"
+import { RequestStatus } from "@prisma/client"
+import { BookingSchema } from "../../models/shared-booking.model"
 
 export const GetServicesRequestQuerySchema = z.object({
     page: z.coerce.number().int().positive().default(1),
@@ -37,6 +19,10 @@ export const GetServicesRequestQuerySchema = z.object({
     orderBy: z.enum([OrderBy.Asc, OrderBy.Desc]).default(OrderBy.Desc),
     sortBy: z.enum([SortByServiceRequest.CreatedAt, SortByServiceRequest.PreferredDate]).default(SortByServiceRequest.CreatedAt),
 })
+export const AssignStaffToBookingBodySchema = BookingSchema.pick({
+    staffId: true,
+    customerId: true,
+    serviceRequestId: true,
+})
 export type GetServicesRequestQueryType = z.infer<typeof GetServicesRequestQuerySchema>
-export type CreateServiceRequestBodyType = z.infer<typeof CreateServiceRequestBodySchema>
-export type CreateBookingBodyType = z.infer<typeof CreateBookingBodySchema>
+export type AssignStaffToBookingBodySchemaType = z.infer<typeof AssignStaffToBookingBodySchema>
