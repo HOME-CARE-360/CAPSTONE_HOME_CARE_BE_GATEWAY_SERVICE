@@ -8,9 +8,8 @@ import { PROVIDER_SERVICE } from 'libs/common/src/constants/service-name.constan
 import { ClientProxy } from '@nestjs/microservices';
 import { lastValueFrom } from 'rxjs';
 import { handleZodError } from 'libs/common/helpers';
-import { GetServicesRequestQueryDTO } from 'libs/common/src/request-response-type/booking/booking.dto';
 import { Body, Controller, Get, Inject, Post, Query, UseGuards } from '@nestjs/common';
-import { AssignStaffToBookingBodyDTO } from 'libs/common/src/request-response-type/bookings/booking.dto';
+import { AssignStaffToBookingBodyDTO, GetServicesRequestQueryDTO } from 'libs/common/src/request-response-type/bookings/booking.dto';
 
 
 
