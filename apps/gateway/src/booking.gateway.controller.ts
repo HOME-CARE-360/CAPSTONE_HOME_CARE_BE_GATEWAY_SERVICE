@@ -20,6 +20,8 @@ export class BookingsGatewayController {
         try {
             return await lastValueFrom(this.bookingClient.send({ cmd: 'create-service-request' }, { body, userId: user.userId, customerID: user.customerId }));
         } catch (error) {
+            console.log(error);
+
             handleZodError(error)
 
 
