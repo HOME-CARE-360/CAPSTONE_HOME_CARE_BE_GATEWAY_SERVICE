@@ -10,7 +10,7 @@ import { lastValueFrom } from 'rxjs';
 import { handleZodError } from 'libs/common/helpers';
 import { CreateStaffBodyDTO, GetStaffsQueryDTO } from 'libs/common/src/request-response-type/provider/manage-staff/manage-staff.dto';
 import { ApiQuery } from '@nestjs/swagger'
-import { OrderBy, SortBy } from 'libs/common/src/constants/others.constant'
+import { OrderBy, SortByStaff } from 'libs/common/src/constants/others.constant'
 import { RawTcpClientService } from 'libs/common/src/tcp/raw-tcp-client.service';
 import { UpdateUserAndStaffProfileDTO } from 'libs/common/src/request-response-type/staff/staff.dto';
 @Controller('manage-staffs')
@@ -53,9 +53,9 @@ export class ManageStaffGatewayController {
     @ApiQuery({
         name: 'sortBy',
         required: false,
-        enum: SortBy,
+        enum: SortByStaff,
         description: 'Sort field: CreatedAt',
-        example: SortBy.CreatedAt,
+        example: SortByStaff.CreatedAt,
     })
     @ZodSerializerDto(GetStaffsQueryDTO)
     async list(@Query() query: GetStaffsQueryDTO, @ActiveUser("providerId") providerID: number) {

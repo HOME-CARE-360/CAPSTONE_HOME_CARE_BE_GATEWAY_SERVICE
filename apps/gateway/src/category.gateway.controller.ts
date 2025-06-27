@@ -7,14 +7,14 @@ import { lastValueFrom } from "rxjs";
 import { ApiQuery } from "@nestjs/swagger";
 import { IsPublic } from "libs/common/src/decorator/auth.decorator";
 import { GetListCategoryQueryDTO, GetListCategoryResDTO } from "libs/common/src/request-response-type/category/category.dto";
-import { OrderBy, SortBy } from "libs/common/src/constants/others.constant";
+import { OrderBy, SortByStaff } from "libs/common/src/constants/others.constant";
 
 @Controller('categories')
 export class CategoryGatewayController {
     constructor(
         @Inject(SERVICE_SERVICE) private readonly serviceClient: ClientProxy
     ) { }
-    @ApiQuery({ name: 'name', required: false, type: String, description: 'Filter by service name (partial match)' })
+    @ApiQuery({ name: 'name', required: false, type: String, description: 'Filter by category name (partial match)' })
 
     @IsPublic()
     @ApiQuery({
@@ -27,9 +27,9 @@ export class CategoryGatewayController {
     @ApiQuery({
         name: 'sortBy',
         required: false,
-        enum: SortBy,
-        description: 'Sort field: CreatedAt, Price, or Discount',
-        example: SortBy.CreatedAt,
+        enum: SortByStaff,
+        description: 'Sort field: CreatedAt',
+        example: SortByStaff.CreatedAt,
     })
     @Get('get-list-category')
     @ZodSerializerDto(GetListCategoryResDTO)

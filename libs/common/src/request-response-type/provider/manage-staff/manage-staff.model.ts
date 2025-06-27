@@ -13,6 +13,7 @@ export const CreateStaffBodySchema = RegisterBody.omit({ code: true }).extend({
         })
     }
 })
+
 export const GetStaffsQuerySchema = z.object({
     page: z.coerce.number().int().positive().default(1),
     limit: z.coerce.number().int().positive().default(10),

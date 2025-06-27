@@ -18,7 +18,7 @@ export const RegisterBodySchema = RegisterBody.superRefine(({ confirmPassword, p
     if (confirmPassword !== password) {
         ctx.addIssue({
             code: 'custom',
-            message: 'Password and cofirm password must match',
+            message: 'Password and confirm password must match',
             path: ['confirmPassword']
         })
     }
