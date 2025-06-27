@@ -3,8 +3,8 @@ export interface AccessTokenPayloadCreate {
     userId: number,
     deviceId: number,
     providerId?: number,
-    staffProviderId?: number,
-    customerId?: number
+    customerId?: number,
+    staffId?: number,
     roles: {
         id: number,
         name: string

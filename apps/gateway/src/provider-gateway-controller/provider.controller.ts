@@ -11,9 +11,9 @@ export class UserGatewayController {
         @Inject(USER_SERVICE) private readonly userRawTcpClient: RawTcpClientService) { }
 
     @Patch('update-service-provider-information')
-    async updateServiceProviderInformation(@Body() body: UpdateUserAndStaffProfileDTO, @ActiveUser("userId") userId: number) {
+    async updateServiceProviderInformation(@Body() body: UpdateUserAndStaffProfileDTO, @ActiveUser("providerId") providerId: number) {
         try {
-            const data = await this.userRawTcpClient.send({ type: 'UPDATE_SERVICE_PROVIDER', userId, data: { ...body } })
+            const data = await this.userRawTcpClient.send({ type: 'UPDATE_SERVICE_PROVIDER', providerId, data: { ...body } })
             console.log(data);
             return data
         } catch (error) {

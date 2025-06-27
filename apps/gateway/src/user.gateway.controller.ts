@@ -11,9 +11,9 @@ export class UserGatewayController {
     constructor(
         @Inject(USER_SERVICE) private readonly userRawTcpClient: RawTcpClientService) { }
     @Patch('update-customer-information')
-    async updateCustomer(@Body() body: UpdateUserAndCustomerProfileDTO, @ActiveUser("userId") userId: number) {
+    async updateCustomer(@Body() body: UpdateUserAndCustomerProfileDTO, @ActiveUser("customerId") customerId: number) {
         try {
-            return await this.userRawTcpClient.send({ type: 'UPDATE_CUSTOMER', data: { ...body }, userId })
+            return await this.userRawTcpClient.send({ type: 'UPDATE_CUSTOMER', data: { ...body }, customerId })
         } catch (error) {
             handleZodError(error)
         }

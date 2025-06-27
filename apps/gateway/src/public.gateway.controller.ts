@@ -51,8 +51,8 @@ export class PublicGatewayController {
     }
     @Get('get-me')
     async getMe(@ActiveUser() user: AccessTokenPayload) {
-        const keyName = (user.customerId && 'customerId' || user.providerId && "providerId" || user.staffProviderId && "staffId") as string
-        const value = user.customerId || user.providerId || user.staffProviderId
+        const keyName = (user.customerId && 'customerId' || user.providerId && "providerId" || user.staffId && "staffId") as string
+        const value = user.customerId || user.providerId || user.staffId
         try {
             const data = await this.userRawTcpClient.send({ type: 'GET_ME', [keyName]: value })
             return data
