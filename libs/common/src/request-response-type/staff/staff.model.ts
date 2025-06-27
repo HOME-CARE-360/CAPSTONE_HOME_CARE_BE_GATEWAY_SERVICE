@@ -40,5 +40,24 @@ export const getBookingBelongToStaffQuerySchema = z.object({
     toDate: z.string().optional(),
     keyword: z.string().optional(),
 });
+export const getBookingDetailSchema = z.object({
+    bookingId: z.string(),
+
+});
 
 export type GetBookingBelongToStaffQueryType = z.infer<typeof getBookingBelongToStaffQuerySchema>;
+
+export const CreateInspectionReportSchema = z.object({
+    bookingId: z.number().int(),
+    estimatedTime: z.number().int().optional(),
+    note: z.string().optional(),
+    images: z.array(z.string().url()),
+})
+
+export const staffGetReviewQuerySchema = z.object({
+    page: z.number().int().min(1).optional().default(1),
+    limit: z.number().int().min(1).optional().default(10),
+    rating: z.number().int().min(1).max(5).optional(),
+    fromDate: z.string().optional(),
+    toDate: z.string().optional(),
+});
