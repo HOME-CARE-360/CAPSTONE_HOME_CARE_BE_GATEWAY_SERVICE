@@ -5,7 +5,7 @@ import { STAFF_SERVICE, USER_SERVICE } from 'libs/common/src/constants/service-n
 import { handleZodError } from 'libs/common/helpers';
 
 import { RawTcpClientService } from 'libs/common/src/tcp/raw-tcp-client.service';
-import { CreateInspectionReportDTO, GetBookingBelongToStaffQueryDTO, GetBookingDetailDTO, StaffGetReviewQueryDTO, UpdateUserAndStaffProfileDTO } from 'libs/common/src/request-response-type/staff/staff.dto';
+import { CreateInspectionReportDTO, GetBookingBelongToStaffQueryDTO, GetBookingDetailDTO, GetInspectionDetailDTO, GetRecentWorkLogsDTO, StaffGetReviewQueryDTO, UpdateInspectionReportDTO, UpdateUserAndStaffProfileDTO } from 'libs/common/src/request-response-type/staff/staff.dto';
 import { ApiOperation, ApiQuery } from '@nestjs/swagger';
 @Controller('staffs')
 export class StaffGatewayController {
@@ -55,7 +55,7 @@ export class StaffGatewayController {
             handleZodError(error)
         }
     }
-    @Get("get-booking-detail/:booking-id")
+    @Get("get-booking-detail/:bookingId")
     async getBookingDetail(@Param() params: GetBookingDetailDTO, @ActiveUser("staffId") staffId: number) {
         try {
             const data = await this.staffRawTcpClient.send({
@@ -117,7 +117,136 @@ export class StaffGatewayController {
             handleZodError(error);
         }
     }
+    @Get("staff-get-inspection-reports")
+    async staffGetInspectionReports(
+        @ActiveUser('staffId') staffId: number,
+    ) {
+        try {
+            const data = await this.staffRawTcpClient.send({
+                type: 'STAFF_GET_INSPECTION_REPORTS',
+                data: {
+                    staffId,
+                },
+            });
+            return data;
+        } catch (error) {
+            handleZodError(error);
+        }
+    }
+    @Get("staff-get-inspection-detail/:inspectionId")
+    async staffGetInspectionDetail(@Param() params: GetInspectionDetailDTO, @ActiveUser("staffId") staffId: number) {
+        try {
+            const data = await this.staffRawTcpClient.send({
+                type: "STAFF_GET_INSPECTION_DETAIL", data: {
+                    ...params, staffId
+                }
+            })
+            return data
+        } catch (error) {
+            handleZodError(error)
+        }
+    }
+    @Patch("update-inspection-report/:inspectionId")
+    async updateInspectionReport(@Body() body: UpdateInspectionReportDTO, @Param() params: GetInspectionDetailDTO, @ActiveUser("staffId") staffId: number) {
+        try {
+            const data = await this.staffRawTcpClient.send({
+                type: "UPDATE_INSPECTION_REPORT", data: {
+                    dataInspection: {
+                        ...body
+                    },
+                    inspectionId: params.inspectionId, staffId
+                }
+            })
+            return data
+        } catch (error) {
+            handleZodError(error)
 
+        }
+    }
+    @Get("get-recent-work-logs")
+    async staffGetWorkLogs(@Query() query: GetRecentWorkLogsDTO, @ActiveUser("staffId") staffId: number) {
+        try {
+            const data = await this.staffRawTcpClient.send({
+                type: "STAFF_GET_WORK_LOGS", data: {
+                    ...query, staffId
+                }
+            })
+            return data
+        } catch (error) {
+            handleZodError(error)
+        }
+    }
+    @Get("staff-get-performance")
+    async staffGetPerformance(@ActiveUser("staffId") staffId: number) {
+        try {
+            const data = await this.staffRawTcpClient.send({
+                type: "STAFF_GET_PERFORMANCE", data: {
+                    staffId
+                }
+            })
+            return data
+        } catch (error) {
+            handleZodError(error)
+        }
+    }
+    @Get("staff-get-review-summary")
+    async staffGetReviewSummary(@ActiveUser("staffId") staffId: number) {
+        try {
+            const data = await this.staffRawTcpClient.send({
+                type: "STAFF_GET_REVIEW_SUMMARY", data: {
+                    staffId
+                }
+            })
+            return data
+        } catch (error) {
+            handleZodError(error)
+        }
+    }
+    @Post("staff-create-work-logs/:bookingId")
+    async staffCreateWorkLogs(@Param() param: GetBookingDetailDTO, @ActiveUser("staffId") staffId: number) {
+        try {
+            const data = await this.staffRawTcpClient.send({
+                type: "STAFF_CREATE_WORK_LOG", data: {
+
+                    bookingId: param.bookingId, staffId
+
+                }
+            })
+            return data
+        } catch (error) {
+            handleZodError(error)
+
+        }
+    }
+    @Patch("staff-checkout/:bookingId")
+    async staffCheckOut(@Param() param: GetBookingDetailDTO) {
+        try {
+            const data = await this.staffRawTcpClient.send({
+                type: "STAFF_CHECK_OUT", data: {
+
+                    bookingId: param.bookingId
+
+                }
+            })
+            return data
+        } catch (error) {
+            handleZodError(error)
+
+        }
+    }
+    @Get("staff-get-monthly-stats")
+    async staffGetMonthlyStats(@ActiveUser("staffId") staffId: number) {
+        try {
+            const data = await this.staffRawTcpClient.send({
+                type: "STAFF_GET_MONTHLY_STATS", data: {
+                    staffId
+                }
+            })
+            return data
+        } catch (error) {
+            handleZodError(error)
+        }
+    }
 
 
 }

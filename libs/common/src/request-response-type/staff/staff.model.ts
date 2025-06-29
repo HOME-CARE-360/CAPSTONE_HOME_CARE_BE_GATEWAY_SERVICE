@@ -32,7 +32,7 @@ export const updateUserAndStaffProfileSchema = z.object({
 
 export type UpdateUserAndStaffProfileType = z.infer<typeof updateUserAndStaffProfileSchema>;
 
-export const getBookingBelongToStaffQuerySchema = z.object({
+export const GetBookingBelongToStaffQuerySchema = z.object({
     status: z.string().optional(),
     page: z.number().int().min(1).optional().default(1),
     limit: z.number().int().min(1).optional().default(10),
@@ -40,12 +40,15 @@ export const getBookingBelongToStaffQuerySchema = z.object({
     toDate: z.string().optional(),
     keyword: z.string().optional(),
 });
-export const getBookingDetailSchema = z.object({
-    bookingId: z.string(),
+export const GetBookingDetailSchema = z.object({
+    bookingId: z.coerce.number().int().positive(),
 
 });
+export const GetInspectionDetailSchema = z.object({
+    inspectionId: z.coerce.number().int().positive(),
 
-export type GetBookingBelongToStaffQueryType = z.infer<typeof getBookingBelongToStaffQuerySchema>;
+});
+export type GetBookingBelongToStaffQueryType = z.infer<typeof GetBookingBelongToStaffQuerySchema>;
 
 export const CreateInspectionReportSchema = z.object({
     bookingId: z.number().int(),
@@ -54,10 +57,26 @@ export const CreateInspectionReportSchema = z.object({
     images: z.array(z.string().url()),
 })
 
-export const staffGetReviewQuerySchema = z.object({
+export const StaffGetReviewQuerySchema = z.object({
     page: z.number().int().min(1).optional().default(1),
     limit: z.number().int().min(1).optional().default(10),
     rating: z.number().int().min(1).max(5).optional(),
     fromDate: z.string().optional(),
     toDate: z.string().optional(),
+});
+export const UpdateInspectionReportSchema = z.object({
+    note: z.string().optional(),
+    images: z.array(z.string().url()).optional(),
+    estimatedTime: z.number().int().min(1).max(600).optional(),
+});
+export const GetRecentWorkLogsSchema = z.object({
+    page: z.coerce.number().int().positive().default(1),
+    limit: z.coerce.number().int().positive().default(10),
+});
+export const GetBookingsByDateSchema = z.object({
+    date: z.string().refine((val) => !isNaN(Date.parse(val)), {
+        message: 'Invalid date format',
+    }),
+    page: z.coerce.number().int().positive().default(1),
+    limit: z.coerce.number().int().positive().default(10),
 });
