@@ -71,7 +71,7 @@ async function bootstrap() {
         'CHATMESSAGES', 'REWARDS', "WORK_SHIFT_TEMPLATE"
     ]
     const StaffModules = ["PUBLICS",
-        'AUTH', 'SCHEDULE',
+        'AUTH', 'SCHEDULE', 'STAFFS',
         'CHATMESSAGES'
     ]
 

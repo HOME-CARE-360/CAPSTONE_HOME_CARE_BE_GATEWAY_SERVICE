@@ -91,7 +91,7 @@ export const updateCustomerProfileSchema = z.object({
 // ================= COMBINED UPDATE =================
 export const updateUserAndCustomerProfileSchema = z.object({
     user: updateUserSchema.optional(),
-    customerProfile: updateCustomerProfileSchema.optional(),
+    customer: updateCustomerProfileSchema.optional(),
 });
 export const ChangePasswordSchema = z.object({
     currentPassword: z.string().min(6, 'Current password must be at least 6 characters'),
