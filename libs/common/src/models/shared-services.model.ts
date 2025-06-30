@@ -30,6 +30,7 @@ export const ServiceSchema = z.object({
     publishedAt: z.date().nullable(),
     deletedAt: z.date().nullable(),
     createdAt: z.date(),
+    serviceItemsId: z.array(z.number()),
     updatedAt: z.date(),
 })
 
