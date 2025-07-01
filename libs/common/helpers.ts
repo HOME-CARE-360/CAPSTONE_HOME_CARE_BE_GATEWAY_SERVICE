@@ -60,7 +60,7 @@ export function handleZodError(error: any): ErrorResponse {
     if (errorRes) {
 
         const status = error.status ? error.status : error.response.statusCode
-        throw new HttpException(error.response, status)
+        throw new HttpException(errorRes, status)
     }
 
     throw new HttpException("Internal server error", HttpStatus.INTERNAL_SERVER_ERROR)
