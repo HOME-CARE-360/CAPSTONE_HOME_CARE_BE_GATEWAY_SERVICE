@@ -169,11 +169,13 @@ export class AuthGatewayController {
     @ZodSerializerDto(MessageResDTO)
     async registerProvider(@Body() body: RegisterProviderBodyDto) {
         try {
+
+
             return await lastValueFrom(
                 this.authClient.send({ cmd: 'register-provider' }, body)
             );
         } catch (error) {
-            console.log(error);
+            console.log(error.error.response.message);
 
             handleZodError(error)
         }
