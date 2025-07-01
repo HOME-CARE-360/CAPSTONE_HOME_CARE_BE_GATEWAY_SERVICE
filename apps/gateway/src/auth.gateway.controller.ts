@@ -175,6 +175,7 @@ export class AuthGatewayController {
                 this.authClient.send({ cmd: 'register-provider' }, body)
             );
         } catch (error) {
+
             console.log(error.error.response.message);
 
             handleZodError(error)
