@@ -177,6 +177,7 @@ export class AuthGatewayController {
         } catch (error) {
 
             console.log(error.error.response.message);
+            console.log(error);
 
             handleZodError(error)
         }
