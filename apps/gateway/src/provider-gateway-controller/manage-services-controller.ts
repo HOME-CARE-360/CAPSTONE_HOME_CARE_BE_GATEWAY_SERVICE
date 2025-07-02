@@ -15,7 +15,7 @@ import { PROVIDER_SERVICE } from 'libs/common/src/constants/service-name.constan
 import { ClientProxy } from '@nestjs/microservices';
 import { lastValueFrom } from 'rxjs';
 import { handleZodError } from 'libs/common/helpers';
-import { CreateServiceItemDTO } from 'libs/common/src/request-response-type/service-item/service-item.dto';
+import { CreateServiceItemDTO, GetServiceItemsQueryDTO } from 'libs/common/src/request-response-type/provider/service-item/service-item.dto';
 
 
 
@@ -45,6 +45,20 @@ export class ManageServicesGatewayController {
     async createServiceItem(@Body() body: CreateServiceItemDTO, @ActiveUser() user: AccessTokenPayload) {
         try {
             return await lastValueFrom(this.providerClient.send({ cmd: "create-service-item" }, { body, providerId: user.providerId as number }));
+        } catch (error) {
+            console.log(error);
+
+            handleZodError(error)
+
+
+        }
+    }
+    @Get("/get-service-item")
+
+    @ZodSerializerDto(CreateServicesBodyDTO)
+    async getServiceItem(@Query() body: GetServiceItemsQueryDTO, @ActiveUser() user: AccessTokenPayload) {
+        try {
+            return await lastValueFrom(this.providerClient.send({ cmd: "get-service-item" }, { body, providerId: user.providerId as number }));
         } catch (error) {
             console.log(error);
 
