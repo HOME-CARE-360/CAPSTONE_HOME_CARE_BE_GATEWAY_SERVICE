@@ -9,7 +9,7 @@ import { VerifiedProviderGuard } from 'libs/common/src/guards/verified-provider.
 import { CreateServicesBodyDTO, DeleteServicesParamDTO, GetServiceResDTO, GetServicesForProviderQueryDTO, GetServicesForProviderResDTO, UpdateServicesBodyDTO } from 'libs/common/src/request-response-type/service/services.dto';
 import { ActiveUser } from 'libs/common/src/decorator/active-user.decorator';
 import { AccessTokenPayload } from 'libs/common/src/types/jwt.type';
-import { OrderBy, SortBy } from 'libs/common/src/constants/others.constant';
+import { OrderBy, SortBy, SortByServiceItem } from 'libs/common/src/constants/others.constant';
 import { MessageResDTO } from 'libs/common/src/dtos/response.dto';
 import { PROVIDER_SERVICE } from 'libs/common/src/constants/service-name.constant';
 import { ClientProxy } from '@nestjs/microservices';
@@ -53,6 +53,63 @@ export class ManageServicesGatewayController {
 
         }
     }
+    ;
+
+    @ApiQuery({
+        name: 'isActive',
+        required: true,
+        type: Boolean,
+        description: 'Filter by active status',
+    })
+    @ApiQuery({
+        name: 'page',
+        required: false,
+        type: Number,
+        description: 'Page number (default 1)',
+        example: 1,
+    })
+    @ApiQuery({
+        name: 'limit',
+        required: false,
+        type: Number,
+        description: 'Number of items per page (default 10)',
+        example: 10,
+    })
+    @ApiQuery({
+        name: 'name',
+        required: false,
+        type: String,
+        description: 'Filter by service item name (partial match)',
+    })
+    @ApiQuery({
+        name: 'minPrice',
+        required: false,
+        type: Number,
+        description: 'Minimum price filter',
+        example: 100,
+    })
+    @ApiQuery({
+        name: 'maxPrice',
+        required: false,
+        type: Number,
+        description: 'Maximum price filter',
+        example: 1000,
+    })
+    @ApiQuery({
+        name: 'orderBy',
+        required: false,
+        enum: OrderBy,
+        description: `Sort order: Asc (ascending) or Desc (descending). Default Desc`,
+        example: OrderBy.Desc,
+    })
+    @ApiQuery({
+        name: 'sortBy',
+        required: false,
+        enum: SortByServiceItem,
+        description: `Sort field: CreatedAt or Price. Default CreatedAt`,
+        example: SortByServiceItem.CreatedAt,
+    })
+
     @Get("/get-service-item")
 
     @ZodSerializerDto(CreateServicesBodyDTO)
