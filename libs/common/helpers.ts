@@ -4,7 +4,6 @@ import { randomInt } from 'crypto'
 import path from 'path'
 import { v4 as uuidv4 } from 'uuid'
 import { HttpException, HttpStatus } from '@nestjs/common';
-import { ErrorResponse } from './src/types/error.type';
 // Type Predicate
 export function isUniqueConstraintPrismaError(error: any): error is Prisma.PrismaClientKnownRequestError {
     return error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002'
@@ -53,19 +52,25 @@ export const adjustDateToWeekday = (startDate: Date, day: WeekDay): Date => {
 }
 
 
-export function handleZodError(error: any): ErrorResponse {
-    const errorRes = error.error.response || error.response
-    const status = (error.status ? error.status : error.response.statusCode) || (error.error.status ? error.error.status : error.error.response.statusCode)
-    console.log(errorRes);
-    console.log(status);
+export function handleZodError(error: any): never {
+    const errorResponse = error?.error?.response || error?.response || null;
 
+    // attempt to get status code
+    const status =
+        error?.status ||
+        error?.response?.statusCode ||
+        error?.error?.status ||
+        error?.error?.response?.statusCode ||
+        HttpStatus.INTERNAL_SERVER_ERROR;
 
-    console.log(errorRes);
+    console.log("Zod error handler caught:", {
+        errorResponse,
+        status
+    });
 
-    if (errorRes && status) {
-        throw new HttpException(errorRes, status)
-    }
-
-    throw new HttpException("Internal server error", HttpStatus.INTERNAL_SERVER_ERROR)
+    throw new HttpException(
+        errorResponse ?? "Internal server error",
+        status
+    );
 }
 
