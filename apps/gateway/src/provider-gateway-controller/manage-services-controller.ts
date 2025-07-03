@@ -126,9 +126,9 @@ export class ManageServicesGatewayController {
 
     @Get("/get-service-item")
 
-    async getServiceItem(@Query() body: GetServiceItemsQueryDTO, @ActiveUser() user: AccessTokenPayload) {
+    async getServiceItem(@Query() query: GetServiceItemsQueryDTO, @ActiveUser() user: AccessTokenPayload) {
         try {
-            return await lastValueFrom(this.providerClient.send({ cmd: "get-service-item" }, { body, providerId: user.providerId as number }));
+            return await lastValueFrom(this.providerClient.send({ cmd: "get-service-item" }, { query, providerId: user.providerId as number }));
         } catch (error) {
             console.log(error);
 
