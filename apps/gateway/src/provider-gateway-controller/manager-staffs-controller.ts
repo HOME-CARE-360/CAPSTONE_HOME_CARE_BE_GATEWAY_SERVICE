@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Inject, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpException, Inject, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { ZodSerializerDto } from 'nestjs-zod';
 import { VerifiedProviderGuard } from 'libs/common/src/guards/verified-provider.guard';
 import { ActiveUser } from 'libs/common/src/decorator/active-user.decorator';
@@ -7,7 +7,7 @@ import { MessageResDTO } from 'libs/common/src/dtos/response.dto';
 import { PROVIDER_SERVICE, USER_SERVICE } from 'libs/common/src/constants/service-name.constant';
 import { ClientProxy } from '@nestjs/microservices';
 import { lastValueFrom } from 'rxjs';
-import { handleZodError } from 'libs/common/helpers';
+import { handlerErrorResponse, handleZodError } from 'libs/common/helpers';
 import { CreateStaffBodyDTO, GetStaffsQueryDTO } from 'libs/common/src/request-response-type/provider/manage-staff/manage-staff.dto';
 import { ApiQuery } from '@nestjs/swagger'
 import { OrderBy, SortByStaff } from 'libs/common/src/constants/others.constant'
@@ -116,8 +116,10 @@ export class ManageStaffGatewayController {
         try {
             const data = await this.userRawTcpClient.send({ type: 'UPDATE_STAFF', userId, data: { ...body } })
             console.log(data);
+            handlerErrorResponse(data)
             return data
         } catch (error) {
+            if (error instanceof HttpException) throw error;
             handleZodError(error)
         }
     }

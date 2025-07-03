@@ -15,17 +15,21 @@ export class PublicGatewayController {
     async getStaffInformation(@Param("staffId") staffId: number) {
         try {
             const data = await this.userRawTcpClient.send({ type: 'GET_STAFF', staffId: Number(staffId) })
-            console.log(data);
+            handlerErrorResponse(data)
             return data
         } catch (error) {
+            if (error instanceof HttpException) throw error;
             handleZodError(error)
         }
     }
     @Get('get-customer-information/:customerId')
     async changeStatusProvider(@Param("customerId") customerId: number) {
         try {
-            return await this.userRawTcpClient.send({ type: 'GET_CUSTOMER', customerId: Number(customerId) })
+            const data = await this.userRawTcpClient.send({ type: 'GET_CUSTOMER', customerId: Number(customerId) })
+            handlerErrorResponse(data)
+            return data
         } catch (error) {
+            if (error instanceof HttpException) throw error;
             handleZodError(error)
         }
 
@@ -33,9 +37,10 @@ export class PublicGatewayController {
     async getServiceProviderInformation(@Param("providerId") providerId: number) {
         try {
             const data = await this.userRawTcpClient.send({ type: 'GET_SERVICE_PROVIDER', providerId: Number(providerId) })
-            console.log(data);
+            handlerErrorResponse(data)
             return data
         } catch (error) {
+            if (error instanceof HttpException) throw error;
             handleZodError(error)
         }
     }
@@ -57,8 +62,10 @@ export class PublicGatewayController {
         const value = user.customerId || user.providerId || user.staffId
         try {
             const data = await this.userRawTcpClient.send({ type: 'GET_ME', [keyName]: value })
+            handlerErrorResponse(data)
             return data
         } catch (error) {
+            if (error instanceof HttpException) throw error;
             handleZodError(error)
         }
     }

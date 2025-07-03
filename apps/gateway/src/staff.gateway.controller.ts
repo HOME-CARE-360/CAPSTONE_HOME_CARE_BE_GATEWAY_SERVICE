@@ -1,8 +1,8 @@
-import { Body, Controller, Get, Inject, Param, Patch, Post, Query, } from '@nestjs/common';
+import { Body, Controller, Get, HttpException, Inject, Param, Patch, Post, Query, } from '@nestjs/common';
 import { ActiveUser } from 'libs/common/src/decorator/active-user.decorator';
 import { STAFF_SERVICE, USER_SERVICE } from 'libs/common/src/constants/service-name.constant';
 
-import { handleZodError } from 'libs/common/helpers';
+import { handlerErrorResponse, handleZodError } from 'libs/common/helpers';
 
 import { RawTcpClientService } from 'libs/common/src/tcp/raw-tcp-client.service';
 import { CreateInspectionReportDTO, GetBookingBelongToStaffQueryDTO, GetBookingDetailDTO, GetInspectionDetailDTO, GetRecentWorkLogsDTO, StaffGetReviewQueryDTO, UpdateInspectionReportDTO, UpdateUserAndStaffProfileDTO } from 'libs/common/src/request-response-type/staff/staff.dto';
@@ -15,9 +15,10 @@ export class StaffGatewayController {
     async getUserInformation(@Body() body: UpdateUserAndStaffProfileDTO, @ActiveUser("staffId") staffId: number) {
         try {
             const data = await this.userRawTcpClient.send({ type: 'UPDATE_STAFF', staffId, data: { ...body } })
-            console.log(data);
+            handlerErrorResponse(data)
             return data
         } catch (error) {
+            if (error instanceof HttpException) throw error;
             handleZodError(error)
         }
     }
@@ -37,8 +38,10 @@ export class StaffGatewayController {
                     staffId, ...query
                 }
             })
+            handlerErrorResponse(data)
             return data
         } catch (error) {
+            if (error instanceof HttpException) throw error;
             handleZodError(error)
         }
     }
@@ -50,8 +53,10 @@ export class StaffGatewayController {
                     ...body, staffId
                 }
             })
+            handlerErrorResponse(data)
             return data
         } catch (error) {
+            if (error instanceof HttpException) throw error;
             handleZodError(error)
         }
     }
@@ -63,8 +68,10 @@ export class StaffGatewayController {
                     ...params, staffId
                 }
             })
+            handlerErrorResponse(data)
             return data
         } catch (error) {
+            if (error instanceof HttpException) throw error;
             handleZodError(error)
         }
     }
@@ -112,9 +119,11 @@ export class StaffGatewayController {
                     staffId,
                 },
             });
-            return data;
+            handlerErrorResponse(data)
+            return data
         } catch (error) {
-            handleZodError(error);
+            if (error instanceof HttpException) throw error;
+            handleZodError(error)
         }
     }
     @Get("staff-get-inspection-reports")
@@ -128,9 +137,11 @@ export class StaffGatewayController {
                     staffId,
                 },
             });
-            return data;
+            handlerErrorResponse(data)
+            return data
         } catch (error) {
-            handleZodError(error);
+            if (error instanceof HttpException) throw error;
+            handleZodError(error)
         }
     }
     @Get("staff-get-inspection-detail/:inspectionId")
@@ -141,8 +152,10 @@ export class StaffGatewayController {
                     ...params, staffId
                 }
             })
+            handlerErrorResponse(data)
             return data
         } catch (error) {
+            if (error instanceof HttpException) throw error;
             handleZodError(error)
         }
     }
@@ -157,10 +170,11 @@ export class StaffGatewayController {
                     inspectionId: params.inspectionId, staffId
                 }
             })
+            handlerErrorResponse(data)
             return data
         } catch (error) {
+            if (error instanceof HttpException) throw error;
             handleZodError(error)
-
         }
     }
     @Get("get-recent-work-logs")
@@ -171,8 +185,10 @@ export class StaffGatewayController {
                     ...query, staffId
                 }
             })
+            handlerErrorResponse(data)
             return data
         } catch (error) {
+            if (error instanceof HttpException) throw error;
             handleZodError(error)
         }
     }
@@ -184,8 +200,10 @@ export class StaffGatewayController {
                     staffId
                 }
             })
+            handlerErrorResponse(data)
             return data
         } catch (error) {
+            if (error instanceof HttpException) throw error;
             handleZodError(error)
         }
     }
@@ -197,8 +215,10 @@ export class StaffGatewayController {
                     staffId
                 }
             })
+            handlerErrorResponse(data)
             return data
         } catch (error) {
+            if (error instanceof HttpException) throw error;
             handleZodError(error)
         }
     }
@@ -212,10 +232,11 @@ export class StaffGatewayController {
 
                 }
             })
+            handlerErrorResponse(data)
             return data
         } catch (error) {
+            if (error instanceof HttpException) throw error;
             handleZodError(error)
-
         }
     }
     @Patch("staff-checkout/:bookingId")
@@ -228,10 +249,11 @@ export class StaffGatewayController {
 
                 }
             })
+            handlerErrorResponse(data)
             return data
         } catch (error) {
+            if (error instanceof HttpException) throw error;
             handleZodError(error)
-
         }
     }
     @Get("staff-get-monthly-stats")
@@ -242,8 +264,10 @@ export class StaffGatewayController {
                     staffId
                 }
             })
+            handlerErrorResponse(data)
             return data
         } catch (error) {
+            if (error instanceof HttpException) throw error;
             handleZodError(error)
         }
     }
