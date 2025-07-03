@@ -127,6 +127,10 @@ export class ManageServicesGatewayController {
     @Get("/get-service-item")
 
     async getServiceItem(@Query() query: GetServiceItemsQueryDTO, @ActiveUser() user: AccessTokenPayload) {
+        console.log("query ne");
+        console.log(query);
+
+
         try {
             return await lastValueFrom(this.providerClient.send({ cmd: "get-service-item" }, { query, providerId: user.providerId as number }));
         } catch (error) {
