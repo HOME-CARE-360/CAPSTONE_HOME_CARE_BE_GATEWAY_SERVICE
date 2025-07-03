@@ -10,13 +10,11 @@ import { CreateServicesBodyDTO, DeleteServicesParamDTO, GetServiceResDTO, GetSer
 import { ActiveUser } from 'libs/common/src/decorator/active-user.decorator';
 import { AccessTokenPayload } from 'libs/common/src/types/jwt.type';
 import { OrderBy, SortBy, SortByServiceItem } from 'libs/common/src/constants/others.constant';
-import { MessageResDTO } from 'libs/common/src/dtos/response.dto';
 import { PROVIDER_SERVICE } from 'libs/common/src/constants/service-name.constant';
 import { ClientProxy } from '@nestjs/microservices';
 import { lastValueFrom } from 'rxjs';
 import { handleZodError } from 'libs/common/helpers';
-import { CreateServiceItemDTO, GetServiceItemsQueryDTO } from 'libs/common/src/request-response-type/provider/service-item/service-item.dto';
-import { GetServiceItemParamsDTO } from 'libs/common/src/request-response-type/service-item/service-item.dto';
+import { CreateServiceItemDTO, GetServiceItemParamsDTO, GetServiceItemsQueryDTO } from 'libs/common/src/request-response-type/provider/service-item/service-item.dto';
 
 
 
