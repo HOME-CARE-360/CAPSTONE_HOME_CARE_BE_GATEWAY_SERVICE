@@ -150,6 +150,20 @@ export class ManageServicesGatewayController {
 
         }
     }
+    @Get("/get-service-item-detail/:serviceItemId")
+
+    async getServiceItemDetail(@Param() param: GetServiceItemParamsDTO, @ActiveUser() user: AccessTokenPayload) {
+        try {
+            return await lastValueFrom(this.providerClient.send({ cmd: "get-service-item-detail" }, { param, user }));
+        } catch (error) {
+            console.log(error);
+
+            handleZodError(error)
+
+
+        }
+    }
+
 
     @Get("/list-service")
     @ApiQuery({ name: 'page', required: false, type: Number, example: 1, description: 'Page number' })
@@ -193,19 +207,8 @@ export class ManageServicesGatewayController {
 
         }
     }
-    @Patch("/update-service")
-    @ZodSerializerDto(MessageResDTO)
-    async updateService(@Body() body: UpdateServicesBodyDTO, @ActiveUser() user: AccessTokenPayload) {
-        try {
-            return await lastValueFrom(this.providerClient.send({ cmd: '/update-service' }, { body, user }));
-        } catch (error) {
-            console.log(error);
-
-            handleZodError(error)
 
 
-        }
-    }
     @Patch("/delete-service/:serviceId")
     @ZodSerializerDto(UpdateServicesBodyDTO)
     async deleteService(@Param() serviceID: DeleteServicesParamDTO, @ActiveUser() user: AccessTokenPayload) {
