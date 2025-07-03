@@ -50,7 +50,14 @@ export const adjustDateToWeekday = (startDate: Date, day: WeekDay): Date => {
     result.setDate(startDate.getDate() + diff);
     return result;
 }
-
+export function handlerErrorResponse(data: any) {
+    if (data.statusCode !== 201 && data.statusCode !== 200) {
+        throw new HttpException(
+            data ?? "Internal server error",
+            data.statusCode
+        );
+    }
+}
 
 export function handleZodError(error: any): never {
     const errorResponse = error?.error?.response || error?.response || null;
