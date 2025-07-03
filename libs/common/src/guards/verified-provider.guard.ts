@@ -8,6 +8,7 @@ import { PrismaService } from '../services/prisma.service';
 import { REQUEST_USER_KEY } from '../constants/auth.constant';
 import { AccessTokenPayload } from '../types/jwt.type';
 import { ProviderNotVerifiedException, ServiceProviderNotFoundException } from '../errors/share-provider.error';
+import { VerificationStatus } from '@prisma/client';
 
 @Injectable()
 export class VerifiedProviderGuard implements CanActivate {
@@ -16,6 +17,7 @@ export class VerifiedProviderGuard implements CanActivate {
     async canActivate(context: ExecutionContext): Promise<boolean> {
         const req = context.switchToHttp().getRequest();
 
+        console.log("kaka9");
 
         const user = req[REQUEST_USER_KEY] as AccessTokenPayload;
         const providerId = user.providerId;
@@ -28,11 +30,10 @@ export class VerifiedProviderGuard implements CanActivate {
             where: { id: providerId },
             select: { verificationStatus: true },
         });
-
         if (!provider) {
             throw ServiceProviderNotFoundException;
         }
-        if (!provider.verificationStatus) {
+        if (provider.verificationStatus !== VerificationStatus.VERIFIED) {
             throw ProviderNotVerifiedException;
         }
 
