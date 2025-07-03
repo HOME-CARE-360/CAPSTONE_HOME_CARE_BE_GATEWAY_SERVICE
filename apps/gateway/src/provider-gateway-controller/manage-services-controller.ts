@@ -16,6 +16,7 @@ import { ClientProxy } from '@nestjs/microservices';
 import { lastValueFrom } from 'rxjs';
 import { handleZodError } from 'libs/common/helpers';
 import { CreateServiceItemDTO, GetServiceItemsQueryDTO } from 'libs/common/src/request-response-type/provider/service-item/service-item.dto';
+import { GetServiceItemParamsDTO } from 'libs/common/src/request-response-type/service-item/service-item.dto';
 
 
 
@@ -53,7 +54,20 @@ export class ManageServicesGatewayController {
 
         }
     }
-    ;
+    @Patch("/update-service-item")
+
+    @ZodSerializerDto(CreateServicesBodyDTO)
+    async updateServiceItem(@Body() body: CreateServiceItemDTO, @ActiveUser() user: AccessTokenPayload) {
+        try {
+            return await lastValueFrom(this.providerClient.send({ cmd: "update-service-item" }, { body, providerId: user.providerId as number }));
+        } catch (error) {
+            console.log(error);
+
+            handleZodError(error)
+
+
+        }
+    }
 
     @ApiQuery({
         name: 'isActive',
@@ -112,7 +126,6 @@ export class ManageServicesGatewayController {
 
     @Get("/get-service-item")
 
-    @ZodSerializerDto(CreateServicesBodyDTO)
     async getServiceItem(@Query() body: GetServiceItemsQueryDTO, @ActiveUser() user: AccessTokenPayload) {
         try {
             return await lastValueFrom(this.providerClient.send({ cmd: "get-service-item" }, { body, providerId: user.providerId as number }));
@@ -124,6 +137,20 @@ export class ManageServicesGatewayController {
 
         }
     }
+    @Get("/delete-service-item/:serviceItemId")
+
+    async deleteServiceItem(@Param() param: GetServiceItemParamsDTO, @ActiveUser() user: AccessTokenPayload) {
+        try {
+            return await lastValueFrom(this.providerClient.send({ cmd: "delete-service-item" }, { param, providerId: user.providerId as number }));
+        } catch (error) {
+            console.log(error);
+
+            handleZodError(error)
+
+
+        }
+    }
+
     @Get("/list-service")
     @ApiQuery({ name: 'page', required: false, type: Number, example: 1, description: 'Page number' })
     @ApiQuery({ name: 'limit', required: false, type: Number, example: 10, description: 'Items per page' })
