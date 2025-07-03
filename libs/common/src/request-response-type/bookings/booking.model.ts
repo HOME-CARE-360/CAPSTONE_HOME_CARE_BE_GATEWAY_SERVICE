@@ -8,7 +8,7 @@ export const GetServicesRequestQuerySchema = z.object({
     page: z.coerce.number().int().positive().default(1),
     limit: z.coerce.number().int().positive().default(10),
     location: z.string().optional(),
-    status: z.enum([RequestStatus.BOOKED, RequestStatus.ESTIMATED, RequestStatus.IN_PROGRESS, RequestStatus.PENDING, RequestStatus.REJECTED]).optional(),
+    status: z.enum([RequestStatus.ESTIMATED, RequestStatus.IN_PROGRESS, RequestStatus.PENDING]).optional(),
     categories: z
         .preprocess((value) => {
             if (typeof value === 'string') {

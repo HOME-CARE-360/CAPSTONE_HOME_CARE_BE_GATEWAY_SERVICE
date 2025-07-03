@@ -10,7 +10,7 @@ export const ServiceRequestSchema = z.object({
     preferredDate: z.coerce.date(),
     location: z.string().max(500),
     categoryId: z.number(),
-    status: z.enum([RequestStatus.BOOKED, RequestStatus.ESTIMATED, RequestStatus.IN_PROGRESS, RequestStatus.REJECTED, RequestStatus.PENDING]),
+    status: z.enum([RequestStatus.ESTIMATED, RequestStatus.IN_PROGRESS, RequestStatus.PENDING]),
     createdAt: z.date(),
     updatedAt: z.date(),
     phoneNumber: z.string(),
