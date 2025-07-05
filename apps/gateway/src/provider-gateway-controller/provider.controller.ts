@@ -1,11 +1,13 @@
-import { Body, Controller, HttpException, Inject, Patch } from "@nestjs/common";
+import { Body, Controller, HttpException, Inject, Patch, UseGuards } from "@nestjs/common";
 import { handlerErrorResponse, handleZodError } from "libs/common/helpers";
 import { USER_SERVICE } from "libs/common/src/constants/service-name.constant";
 import { ActiveUser } from "libs/common/src/decorator/active-user.decorator";
+import { VerifiedProviderGuard } from "libs/common/src/guards/verified-provider.guard";
 import { UpdateUserAndStaffProfileDTO } from "libs/common/src/request-response-type/staff/staff.dto";
 import { RawTcpClientService } from "libs/common/src/tcp/raw-tcp-client.service";
 
 @Controller('providers')
+@UseGuards(VerifiedProviderGuard)
 export class UserGatewayController {
     constructor(
         @Inject(USER_SERVICE) private readonly userRawTcpClient: RawTcpClientService) { }
