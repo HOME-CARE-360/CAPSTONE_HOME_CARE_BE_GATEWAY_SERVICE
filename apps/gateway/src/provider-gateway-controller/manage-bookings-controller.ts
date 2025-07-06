@@ -10,6 +10,7 @@ import { lastValueFrom } from 'rxjs';
 import { handleZodError } from 'libs/common/helpers';
 import { Body, Controller, Get, Inject, Post, Query, UseGuards } from '@nestjs/common';
 import { AssignStaffToBookingBodyDTO, GetServicesRequestQueryDTO } from 'libs/common/src/request-response-type/bookings/booking.dto';
+import { CreateProposedServiceDTO } from 'libs/common/src/request-response-type/proposed/proposed.dto';
 
 
 
@@ -68,4 +69,17 @@ export class ManageBookingsGatewayController {
 
         }
     }
+    @Post("create-proposed")
+    async createProposed(@Body() body: CreateProposedServiceDTO, @ActiveUser("providerId") providerID: number) {
+        try {
+            return await lastValueFrom(this.providerClient.send({ cmd: 'create-proposed' }, { data: { ...body }, providerID }));
+        } catch (error) {
+            console.log(error);
+
+            handleZodError(error)
+
+
+        }
+    }
+
 }
