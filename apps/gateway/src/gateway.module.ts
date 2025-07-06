@@ -19,6 +19,7 @@ import { BookingsGatewayController } from './booking.gateway.controller';
 import { PublicGatewayController } from './public.gateway.controller';
 import { ManageBookingsGatewayController } from './provider-gateway-controller/manage-bookings-controller';
 import { StaffGatewayController } from './staff.gateway.controller';
+import { AdminGatewayController } from './admin.gateway.controller';
 
 @Module({
   imports: [CommonModule, ConfigModule,
@@ -80,7 +81,7 @@ import { StaffGatewayController } from './staff.gateway.controller';
       }
     ]),
   ],
-  controllers: [AuthGatewayController, ManagerGatewayController, MediaGatewayController, ManageServicesGatewayController, ManageStaffGatewayController, ServiceGatewayController, CategoryGatewayController, UserGatewayController, BookingsGatewayController, PublicGatewayController, ManageBookingsGatewayController, StaffGatewayController],
+  controllers: [AuthGatewayController, ManagerGatewayController, MediaGatewayController, ManageServicesGatewayController, ManageStaffGatewayController, ServiceGatewayController, CategoryGatewayController, UserGatewayController, BookingsGatewayController, PublicGatewayController, ManageBookingsGatewayController, StaffGatewayController, AdminGatewayController],
   providers: [{
     provide: APP_PIPE,
     useClass: CustomZodValidationPipe,
