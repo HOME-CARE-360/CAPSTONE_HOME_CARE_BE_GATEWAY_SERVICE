@@ -29,7 +29,6 @@ import {
     CreateRoleDTO,
     CreateUserDTO,
     GetUsersQuery,
-    IdParamDTO,
     MonthlyReportDTO,
     MultiMonthReportDTO,
     ResetPasswordDTO,
@@ -252,22 +251,28 @@ export class AdminGatewayController {
     @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
     @ApiResponse({ status: 404, description: 'User not found' })
     async resetUserPassword(
-        @Param('id', ParseIntPipe) id: number,
-        @Body() body: ResetPasswordDTO,
-        @ActiveUser('userId') userId: number
+    @Param('id', ParseIntPipe) id: number,
+    @Body() body: ResetPasswordDTO,
+    @ActiveUser('userId') userId: number
     ) {
-        try {
-            const data = await this.adminRawTcpClient.send({
-                type: 'ADMIN_RESET_USER_PASSWORD',
-                data: { id, ...body, adminId: userId },
-            });
-            handlerErrorResponse(data);
-            return data;
-        } catch (error) {
-            if (error instanceof HttpException) throw error;
-            handleZodError(error);
-        }
+    try {
+        const data = await this.adminRawTcpClient.send({
+        type: 'ADMIN_RESET_USER_PASSWORD',
+        data: {
+            id,                           
+            newPassword: body.newPassword,
+            confirmPassword: body.confirmPassword,
+            adminId: userId,
+        },
+        });
+        handlerErrorResponse(data);
+        return data;
+    } catch (error) {
+        if (error instanceof HttpException) throw error;
+        handleZodError(error);
     }
+    }
+
 
     @Patch('users/:id/restore')
     @ApiOperation({ summary: 'Restore deleted user' })
@@ -320,21 +325,25 @@ export class AdminGatewayController {
     @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
     @ApiResponse({ status: 404, description: 'User not found' })
     async assignRolesToUser(
-        @Param('userId', ParseIntPipe) userId: number,
-        @Body() body: AssignRolesDTO,
-        @ActiveUser('userId') adminId: number
+    @Param('userId', ParseIntPipe) userId: number,
+    @Body() body: AssignRolesDTO,
+    @ActiveUser('userId') adminId: number
     ) {
-        try {
-            const data = await this.adminRawTcpClient.send({
-                type: 'ADMIN_ASSIGN_ROLES',
-                data: { ...body, userId, adminId },
-            });
-            handlerErrorResponse(data);
-            return data;
-        } catch (error) {
-            if (error instanceof HttpException) throw error;
-            handleZodError(error);
-        }
+    try {
+        const data = await this.adminRawTcpClient.send({
+        type: 'ADMIN_ASSIGN_ROLES',
+        data: {
+            roleIds: body.roleIds,
+            userId,
+            adminId,
+        },
+        });
+        handlerErrorResponse(data);
+        return data;
+    } catch (error) {
+        if (error instanceof HttpException) throw error;
+        handleZodError(error);
+    }
     }
 
     @Get('users/:id/activity')
@@ -386,18 +395,24 @@ export class AdminGatewayController {
     @ApiResponse({ status: 401, description: 'Unauthorized' })
     @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
     @ApiResponse({ status: 409, description: 'Conflict - Role already exists' })
-    async createRole(@Body() body: CreateRoleDTO, @ActiveUser('userId') userId: number) {
-        try {
-            const data = await this.adminRawTcpClient.send({
-                type: 'ADMIN_CREATE_ROLE',
-                data: { ...body, adminId: userId },
-            });
-            handlerErrorResponse(data);
-            return data;
-        } catch (error) {
-            if (error instanceof HttpException) throw error;
-            handleZodError(error);
-        }
+    async createRole(
+    @Body() body: CreateRoleDTO,
+    @ActiveUser('userId') userId: number
+    ) {
+    try {
+        const data = await this.adminRawTcpClient.send({
+        type: 'ADMIN_CREATE_ROLE',
+        data: {
+            name: body.name,
+            adminId: userId,
+        },
+        });
+        handlerErrorResponse(data);
+        return data;
+    } catch (error) {
+        if (error instanceof HttpException) throw error;
+        handleZodError(error);
+    }
     }
 
     @Get('roles/:id')
@@ -430,21 +445,25 @@ export class AdminGatewayController {
     @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
     @ApiResponse({ status: 404, description: 'Role not found' })
     async updateRole(
-        @Param() params: IdParamDTO,
-        @Body() body: UpdateRoleDTO,
-        @ActiveUser('userId') userId: number
+    @Param('id', ParseIntPipe) id: number,
+    @Body() body: UpdateRoleDTO,
+    @ActiveUser('userId') userId: number
     ) {
-        try {
-            const data = await this.adminRawTcpClient.send({
-                type: 'ADMIN_UPDATE_ROLE',
-                data: { ...params, ...body, adminId: userId },
-            });
-            handlerErrorResponse(data);
-            return data;
-        } catch (error) {
-            if (error instanceof HttpException) throw error;
-            handleZodError(error);
-        }
+    try {
+        const data = await this.adminRawTcpClient.send({
+        type: 'ADMIN_UPDATE_ROLE',
+        data: {
+            id,
+            ...(body.name && { name: body.name }),
+            adminId: userId,
+        },
+        });
+        handlerErrorResponse(data);
+        return data;
+    } catch (error) {
+        if (error instanceof HttpException) throw error;
+        handleZodError(error);
+    }
     }
 
     @Delete('roles/:id')
@@ -493,35 +512,35 @@ export class AdminGatewayController {
         }
     }
 
-    @Post('roles/:roleId/permissions')
-    @ApiOperation({ summary: 'Assign permissions to role' })
-    @ApiParam({ name: 'roleId', type: Number, description: 'Role ID' })
-    @ApiResponse({ status: 200, description: 'Permissions assigned successfully' })
-    @ApiResponse({ status: 400, description: 'Bad request - Invalid permission data' })
-    @ApiResponse({ status: 401, description: 'Unauthorized' })
-    @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
-    @ApiResponse({ status: 404, description: 'Role not found' })
-    async assignPermissionsToRole(
-        @Param('roleId', ParseIntPipe) roleId: number,
-        @Body() body: AssignPermissionsToRoleDTO,
-        @ActiveUser('userId') userId: number
-    ) {
-        try {
-            const data = await this.adminRawTcpClient.send({
-                type: 'ADMIN_ASSIGN_PERMISSIONS_TO_ROLE',
-                data: {
-                    ...body,
-                    roleId,
-                    adminId: userId,
-                },
-            });
-            handlerErrorResponse(data);
-            return data;
-        } catch (error) {
-            if (error instanceof HttpException) throw error;
-            handleZodError(error);
-        }
-    }
+@Post('roles/:roleId/permissions')
+@ApiOperation({ summary: 'Assign permissions to role' })
+@ApiParam({ name: 'roleId', type: Number, description: 'Role ID' })
+@ApiResponse({ status: 200, description: 'Permissions assigned successfully' })
+@ApiResponse({ status: 400, description: 'Bad request - Invalid permission data' })
+@ApiResponse({ status: 401, description: 'Unauthorized' })
+@ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
+@ApiResponse({ status: 404, description: 'Role not found' })
+async assignPermissionsToRole(
+  @Param('roleId', ParseIntPipe) roleId: number,
+  @Body() body: AssignPermissionsToRoleDTO,
+  @ActiveUser('userId') userId: number
+) {
+  try {
+    const data = await this.adminRawTcpClient.send({
+      type: 'ADMIN_ASSIGN_PERMISSIONS_TO_ROLE',
+      data: {
+        permissionIds: body.permissionIds, 
+        roleId,
+        adminId: userId,
+      },
+    });
+    handlerErrorResponse(data);
+    return data;
+  } catch (error) {
+    if (error instanceof HttpException) throw error;
+    handleZodError(error);
+  }
+}
 
     // === PERMISSIONS ===
     
