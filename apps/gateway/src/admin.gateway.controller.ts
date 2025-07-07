@@ -613,18 +613,25 @@ async assignPermissionsToRole(
     @ApiResponse({ status: 400, description: 'Bad request - Invalid month or year' })
     @ApiResponse({ status: 401, description: 'Unauthorized' })
     @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
-    async getMonthlyReport(@Query() query: MonthlyReportDTO, @ActiveUser('userId') userId: number) {
-        try {
-            const data = await this.adminRawTcpClient.send({
-                type: 'ADMIN_GET_MONTHLY_REPORT',
-                data: { ...query, adminId: userId },
-            });
-            handlerErrorResponse(data);
-            return data;
-        } catch (error) {
-            if (error instanceof HttpException) throw error;
-            handleZodError(error);
-        }
+    async getMonthlyReport(
+    @Query() query: MonthlyReportDTO,
+    @ActiveUser('userId') userId: number
+    ) {
+    try {
+        const data = await this.adminRawTcpClient.send({
+        type: 'ADMIN_GET_MONTHLY_REPORT',
+        data: {
+            month: Number(query.month),
+            year: Number(query.year),
+            adminId: userId,
+        },
+        });
+        handlerErrorResponse(data);
+        return data;
+    } catch (error) {
+        if (error instanceof HttpException) throw error;
+        handleZodError(error);
+    }
     }
 
     @Get('reports/monthly/export/pdf')
@@ -635,18 +642,25 @@ async assignPermissionsToRole(
     @ApiResponse({ status: 400, description: 'Bad request - Invalid month or year' })
     @ApiResponse({ status: 401, description: 'Unauthorized' })
     @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
-    async exportMonthlyPDF(@Query() query: MonthlyReportDTO, @ActiveUser('userId') userId: number) {
-        try {
-            const data = await this.adminRawTcpClient.send({
-                type: 'ADMIN_EXPORT_MONTHLY_PDF',
-                data: { ...query, adminId: userId },
-            });
-            handlerErrorResponse(data);
-            return data;
-        } catch (error) {
-            if (error instanceof HttpException) throw error;
-            handleZodError(error);
-        }
+    async exportMonthlyPDF(
+    @Query() query: MonthlyReportDTO,
+    @ActiveUser('userId') userId: number
+    ) {
+    try {
+        const data = await this.adminRawTcpClient.send({
+        type: 'ADMIN_EXPORT_MONTHLY_PDF',
+        data: {
+            month: Number(query.month),
+            year: Number(query.year),
+            adminId: userId,
+        },
+        });
+        handlerErrorResponse(data);
+        return data;
+    } catch (error) {
+        if (error instanceof HttpException) throw error;
+        handleZodError(error);
+    }
     }
 
     @Get('reports/multi-months/export/pdf')
@@ -660,19 +674,25 @@ async assignPermissionsToRole(
     @ApiResponse({ status: 401, description: 'Unauthorized' })
     @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
     async exportMultiMonthsPDF(
-        @Query() query: MultiMonthReportDTO,
-        @ActiveUser('userId') userId: number
+    @Query() query: MultiMonthReportDTO,
+    @ActiveUser('userId') userId: number
     ) {
-        try {
-            const data = await this.adminRawTcpClient.send({
-                type: 'ADMIN_EXPORT_MULTI_MONTHS_PDF',
-                data: { ...query, adminId: userId },
-            });
-            handlerErrorResponse(data);
-            return data;
-        } catch (error) {
-            if (error instanceof HttpException) throw error;
-            handleZodError(error);
-        }
+    try {
+        const data = await this.adminRawTcpClient.send({
+        type: 'ADMIN_EXPORT_MULTI_MONTHS_PDF',
+        data: {
+            startMonth: Number(query.startMonth),
+            startYear: Number(query.startYear),
+            endMonth: Number(query.endMonth),
+            endYear: Number(query.endYear),
+            adminId: userId,
+        },
+        });
+        handlerErrorResponse(data);
+        return data;
+    } catch (error) {
+        if (error instanceof HttpException) throw error;
+        handleZodError(error);
+    }
     }
 }
