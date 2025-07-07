@@ -16,7 +16,6 @@ export const UpdateUserSchema = z.object({
     email: z.string().email().optional(),
     name: z.string().optional(),
     phone: z.string().optional(),
-    password: z.string().min(6, 'Password must be at least 6 characters').optional(),
     avatar: z.string().url().optional(),
     status: UserStatus.optional(),
     roleIds: z.array(z.number().int().positive()).optional(),

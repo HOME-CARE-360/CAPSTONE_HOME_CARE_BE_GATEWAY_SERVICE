@@ -34,7 +34,7 @@ import {
     MultiMonthReportDTO,
     ResetPasswordDTO,
     UpdateRoleDTO,
-    UpdateUserDTO,
+    // UpdateUserDTO,
 } from 'libs/common/src/request-response-type/admin/admin.dto';
 
 @Controller('admin')
@@ -133,31 +133,31 @@ export class AdminGatewayController {
         }
     }
 
-    @Patch('users/:id')
-    @ApiOperation({ summary: 'Update user information' })
-    @ApiParam({ name: 'id', type: Number, description: 'User ID' })
-    @ApiResponse({ status: 200, description: 'User updated successfully' })
-    @ApiResponse({ status: 400, description: 'Bad request - Invalid input data' })
-    @ApiResponse({ status: 401, description: 'Unauthorized' })
-    @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
-    @ApiResponse({ status: 404, description: 'User not found' })
-    async updateUser(
-        @Param('id', ParseIntPipe) id: number,
-        @Body() body: UpdateUserDTO,
-        @ActiveUser('userId') userId: number
-    ) {
-        try {
-            const data = await this.adminRawTcpClient.send({
-                type: 'ADMIN_UPDATE_USER',
-                data: { id, data: body, adminId: userId },
-            });
-            handlerErrorResponse(data);
-            return data;
-        } catch (error) {
-            if (error instanceof HttpException) throw error;
-            handleZodError(error);
-        }
-    }
+    // @Patch('users/:id')
+    // @ApiOperation({ summary: 'Update user information' })
+    // @ApiParam({ name: 'id', type: Number, description: 'User ID' })
+    // @ApiResponse({ status: 200, description: 'User updated successfully' })
+    // @ApiResponse({ status: 400, description: 'Bad request - Invalid input data' })
+    // @ApiResponse({ status: 401, description: 'Unauthorized' })
+    // @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
+    // @ApiResponse({ status: 404, description: 'User not found' })
+    // async updateUser(
+    //     @Param('id', ParseIntPipe) id: number,
+    //     @Body() body: UpdateUserDTO,
+    //     @ActiveUser('userId') userId: number
+    // ) {
+    //     try {
+    //         const data = await this.adminRawTcpClient.send({
+    //             type: 'ADMIN_UPDATE_USER',
+    //             data: { id, data: body, adminId: userId },
+    //         });
+    //         handlerErrorResponse(data);
+    //         return data;
+    //     } catch (error) {
+    //         if (error instanceof HttpException) throw error;
+    //         handleZodError(error);
+    //     }
+    // }
 
     @Delete('users/:id')
     @ApiOperation({ summary: 'Delete user (soft delete)' })
@@ -483,7 +483,7 @@ export class AdminGatewayController {
         try {
             const data = await this.adminRawTcpClient.send({
                 type: 'ADMIN_GET_PERMISSIONS_BY_ROLE',
-                data: { roleId: id },
+                data: { id },
             });
             handlerErrorResponse(data);
             return data;
