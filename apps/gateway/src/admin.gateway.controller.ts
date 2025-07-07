@@ -29,8 +29,6 @@ import {
     CreateRoleDTO,
     CreateUserDTO,
     GetUsersQuery,
-    MonthlyReportDTO,
-    MultiMonthReportDTO,
     ResetPasswordDTO,
     UpdateRoleDTO,
     // UpdateUserDTO,
@@ -614,15 +612,16 @@ async assignPermissionsToRole(
     @ApiResponse({ status: 401, description: 'Unauthorized' })
     @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
     async getMonthlyReport(
-    @Query() query: MonthlyReportDTO,
+    @Query('month', ParseIntPipe) month: number,
+    @Query('year', ParseIntPipe) year: number,
     @ActiveUser('userId') userId: number
     ) {
     try {
         const data = await this.adminRawTcpClient.send({
         type: 'ADMIN_GET_MONTHLY_REPORT',
         data: {
-            month: Number(query.month),
-            year: Number(query.year),
+            month,
+            year,
             adminId: userId,
         },
         });
@@ -643,15 +642,16 @@ async assignPermissionsToRole(
     @ApiResponse({ status: 401, description: 'Unauthorized' })
     @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
     async exportMonthlyPDF(
-    @Query() query: MonthlyReportDTO,
+    @Query('month', ParseIntPipe) month: number,
+    @Query('year', ParseIntPipe) year: number,
     @ActiveUser('userId') userId: number
     ) {
     try {
         const data = await this.adminRawTcpClient.send({
         type: 'ADMIN_EXPORT_MONTHLY_PDF',
         data: {
-            month: Number(query.month),
-            year: Number(query.year),
+            month,
+            year,
             adminId: userId,
         },
         });
@@ -674,17 +674,20 @@ async assignPermissionsToRole(
     @ApiResponse({ status: 401, description: 'Unauthorized' })
     @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
     async exportMultiMonthsPDF(
-    @Query() query: MultiMonthReportDTO,
+    @Query('startMonth', ParseIntPipe) startMonth: number,
+    @Query('startYear', ParseIntPipe) startYear: number,
+    @Query('endMonth', ParseIntPipe) endMonth: number,
+    @Query('endYear', ParseIntPipe) endYear: number,
     @ActiveUser('userId') userId: number
     ) {
     try {
         const data = await this.adminRawTcpClient.send({
         type: 'ADMIN_EXPORT_MULTI_MONTHS_PDF',
         data: {
-            startMonth: Number(query.startMonth),
-            startYear: Number(query.startYear),
-            endMonth: Number(query.endMonth),
-            endYear: Number(query.endYear),
+            startMonth,
+            startYear,
+            endMonth,
+            endYear,
             adminId: userId,
         },
         });
