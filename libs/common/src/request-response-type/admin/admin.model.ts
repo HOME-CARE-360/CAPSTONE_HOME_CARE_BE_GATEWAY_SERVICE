@@ -54,7 +54,6 @@ export const AssignRolesSchema = AdminIdSchema.extend({
 });
 
 export const ResetPasswordSchema = AdminIdSchema.extend({
-    id: z.number().int().positive(),
     newPassword: z.string().min(6, 'Password must be at least 6 characters'),
 });
 
