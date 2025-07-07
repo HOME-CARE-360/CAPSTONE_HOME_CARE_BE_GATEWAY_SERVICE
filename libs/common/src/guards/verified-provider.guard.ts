@@ -17,7 +17,6 @@ export class VerifiedProviderGuard implements CanActivate {
     async canActivate(context: ExecutionContext): Promise<boolean> {
         const req = context.switchToHttp().getRequest();
 
-        console.log("kaka9");
 
         const user = req[REQUEST_USER_KEY] as AccessTokenPayload;
         const providerId = user.providerId;
