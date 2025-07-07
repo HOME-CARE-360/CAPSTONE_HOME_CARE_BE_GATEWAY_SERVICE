@@ -10,7 +10,14 @@ import {
     Query,
     Delete,
 } from '@nestjs/common';
-import { ApiOperation, ApiParam, ApiQuery } from '@nestjs/swagger';
+import { 
+    ApiOperation, 
+    ApiParam, 
+    ApiQuery, 
+    ApiBearerAuth, 
+    ApiTags,
+    ApiResponse 
+} from '@nestjs/swagger';
 import { ActiveUser } from 'libs/common/src/decorator/active-user.decorator';
 import { ADMIN_SERVICE } from 'libs/common/src/constants/service-name.constant';
 import { handlerErrorResponse, handleZodError } from 'libs/common/helpers';
@@ -30,6 +37,8 @@ import {
 } from 'libs/common/src/request-response-type/admin/admin.dto';
 
 @Controller('admin')
+@ApiTags('Admin Management')
+@ApiBearerAuth()
 export class AdminGatewayController {
     constructor(
         @Inject(ADMIN_SERVICE)
@@ -37,29 +46,17 @@ export class AdminGatewayController {
     ) { }
 
     // === USER MANAGEMENT ===
-    @Post('users')
-    @ApiOperation({ summary: 'Create a new user' })
-    async createUser(@Body() body: CreateUserDTO, @ActiveUser('userId') userId: number) {
-        try {
-            const data = await this.adminRawTcpClient.send({
-                type: 'ADMIN_CREATE_USER',
-                data: { ...body, adminId: userId },
-            });
-            handlerErrorResponse(data);
-            return data;
-        } catch (error) {
-            if (error instanceof HttpException) throw error;
-            handleZodError(error);
-        }
-    }
-
+    
     @Get('users')
-    @ApiOperation({ summary: 'Get all users' })
-    @ApiQuery({ name: 'page', required: false, type: Number })
-    @ApiQuery({ name: 'limit', required: false, type: Number })
-    @ApiQuery({ name: 'search', required: false, type: String })
-    @ApiQuery({ name: 'role', required: false, type: String })
-    @ApiQuery({ name: 'status', required: false, type: String })
+    @ApiOperation({ summary: 'Get all users with filtering and pagination' })
+    @ApiQuery({ name: 'page', required: false, type: Number, description: 'Page number (default: 1)' })
+    @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Items per page (default: 10)' })
+    @ApiQuery({ name: 'search', required: false, type: String, description: 'Search by username or email' })
+    @ApiQuery({ name: 'role', required: false, type: String, description: 'Filter by role' })
+    @ApiQuery({ name: 'status', required: false, type: String, description: 'Filter by status (active, inactive, blocked)' })
+    @ApiResponse({ status: 200, description: 'List of users retrieved successfully' })
+    @ApiResponse({ status: 401, description: 'Unauthorized' })
+    @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
     async getAllUsers(@Query() query: GetUsersQuery) {
         try {
             const data = await this.adminRawTcpClient.send({
@@ -74,9 +71,53 @@ export class AdminGatewayController {
         }
     }
 
+    @Get('users/deleted')
+    @ApiOperation({ summary: 'Get all deleted users' })
+    @ApiResponse({ status: 200, description: 'List of deleted users retrieved successfully' })
+    @ApiResponse({ status: 401, description: 'Unauthorized' })
+    @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
+    async getDeletedUsers() {
+        try {
+            const data = await this.adminRawTcpClient.send({
+                type: 'ADMIN_GET_DELETED_USERS',
+                data: {},
+            });
+            handlerErrorResponse(data);
+            return data;
+        } catch (error) {
+            if (error instanceof HttpException) throw error;
+            handleZodError(error);
+        }
+    }
+
+    @Post('users')
+    @ApiOperation({ summary: 'Create a new user' })
+    @ApiResponse({ status: 201, description: 'User created successfully' })
+    @ApiResponse({ status: 400, description: 'Bad request - Invalid input data' })
+    @ApiResponse({ status: 401, description: 'Unauthorized' })
+    @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
+    @ApiResponse({ status: 409, description: 'Conflict - User already exists' })
+    async createUser(@Body() body: CreateUserDTO, @ActiveUser('userId') userId: number) {
+        try {
+            const data = await this.adminRawTcpClient.send({
+                type: 'ADMIN_CREATE_USER',
+                data: { ...body, adminId: userId },
+            });
+            handlerErrorResponse(data);
+            return data;
+        } catch (error) {
+            if (error instanceof HttpException) throw error;
+            handleZodError(error);
+        }
+    }
+
     @Get('users/:id')
     @ApiOperation({ summary: 'Get user by ID' })
-    @ApiParam({ name: 'id', type: Number })
+    @ApiParam({ name: 'id', type: Number, description: 'User ID' })
+    @ApiResponse({ status: 200, description: 'User retrieved successfully' })
+    @ApiResponse({ status: 401, description: 'Unauthorized' })
+    @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
+    @ApiResponse({ status: 404, description: 'User not found' })
     async getUserById(@Param() params: IdParamDTO) {
         try {
             const data = await this.adminRawTcpClient.send({
@@ -92,7 +133,13 @@ export class AdminGatewayController {
     }
 
     @Patch('users/:id')
-    @ApiOperation({ summary: 'Update user' })
+    @ApiOperation({ summary: 'Update user information' })
+    @ApiParam({ name: 'id', type: Number, description: 'User ID' })
+    @ApiResponse({ status: 200, description: 'User updated successfully' })
+    @ApiResponse({ status: 400, description: 'Bad request - Invalid input data' })
+    @ApiResponse({ status: 401, description: 'Unauthorized' })
+    @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
+    @ApiResponse({ status: 404, description: 'User not found' })
     async updateUser(
         @Param() params: IdParamDTO,
         @Body() body: UpdateUserDTO,
@@ -112,7 +159,12 @@ export class AdminGatewayController {
     }
 
     @Delete('users/:id')
-    @ApiOperation({ summary: 'Delete user' })
+    @ApiOperation({ summary: 'Delete user (soft delete)' })
+    @ApiParam({ name: 'id', type: Number, description: 'User ID' })
+    @ApiResponse({ status: 200, description: 'User deleted successfully' })
+    @ApiResponse({ status: 401, description: 'Unauthorized' })
+    @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
+    @ApiResponse({ status: 404, description: 'User not found' })
     async deleteUser(@Param() params: IdParamDTO, @ActiveUser('userId') userId: number) {
         try {
             const data = await this.adminRawTcpClient.send({
@@ -128,7 +180,12 @@ export class AdminGatewayController {
     }
 
     @Patch('users/:id/block')
-    @ApiOperation({ summary: 'Block user' })
+    @ApiOperation({ summary: 'Block user account' })
+    @ApiParam({ name: 'id', type: Number, description: 'User ID' })
+    @ApiResponse({ status: 200, description: 'User blocked successfully' })
+    @ApiResponse({ status: 401, description: 'Unauthorized' })
+    @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
+    @ApiResponse({ status: 404, description: 'User not found' })
     async blockUser(@Param() params: IdParamDTO, @ActiveUser('userId') userId: number) {
         try {
             const data = await this.adminRawTcpClient.send({
@@ -144,7 +201,12 @@ export class AdminGatewayController {
     }
 
     @Patch('users/:id/unblock')
-    @ApiOperation({ summary: 'Unblock user' })
+    @ApiOperation({ summary: 'Unblock user account' })
+    @ApiParam({ name: 'id', type: Number, description: 'User ID' })
+    @ApiResponse({ status: 200, description: 'User unblocked successfully' })
+    @ApiResponse({ status: 401, description: 'Unauthorized' })
+    @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
+    @ApiResponse({ status: 404, description: 'User not found' })
     async unblockUser(@Param() params: IdParamDTO, @ActiveUser('userId') userId: number) {
         try {
             const data = await this.adminRawTcpClient.send({
@@ -160,7 +222,12 @@ export class AdminGatewayController {
     }
 
     @Patch('users/:id/activate')
-    @ApiOperation({ summary: 'Activate user' })
+    @ApiOperation({ summary: 'Activate user account' })
+    @ApiParam({ name: 'id', type: Number, description: 'User ID' })
+    @ApiResponse({ status: 200, description: 'User activated successfully' })
+    @ApiResponse({ status: 401, description: 'Unauthorized' })
+    @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
+    @ApiResponse({ status: 404, description: 'User not found' })
     async activateUser(@Param() params: IdParamDTO, @ActiveUser('userId') userId: number) {
         try {
             const data = await this.adminRawTcpClient.send({
@@ -177,6 +244,12 @@ export class AdminGatewayController {
 
     @Patch('users/:id/reset-password')
     @ApiOperation({ summary: 'Reset user password' })
+    @ApiParam({ name: 'id', type: Number, description: 'User ID' })
+    @ApiResponse({ status: 200, description: 'Password reset successfully' })
+    @ApiResponse({ status: 400, description: 'Bad request - Invalid password' })
+    @ApiResponse({ status: 401, description: 'Unauthorized' })
+    @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
+    @ApiResponse({ status: 404, description: 'User not found' })
     async resetUserPassword(
         @Param() params: IdParamDTO,
         @Body() body: ResetPasswordDTO,
@@ -197,6 +270,11 @@ export class AdminGatewayController {
 
     @Patch('users/:id/restore')
     @ApiOperation({ summary: 'Restore deleted user' })
+    @ApiParam({ name: 'id', type: Number, description: 'User ID' })
+    @ApiResponse({ status: 200, description: 'User restored successfully' })
+    @ApiResponse({ status: 401, description: 'Unauthorized' })
+    @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
+    @ApiResponse({ status: 404, description: 'User not found' })
     async restoreUser(@Param() params: IdParamDTO, @ActiveUser('userId') userId: number) {
         try {
             const data = await this.adminRawTcpClient.send({
@@ -211,13 +289,65 @@ export class AdminGatewayController {
         }
     }
 
-    @Get('users/deleted')
-    @ApiOperation({ summary: 'Get deleted users' })
-    async getDeletedUsers() {
+    @Get('users/:id/roles')
+    @ApiOperation({ summary: 'Get user roles' })
+    @ApiParam({ name: 'id', type: Number, description: 'User ID' })
+    @ApiResponse({ status: 200, description: 'User roles retrieved successfully' })
+    @ApiResponse({ status: 401, description: 'Unauthorized' })
+    @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
+    @ApiResponse({ status: 404, description: 'User not found' })
+    async getUserRoles(@Param() params: IdParamDTO) {
         try {
             const data = await this.adminRawTcpClient.send({
-                type: 'ADMIN_GET_DELETED_USERS',
-                data: {},
+                type: 'ADMIN_GET_USER_ROLES',
+                data: params,
+            });
+            handlerErrorResponse(data);
+            return data;
+        } catch (error) {
+            if (error instanceof HttpException) throw error;
+            handleZodError(error);
+        }
+    }
+
+    @Post('users/:userId/roles')
+    @ApiOperation({ summary: 'Assign roles to user' })
+    @ApiParam({ name: 'userId', type: Number, description: 'User ID' })
+    @ApiResponse({ status: 200, description: 'Roles assigned successfully' })
+    @ApiResponse({ status: 400, description: 'Bad request - Invalid role data' })
+    @ApiResponse({ status: 401, description: 'Unauthorized' })
+    @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
+    @ApiResponse({ status: 404, description: 'User not found' })
+    async assignRolesToUser(
+        @Param('userId') userId: number,
+        @Body() body: AssignRolesDTO,
+        @ActiveUser('userId') adminId: number
+    ) {
+        try {
+            const data = await this.adminRawTcpClient.send({
+                type: 'ADMIN_ASSIGN_ROLES',
+                data: { ...body, userId, adminId },
+            });
+            handlerErrorResponse(data);
+            return data;
+        } catch (error) {
+            if (error instanceof HttpException) throw error;
+            handleZodError(error);
+        }
+    }
+
+    @Get('users/:id/activity')
+    @ApiOperation({ summary: 'Get user activity logs' })
+    @ApiParam({ name: 'id', type: Number, description: 'User ID' })
+    @ApiResponse({ status: 200, description: 'User activity logs retrieved successfully' })
+    @ApiResponse({ status: 401, description: 'Unauthorized' })
+    @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
+    @ApiResponse({ status: 404, description: 'User not found' })
+    async getUserActivity(@Param() params: IdParamDTO) {
+        try {
+            const data = await this.adminRawTcpClient.send({
+                type: 'ADMIN_GET_USER_ACTIVITY',
+                data: params,
             });
             handlerErrorResponse(data);
             return data;
@@ -228,8 +358,33 @@ export class AdminGatewayController {
     }
 
     // === ROLE MANAGEMENT ===
+    
+    @Get('roles')
+    @ApiOperation({ summary: 'Get all roles' })
+    @ApiResponse({ status: 200, description: 'List of roles retrieved successfully' })
+    @ApiResponse({ status: 401, description: 'Unauthorized' })
+    @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
+    async getAllRoles() {
+        try {
+            const data = await this.adminRawTcpClient.send({
+                type: 'ADMIN_GET_ROLES',
+                data: {},
+            });
+            handlerErrorResponse(data);
+            return data;
+        } catch (error) {
+            if (error instanceof HttpException) throw error;
+            handleZodError(error);
+        }
+    }
+
     @Post('roles')
     @ApiOperation({ summary: 'Create a new role' })
+    @ApiResponse({ status: 201, description: 'Role created successfully' })
+    @ApiResponse({ status: 400, description: 'Bad request - Invalid input data' })
+    @ApiResponse({ status: 401, description: 'Unauthorized' })
+    @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
+    @ApiResponse({ status: 409, description: 'Conflict - Role already exists' })
     async createRole(@Body() body: CreateRoleDTO, @ActiveUser('userId') userId: number) {
         try {
             const data = await this.adminRawTcpClient.send({
@@ -244,9 +399,35 @@ export class AdminGatewayController {
         }
     }
 
+    @Get('roles/:id')
+    @ApiOperation({ summary: 'Get role by ID' })
+    @ApiParam({ name: 'id', type: Number, description: 'Role ID' })
+    @ApiResponse({ status: 200, description: 'Role retrieved successfully' })
+    @ApiResponse({ status: 401, description: 'Unauthorized' })
+    @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
+    @ApiResponse({ status: 404, description: 'Role not found' })
+    async getRoleById(@Param() params: IdParamDTO) {
+        try {
+            const data = await this.adminRawTcpClient.send({
+                type: 'ADMIN_GET_ROLE_BY_ID',
+                data: params,
+            });
+            handlerErrorResponse(data);
+            return data;
+        } catch (error) {
+            if (error instanceof HttpException) throw error;
+            handleZodError(error);
+        }
+    }
+
     @Patch('roles/:id')
     @ApiOperation({ summary: 'Update role' })
-    @ApiParam({ name: 'id', description: 'Role ID' })
+    @ApiParam({ name: 'id', type: Number, description: 'Role ID' })
+    @ApiResponse({ status: 200, description: 'Role updated successfully' })
+    @ApiResponse({ status: 400, description: 'Bad request - Invalid input data' })
+    @ApiResponse({ status: 401, description: 'Unauthorized' })
+    @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
+    @ApiResponse({ status: 404, description: 'Role not found' })
     async updateRole(
         @Param() params: IdParamDTO,
         @Body() body: UpdateRoleDTO,
@@ -267,7 +448,12 @@ export class AdminGatewayController {
 
     @Delete('roles/:id')
     @ApiOperation({ summary: 'Delete role' })
-    @ApiParam({ name: 'id', description: 'Role ID' })
+    @ApiParam({ name: 'id', type: Number, description: 'Role ID' })
+    @ApiResponse({ status: 200, description: 'Role deleted successfully' })
+    @ApiResponse({ status: 401, description: 'Unauthorized' })
+    @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
+    @ApiResponse({ status: 404, description: 'Role not found' })
+    @ApiResponse({ status: 409, description: 'Conflict - Role is in use' })
     async deleteRole(@Param() params: IdParamDTO, @ActiveUser('userId') userId: number) {
         try {
             const data = await this.adminRawTcpClient.send({
@@ -282,40 +468,13 @@ export class AdminGatewayController {
         }
     }
 
-    @Get('roles')
-    @ApiOperation({ summary: 'Get all roles' })
-    async getAllRoles() {
-        try {
-            const data = await this.adminRawTcpClient.send({
-                type: 'ADMIN_GET_ROLES',
-                data: {},
-            });
-            handlerErrorResponse(data);
-            return data;
-        } catch (error) {
-            if (error instanceof HttpException) throw error;
-            handleZodError(error);
-        }
-    }
-
-    @Get('roles/:id')
-    @ApiOperation({ summary: 'Get role by ID' })
-    async getRoleById(@Param() params: IdParamDTO) {
-        try {
-            const data = await this.adminRawTcpClient.send({
-                type: 'ADMIN_GET_ROLE_BY_ID',
-                data: params,
-            });
-            handlerErrorResponse(data);
-            return data;
-        } catch (error) {
-            if (error instanceof HttpException) throw error;
-            handleZodError(error);
-        }
-    }
-
     @Get('roles/:id/permissions')
     @ApiOperation({ summary: 'Get permissions by role' })
+    @ApiParam({ name: 'id', type: Number, description: 'Role ID' })
+    @ApiResponse({ status: 200, description: 'Role permissions retrieved successfully' })
+    @ApiResponse({ status: 401, description: 'Unauthorized' })
+    @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
+    @ApiResponse({ status: 404, description: 'Role not found' })
     async getPermissionsByRole(@Param() params: IdParamDTO) {
         try {
             const data = await this.adminRawTcpClient.send({
@@ -332,6 +491,12 @@ export class AdminGatewayController {
 
     @Post('roles/:roleId/permissions')
     @ApiOperation({ summary: 'Assign permissions to role' })
+    @ApiParam({ name: 'roleId', type: Number, description: 'Role ID' })
+    @ApiResponse({ status: 200, description: 'Permissions assigned successfully' })
+    @ApiResponse({ status: 400, description: 'Bad request - Invalid permission data' })
+    @ApiResponse({ status: 401, description: 'Unauthorized' })
+    @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
+    @ApiResponse({ status: 404, description: 'Role not found' })
     async assignPermissionsToRole(
         @Param('roleId') roleId: number,
         @Body() body: AssignPermissionsToRoleDTO,
@@ -350,45 +515,13 @@ export class AdminGatewayController {
         }
     }
 
-    // === USER ROLE ASSIGNMENT ===
-    @Post('users/:userId/roles')
-    @ApiOperation({ summary: 'Assign roles to user' })
-    async assignRolesToUser(
-        @Param('userId') userId: number,
-        @Body() body: AssignRolesDTO,
-        @ActiveUser('userId') adminId: number
-    ) {
-        try {
-            const data = await this.adminRawTcpClient.send({
-                type: 'ADMIN_ASSIGN_ROLES',
-                data: { ...body, userId, adminId },
-            });
-            handlerErrorResponse(data);
-            return data;
-        } catch (error) {
-            if (error instanceof HttpException) throw error;
-            handleZodError(error);
-        }
-    }
-
-    @Get('users/:id/roles')
-    @ApiOperation({ summary: 'Get user roles' })
-    async getUserRoles(@Param() params: IdParamDTO) {
-        try {
-            const data = await this.adminRawTcpClient.send({
-                type: 'ADMIN_GET_USER_ROLES',
-                data: params,
-            });
-            handlerErrorResponse(data);
-            return data;
-        } catch (error) {
-            if (error instanceof HttpException) throw error;
-            handleZodError(error);
-        }
-    }
-
+    // === PERMISSIONS ===
+    
     @Get('permissions')
     @ApiOperation({ summary: 'Get all permissions' })
+    @ApiResponse({ status: 200, description: 'List of permissions retrieved successfully' })
+    @ApiResponse({ status: 401, description: 'Unauthorized' })
+    @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
     async getAllPermissions() {
         try {
             const data = await this.adminRawTcpClient.send({
@@ -404,8 +537,12 @@ export class AdminGatewayController {
     }
 
     // === STATISTICS ===
+    
     @Get('statistics/users')
     @ApiOperation({ summary: 'Get user statistics' })
+    @ApiResponse({ status: 200, description: 'User statistics retrieved successfully' })
+    @ApiResponse({ status: 401, description: 'Unauthorized' })
+    @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
     async getUserStatistics() {
         try {
             const data = await this.adminRawTcpClient.send({
@@ -422,6 +559,9 @@ export class AdminGatewayController {
 
     @Get('statistics/roles')
     @ApiOperation({ summary: 'Get role statistics' })
+    @ApiResponse({ status: 200, description: 'Role statistics retrieved successfully' })
+    @ApiResponse({ status: 401, description: 'Unauthorized' })
+    @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
     async getRoleStatistics() {
         try {
             const data = await this.adminRawTcpClient.send({
@@ -436,27 +576,16 @@ export class AdminGatewayController {
         }
     }
 
-    @Get('users/:id/activity')
-    @ApiOperation({ summary: 'Get user activity logs' })
-    async getUserActivity(@Param() params: IdParamDTO) {
-        try {
-            const data = await this.adminRawTcpClient.send({
-                type: 'ADMIN_GET_USER_ACTIVITY',
-                data: params,
-            });
-            handlerErrorResponse(data);
-            return data;
-        } catch (error) {
-            if (error instanceof HttpException) throw error;
-            handleZodError(error);
-        }
-    }
-
     // === REPORTS ===
+    
     @Get('reports/monthly')
     @ApiOperation({ summary: 'Get monthly report' })
-    @ApiQuery({ name: 'month', required: true, type: Number })
-    @ApiQuery({ name: 'year', required: true, type: Number })
+    @ApiQuery({ name: 'month', required: true, type: Number, description: 'Month (1-12)' })
+    @ApiQuery({ name: 'year', required: true, type: Number, description: 'Year (e.g., 2024)' })
+    @ApiResponse({ status: 200, description: 'Monthly report retrieved successfully' })
+    @ApiResponse({ status: 400, description: 'Bad request - Invalid month or year' })
+    @ApiResponse({ status: 401, description: 'Unauthorized' })
+    @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
     async getMonthlyReport(@Query() query: MonthlyReportDTO, @ActiveUser('userId') userId: number) {
         try {
             const data = await this.adminRawTcpClient.send({
@@ -473,8 +602,12 @@ export class AdminGatewayController {
 
     @Get('reports/monthly/export/pdf')
     @ApiOperation({ summary: 'Export monthly report as PDF' })
-    @ApiQuery({ name: 'month', required: true, type: Number })
-    @ApiQuery({ name: 'year', required: true, type: Number })
+    @ApiQuery({ name: 'month', required: true, type: Number, description: 'Month (1-12)' })
+    @ApiQuery({ name: 'year', required: true, type: Number, description: 'Year (e.g., 2024)' })
+    @ApiResponse({ status: 200, description: 'PDF report generated successfully' })
+    @ApiResponse({ status: 400, description: 'Bad request - Invalid month or year' })
+    @ApiResponse({ status: 401, description: 'Unauthorized' })
+    @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
     async exportMonthlyPDF(@Query() query: MonthlyReportDTO, @ActiveUser('userId') userId: number) {
         try {
             const data = await this.adminRawTcpClient.send({
@@ -491,10 +624,14 @@ export class AdminGatewayController {
 
     @Get('reports/multi-months/export/pdf')
     @ApiOperation({ summary: 'Export multi-month report as PDF' })
-    @ApiQuery({ name: 'startMonth', required: true, type: Number })
-    @ApiQuery({ name: 'startYear', required: true, type: Number })
-    @ApiQuery({ name: 'endMonth', required: true, type: Number })
-    @ApiQuery({ name: 'endYear', required: true, type: Number })
+    @ApiQuery({ name: 'startMonth', required: true, type: Number, description: 'Start month (1-12)' })
+    @ApiQuery({ name: 'startYear', required: true, type: Number, description: 'Start year (e.g., 2024)' })
+    @ApiQuery({ name: 'endMonth', required: true, type: Number, description: 'End month (1-12)' })
+    @ApiQuery({ name: 'endYear', required: true, type: Number, description: 'End year (e.g., 2024)' })
+    @ApiResponse({ status: 200, description: 'Multi-month PDF report generated successfully' })
+    @ApiResponse({ status: 400, description: 'Bad request - Invalid date range' })
+    @ApiResponse({ status: 401, description: 'Unauthorized' })
+    @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
     async exportMultiMonthsPDF(
         @Query() query: MultiMonthReportDTO,
         @ActiveUser('userId') userId: number
@@ -512,5 +649,3 @@ export class AdminGatewayController {
         }
     }
 }
-
-
