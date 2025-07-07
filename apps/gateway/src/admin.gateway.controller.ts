@@ -257,7 +257,7 @@ export class AdminGatewayController {
         const data = await this.adminRawTcpClient.send({
         type: 'ADMIN_RESET_USER_PASSWORD',
         data: {
-            id,                           
+            id,
             newPassword: body.newPassword,
             confirmPassword: body.confirmPassword,
             adminId: userId,
@@ -270,7 +270,6 @@ export class AdminGatewayController {
         handleZodError(error);
     }
     }
-
 
     @Patch('users/:id/restore')
     @ApiOperation({ summary: 'Restore deleted user' })
