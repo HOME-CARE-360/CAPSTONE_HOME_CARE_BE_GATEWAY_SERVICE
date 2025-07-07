@@ -9,6 +9,7 @@ import {
     Post,
     Query,
     Delete,
+    ParseIntPipe,
 } from '@nestjs/common';
 import { 
     ApiOperation, 
@@ -111,18 +112,18 @@ export class AdminGatewayController {
         }
     }
 
-    @Get('users/:id')
+ @Get('users/:id')
     @ApiOperation({ summary: 'Get user by ID' })
     @ApiParam({ name: 'id', type: Number, description: 'User ID' })
     @ApiResponse({ status: 200, description: 'User retrieved successfully' })
     @ApiResponse({ status: 401, description: 'Unauthorized' })
     @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
     @ApiResponse({ status: 404, description: 'User not found' })
-    async getUserById(@Param() params: IdParamDTO) {
+    async getUserById(@Param('id', ParseIntPipe) id: number) {
         try {
             const data = await this.adminRawTcpClient.send({
                 type: 'ADMIN_GET_USER_BY_ID',
-                data: params,
+                data: { id },
             });
             handlerErrorResponse(data);
             return data;
@@ -141,14 +142,14 @@ export class AdminGatewayController {
     @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
     @ApiResponse({ status: 404, description: 'User not found' })
     async updateUser(
-        @Param() params: IdParamDTO,
+        @Param('id', ParseIntPipe) id: number,
         @Body() body: UpdateUserDTO,
         @ActiveUser('userId') userId: number
     ) {
         try {
             const data = await this.adminRawTcpClient.send({
                 type: 'ADMIN_UPDATE_USER',
-                data: { id: params.id, data: body, adminId: userId },
+                data: { id, data: body, adminId: userId },
             });
             handlerErrorResponse(data);
             return data;
@@ -165,11 +166,11 @@ export class AdminGatewayController {
     @ApiResponse({ status: 401, description: 'Unauthorized' })
     @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
     @ApiResponse({ status: 404, description: 'User not found' })
-    async deleteUser(@Param() params: IdParamDTO, @ActiveUser('userId') userId: number) {
+    async deleteUser(@Param('id', ParseIntPipe) id: number, @ActiveUser('userId') userId: number) {
         try {
             const data = await this.adminRawTcpClient.send({
                 type: 'ADMIN_DELETE_USER',
-                data: { ...params, adminId: userId },
+                data: { id, adminId: userId },
             });
             handlerErrorResponse(data);
             return data;
@@ -186,11 +187,11 @@ export class AdminGatewayController {
     @ApiResponse({ status: 401, description: 'Unauthorized' })
     @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
     @ApiResponse({ status: 404, description: 'User not found' })
-    async blockUser(@Param() params: IdParamDTO, @ActiveUser('userId') userId: number) {
+    async blockUser(@Param('id', ParseIntPipe) id: number, @ActiveUser('userId') userId: number) {
         try {
             const data = await this.adminRawTcpClient.send({
                 type: 'ADMIN_BLOCK_USER',
-                data: { ...params, adminId: userId },
+                data: { id, adminId: userId },
             });
             handlerErrorResponse(data);
             return data;
@@ -207,11 +208,11 @@ export class AdminGatewayController {
     @ApiResponse({ status: 401, description: 'Unauthorized' })
     @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
     @ApiResponse({ status: 404, description: 'User not found' })
-    async unblockUser(@Param() params: IdParamDTO, @ActiveUser('userId') userId: number) {
+    async unblockUser(@Param('id', ParseIntPipe) id: number, @ActiveUser('userId') userId: number) {
         try {
             const data = await this.adminRawTcpClient.send({
                 type: 'ADMIN_UNBLOCK_USER',
-                data: { ...params, adminId: userId },
+                data: { id, adminId: userId },
             });
             handlerErrorResponse(data);
             return data;
@@ -228,11 +229,11 @@ export class AdminGatewayController {
     @ApiResponse({ status: 401, description: 'Unauthorized' })
     @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
     @ApiResponse({ status: 404, description: 'User not found' })
-    async activateUser(@Param() params: IdParamDTO, @ActiveUser('userId') userId: number) {
+    async activateUser(@Param('id', ParseIntPipe) id: number, @ActiveUser('userId') userId: number) {
         try {
             const data = await this.adminRawTcpClient.send({
                 type: 'ADMIN_ACTIVATE_USER',
-                data: { ...params, adminId: userId },
+                data: { id, adminId: userId },
             });
             handlerErrorResponse(data);
             return data;
@@ -251,14 +252,14 @@ export class AdminGatewayController {
     @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
     @ApiResponse({ status: 404, description: 'User not found' })
     async resetUserPassword(
-        @Param() params: IdParamDTO,
+        @Param('id', ParseIntPipe) id: number,
         @Body() body: ResetPasswordDTO,
         @ActiveUser('userId') userId: number
     ) {
         try {
             const data = await this.adminRawTcpClient.send({
                 type: 'ADMIN_RESET_USER_PASSWORD',
-                data: { ...params, ...body, adminId: userId },
+                data: { id, ...body, adminId: userId },
             });
             handlerErrorResponse(data);
             return data;
@@ -275,11 +276,11 @@ export class AdminGatewayController {
     @ApiResponse({ status: 401, description: 'Unauthorized' })
     @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
     @ApiResponse({ status: 404, description: 'User not found' })
-    async restoreUser(@Param() params: IdParamDTO, @ActiveUser('userId') userId: number) {
+    async restoreUser(@Param('id', ParseIntPipe) id: number, @ActiveUser('userId') userId: number) {
         try {
             const data = await this.adminRawTcpClient.send({
                 type: 'ADMIN_RESTORE_USER',
-                data: { ...params, adminId: userId },
+                data: { id, adminId: userId },
             });
             handlerErrorResponse(data);
             return data;
@@ -296,11 +297,11 @@ export class AdminGatewayController {
     @ApiResponse({ status: 401, description: 'Unauthorized' })
     @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
     @ApiResponse({ status: 404, description: 'User not found' })
-    async getUserRoles(@Param() params: IdParamDTO) {
+    async getUserRoles(@Param('id', ParseIntPipe) id: number) {
         try {
             const data = await this.adminRawTcpClient.send({
                 type: 'ADMIN_GET_USER_ROLES',
-                data: params,
+                data: { id },
             });
             handlerErrorResponse(data);
             return data;
@@ -308,7 +309,7 @@ export class AdminGatewayController {
             if (error instanceof HttpException) throw error;
             handleZodError(error);
         }
-    }
+    }   
 
     @Post('users/:userId/roles')
     @ApiOperation({ summary: 'Assign roles to user' })
@@ -319,7 +320,7 @@ export class AdminGatewayController {
     @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
     @ApiResponse({ status: 404, description: 'User not found' })
     async assignRolesToUser(
-        @Param('userId') userId: number,
+        @Param('userId', ParseIntPipe) userId: number,
         @Body() body: AssignRolesDTO,
         @ActiveUser('userId') adminId: number
     ) {
@@ -343,11 +344,11 @@ export class AdminGatewayController {
     @ApiResponse({ status: 401, description: 'Unauthorized' })
     @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
     @ApiResponse({ status: 404, description: 'User not found' })
-    async getUserActivity(@Param() params: IdParamDTO) {
+    async getUserActivity(@Param('id', ParseIntPipe) id: number) {
         try {
             const data = await this.adminRawTcpClient.send({
                 type: 'ADMIN_GET_USER_ACTIVITY',
-                data: params,
+                data: { id },
             });
             handlerErrorResponse(data);
             return data;
@@ -406,11 +407,11 @@ export class AdminGatewayController {
     @ApiResponse({ status: 401, description: 'Unauthorized' })
     @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
     @ApiResponse({ status: 404, description: 'Role not found' })
-    async getRoleById(@Param() params: IdParamDTO) {
+    async getRoleById(@Param('id', ParseIntPipe) id: number) {
         try {
             const data = await this.adminRawTcpClient.send({
                 type: 'ADMIN_GET_ROLE_BY_ID',
-                data: params,
+                data: { id },
             });
             handlerErrorResponse(data);
             return data;
@@ -454,18 +455,21 @@ export class AdminGatewayController {
     @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
     @ApiResponse({ status: 404, description: 'Role not found' })
     @ApiResponse({ status: 409, description: 'Conflict - Role is in use' })
-    async deleteRole(@Param() params: IdParamDTO, @ActiveUser('userId') userId: number) {
-        try {
-            const data = await this.adminRawTcpClient.send({
-                type: 'ADMIN_DELETE_ROLE',
-                data: { ...params, adminId: userId },
-            });
-            handlerErrorResponse(data);
-            return data;
-        } catch (error) {
-            if (error instanceof HttpException) throw error;
-            handleZodError(error);
-        }
+    async deleteRole(
+    @Param('id', ParseIntPipe) id: number,
+    @ActiveUser('userId') userId: number
+    ) {
+    try {
+        const data = await this.adminRawTcpClient.send({
+        type: 'ADMIN_DELETE_ROLE',
+        data: { id, adminId: userId },
+        });
+        handlerErrorResponse(data);
+        return data;
+    } catch (error) {
+        if (error instanceof HttpException) throw error;
+        handleZodError(error);
+    }
     }
 
     @Get('roles/:id/permissions')
@@ -475,11 +479,11 @@ export class AdminGatewayController {
     @ApiResponse({ status: 401, description: 'Unauthorized' })
     @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
     @ApiResponse({ status: 404, description: 'Role not found' })
-    async getPermissionsByRole(@Param() params: IdParamDTO) {
+    async getPermissionsByRole(@Param('id', ParseIntPipe) id: number) {
         try {
             const data = await this.adminRawTcpClient.send({
                 type: 'ADMIN_GET_PERMISSIONS_BY_ROLE',
-                data: { roleId: params.id },
+                data: { roleId: id },
             });
             handlerErrorResponse(data);
             return data;
@@ -498,14 +502,18 @@ export class AdminGatewayController {
     @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
     @ApiResponse({ status: 404, description: 'Role not found' })
     async assignPermissionsToRole(
-        @Param('roleId') roleId: number,
+        @Param('roleId', ParseIntPipe) roleId: number,
         @Body() body: AssignPermissionsToRoleDTO,
         @ActiveUser('userId') userId: number
     ) {
         try {
             const data = await this.adminRawTcpClient.send({
                 type: 'ADMIN_ASSIGN_PERMISSIONS_TO_ROLE',
-                data: { ...body, roleId, adminId: userId },
+                data: {
+                    ...body,
+                    roleId,
+                    adminId: userId,
+                },
             });
             handlerErrorResponse(data);
             return data;
