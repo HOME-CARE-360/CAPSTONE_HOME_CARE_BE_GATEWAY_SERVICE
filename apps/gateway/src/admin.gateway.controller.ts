@@ -10,6 +10,7 @@ import {
     Query,
     Delete,
     ParseIntPipe,
+    DefaultValuePipe,
 } from '@nestjs/common';
 import { 
     ApiOperation, 
@@ -30,7 +31,6 @@ import {
     CreateUserDTO,
     ResetPasswordDTO,
     UpdateRoleDTO,
-    // UpdateUserDTO,
 } from 'libs/common/src/request-response-type/admin/admin.dto';
 
 @Controller('admin')
@@ -55,8 +55,9 @@ export class AdminGatewayController {
     @ApiResponse({ status: 401, description: 'Unauthorized' })
     @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
     async getAllUsers(
-    @Query('page', ParseIntPipe) page: number,
-    @Query('limit',  ParseIntPipe) limit: number,
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
+
     @Query('search') search?: string,
     @Query('role') role?: string,
     @Query('status') status?: string,
@@ -89,8 +90,8 @@ export class AdminGatewayController {
     @ApiResponse({ status: 401, description: 'Unauthorized' })
     @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
     async getDeletedUsers(
-    @Query('page', ParseIntPipe) page = 1,
-    @Query('limit', ParseIntPipe) limit = 10
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
     ) {
     try {
         const data = await this.adminRawTcpClient.send({
@@ -392,8 +393,8 @@ export class AdminGatewayController {
     @ApiResponse({ status: 401, description: 'Unauthorized' })
     @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
     async getAllRoles(
-    @Query('page', ParseIntPipe) page = 1,
-    @Query('limit', ParseIntPipe) limit = 10
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
     ) {
     try {
         const data = await this.adminRawTcpClient.send({
@@ -523,8 +524,8 @@ export class AdminGatewayController {
     @ApiResponse({ status: 404, description: 'Role not found' })
     async getPermissionsByRole(
     @Param('id', ParseIntPipe) id: number,
-    @Query('page', ParseIntPipe) page: number,
-    @Query('limit', ParseIntPipe) limit: number,
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
     ) {
     try {
         const data = await this.adminRawTcpClient.send({
@@ -583,8 +584,8 @@ export class AdminGatewayController {
     @ApiResponse({ status: 401, description: 'Unauthorized' })
     @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
     async getAllPermissions(
-    @Query('page', ParseIntPipe) page: number,
-    @Query('limit', ParseIntPipe) limit: number,
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
     ) {
     try {
         const data = await this.adminRawTcpClient.send({
