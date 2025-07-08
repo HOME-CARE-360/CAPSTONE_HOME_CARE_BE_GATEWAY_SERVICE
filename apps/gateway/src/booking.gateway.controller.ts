@@ -17,6 +17,10 @@ export class BookingsGatewayController {
     @Post('create-service-request')
     @ZodSerializerDto(GetListCategoryResDTO)
     async getListService(@Body() body: CreateServiceRequestBodySchemaDTO, @ActiveUser() user: AccessTokenPayload) {
+        console.log(user);
+        console.log("ja");
+
+
         try {
             return await lastValueFrom(this.bookingClient.send({ cmd: 'create-service-request' }, { body, userId: user.userId, customerID: user.customerId }));
         } catch (error) {

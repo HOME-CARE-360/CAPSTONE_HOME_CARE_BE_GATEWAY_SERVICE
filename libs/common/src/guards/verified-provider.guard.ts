@@ -20,10 +20,13 @@ export class VerifiedProviderGuard implements CanActivate {
 
         const user = req[REQUEST_USER_KEY] as AccessTokenPayload;
         const providerId = user.providerId;
+        console.log(user);
 
         if (!providerId) {
             throw ServiceProviderNotFoundException;
         }
+        console.log("a");
+
 
         const provider = await this.prisma.serviceProvider.findUnique({
             where: { id: providerId },
@@ -32,6 +35,7 @@ export class VerifiedProviderGuard implements CanActivate {
         if (!provider) {
             throw ServiceProviderNotFoundException;
         }
+        console.log("a1");
         if (provider.verificationStatus !== VerificationStatus.VERIFIED) {
             throw ProviderNotVerifiedException;
         }
