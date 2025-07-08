@@ -33,6 +33,7 @@ import {
     UpdateRoleDTO,
     // UpdateUserDTO,
 } from 'libs/common/src/request-response-type/admin/admin.dto';
+import { PaginationParams } from 'libs/common/src/request-response-type/admin/admin.model';
 
 @Controller('admin')
 @ApiTags('Admin Management')
@@ -70,15 +71,17 @@ export class AdminGatewayController {
     }
 
     @Get('users/deleted')
-    @ApiOperation({ summary: 'Get all deleted users' })
+    @ApiOperation({ summary: 'Get all deleted users (with pagination)' })
+    @ApiQuery({ name: 'page', required: false, type: Number, description: 'Page number (default: 1)' })
+    @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Items per page (default: 10)' })
     @ApiResponse({ status: 200, description: 'List of deleted users retrieved successfully' })
     @ApiResponse({ status: 401, description: 'Unauthorized' })
     @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
-    async getDeletedUsers() {
+    async getDeletedUsers(@Query() query: PaginationParams) {
         try {
             const data = await this.adminRawTcpClient.send({
                 type: 'ADMIN_GET_DELETED_USERS',
-                data: {},
+                data: query,
             });
             handlerErrorResponse(data);
             return data;
@@ -367,15 +370,17 @@ export class AdminGatewayController {
     // === ROLE MANAGEMENT ===
     
     @Get('roles')
-    @ApiOperation({ summary: 'Get all roles' })
+    @ApiOperation({ summary: 'Get all roles with pagination' })
+    @ApiQuery({ name: 'page', required: false, type: Number, description: 'Page number (default: 1)' })
+    @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Items per page (default: 10)' })
     @ApiResponse({ status: 200, description: 'List of roles retrieved successfully' })
     @ApiResponse({ status: 401, description: 'Unauthorized' })
     @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
-    async getAllRoles() {
+    async getAllRoles(@Query() query: PaginationParams) {
         try {
             const data = await this.adminRawTcpClient.send({
                 type: 'ADMIN_GET_ROLES',
-                data: {},
+                data: query,
             });
             handlerErrorResponse(data);
             return data;
@@ -384,7 +389,7 @@ export class AdminGatewayController {
             handleZodError(error);
         }
     }
-
+    
     @Post('roles')
     @ApiOperation({ summary: 'Create a new role' })
     @ApiResponse({ status: 201, description: 'Role created successfully' })
@@ -489,17 +494,25 @@ export class AdminGatewayController {
     }
 
     @Get('roles/:id/permissions')
-    @ApiOperation({ summary: 'Get permissions by role' })
+    @ApiOperation({ summary: 'Get permissions by role with pagination' })
     @ApiParam({ name: 'id', type: Number, description: 'Role ID' })
+    @ApiQuery({ name: 'page', required: false, type: Number, description: 'Page number (default: 1)' })
+    @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Items per page (default: 10)' })
     @ApiResponse({ status: 200, description: 'Role permissions retrieved successfully' })
     @ApiResponse({ status: 401, description: 'Unauthorized' })
     @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
     @ApiResponse({ status: 404, description: 'Role not found' })
-    async getPermissionsByRole(@Param('id', ParseIntPipe) id: number) {
+    async getPermissionsByRole(
+        @Param('id', ParseIntPipe) id: number,
+        @Query() query: PaginationParams
+    ) {
         try {
             const data = await this.adminRawTcpClient.send({
                 type: 'ADMIN_GET_PERMISSIONS_BY_ROLE',
-                data: { id },
+                data: {
+                    id,
+                    ...query,
+                },
             });
             handlerErrorResponse(data);
             return data;
@@ -509,55 +522,58 @@ export class AdminGatewayController {
         }
     }
 
-@Post('roles/:roleId/permissions')
-@ApiOperation({ summary: 'Assign permissions to role' })
-@ApiParam({ name: 'roleId', type: Number, description: 'Role ID' })
-@ApiResponse({ status: 200, description: 'Permissions assigned successfully' })
-@ApiResponse({ status: 400, description: 'Bad request - Invalid permission data' })
-@ApiResponse({ status: 401, description: 'Unauthorized' })
-@ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
-@ApiResponse({ status: 404, description: 'Role not found' })
-async assignPermissionsToRole(
-  @Param('roleId', ParseIntPipe) roleId: number,
-  @Body() body: AssignPermissionsToRoleDTO,
-  @ActiveUser('userId') userId: number
-) {
-  try {
-    const data = await this.adminRawTcpClient.send({
-      type: 'ADMIN_ASSIGN_PERMISSIONS_TO_ROLE',
-      data: {
-        permissionIds: body.permissionIds, 
-        roleId,
-        adminId: userId,
-      },
-    });
-    handlerErrorResponse(data);
-    return data;
-  } catch (error) {
-    if (error instanceof HttpException) throw error;
-    handleZodError(error);
-  }
-}
+
+    @Post('roles/:roleId/permissions')
+    @ApiOperation({ summary: 'Assign permissions to role' })
+    @ApiParam({ name: 'roleId', type: Number, description: 'Role ID' })
+    @ApiResponse({ status: 200, description: 'Permissions assigned successfully' })
+    @ApiResponse({ status: 400, description: 'Bad request - Invalid permission data' })
+    @ApiResponse({ status: 401, description: 'Unauthorized' })
+    @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
+    @ApiResponse({ status: 404, description: 'Role not found' })
+    async assignPermissionsToRole(
+    @Param('roleId', ParseIntPipe) roleId: number,
+    @Body() body: AssignPermissionsToRoleDTO,
+    @ActiveUser('userId') userId: number
+    ) {
+    try {
+        const data = await this.adminRawTcpClient.send({
+        type: 'ADMIN_ASSIGN_PERMISSIONS_TO_ROLE',
+        data: {
+            permissionIds: body.permissionIds, 
+            roleId,
+            adminId: userId,
+        },
+        });
+        handlerErrorResponse(data);
+        return data;
+    } catch (error) {
+        if (error instanceof HttpException) throw error;
+        handleZodError(error);
+    }
+    }
 
     // === PERMISSIONS ===
     
     @Get('permissions')
-    @ApiOperation({ summary: 'Get all permissions' })
+    @ApiOperation({ summary: 'Get all permissions (with pagination)' })
+    @ApiQuery({ name: 'page', required: false, type: Number, description: 'Page number (default: 1)' })
+    @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Items per page (default: 10)' })
     @ApiResponse({ status: 200, description: 'List of permissions retrieved successfully' })
     @ApiResponse({ status: 401, description: 'Unauthorized' })
     @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
-    async getAllPermissions() {
-        try {
-            const data = await this.adminRawTcpClient.send({
-                type: 'ADMIN_GET_PERMISSIONS',
-                data: {},
-            });
-            handlerErrorResponse(data);
-            return data;
-        } catch (error) {
-            if (error instanceof HttpException) throw error;
-            handleZodError(error);
-        }
+    async getAllPermissions(@Query() query: PaginationParams) {
+    try {
+        const data = await this.adminRawTcpClient.send({
+        type: 'ADMIN_GET_PERMISSIONS',
+        data: query,
+        });
+        handlerErrorResponse(data);
+        return data;
+    } catch (error) {
+        if (error instanceof HttpException) throw error;
+        handleZodError(error);
+    }
     }
 
     // === STATISTICS ===

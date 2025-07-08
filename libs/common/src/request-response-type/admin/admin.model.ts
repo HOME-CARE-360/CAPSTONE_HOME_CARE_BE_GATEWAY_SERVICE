@@ -84,3 +84,8 @@ export const MultiMonthReportSchema = z.object({
   endMonth: z.number().int().min(1).max(12),
   endYear: z.number().int().min(2000),
 });
+
+export interface PaginationParams {
+  page?: number;
+  limit?: number;
+}
