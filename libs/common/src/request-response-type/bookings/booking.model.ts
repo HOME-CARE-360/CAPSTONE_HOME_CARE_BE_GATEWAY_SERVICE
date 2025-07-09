@@ -38,6 +38,10 @@ export const CreateBookingBodySchema = BookingSchema.omit({
     createdAt: true,
     id: true
 }).strict()
+export const CancelServiceRequestBodySchema = z.object({
+    serviceRequestId: z.number(),
+}).strict()
+export type CancelServiceRequestBodySchema = z.infer<typeof CancelServiceRequestBodySchema>
 export type GetServicesRequestQueryType = z.infer<typeof GetServicesRequestQuerySchema>
 export type AssignStaffToBookingBodySchemaType = z.infer<typeof AssignStaffToBookingBodySchema>
 

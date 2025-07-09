@@ -6,8 +6,8 @@ import { ZodSerializerDto } from "nestjs-zod";
 import { lastValueFrom } from "rxjs";
 import { GetListCategoryResDTO } from "libs/common/src/request-response-type/category/category.dto";
 import { ActiveUser } from "libs/common/src/decorator/active-user.decorator";
-import { CreateServiceRequestBodySchemaDTO } from "libs/common/src/request-response-type/bookings/booking.dto";
 import { AccessTokenPayload } from "libs/common/src/types/jwt.type";
+import { CreateServiceRequestBodySchemaDTO } from "libs/common/src/request-response-type/bookings/booking.dto";
 
 @Controller('bookings')
 export class BookingsGatewayController {

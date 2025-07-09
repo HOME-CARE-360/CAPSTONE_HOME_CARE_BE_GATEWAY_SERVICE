@@ -8,9 +8,9 @@ import { PROVIDER_SERVICE } from 'libs/common/src/constants/service-name.constan
 import { ClientProxy } from '@nestjs/microservices';
 import { lastValueFrom } from 'rxjs';
 import { handleZodError } from 'libs/common/helpers';
-import { Body, Controller, Get, Inject, Post, Query, UseGuards } from '@nestjs/common';
-import { AssignStaffToBookingBodyDTO, GetServicesRequestQueryDTO } from 'libs/common/src/request-response-type/bookings/booking.dto';
+import { Body, Controller, Get, Inject, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { CreateProposedServiceDTO } from 'libs/common/src/request-response-type/proposed/proposed.dto';
+import { AssignStaffToBookingBodyDTO, CancelServiceRequestBodyDTO, GetServicesRequestQueryDTO } from 'libs/common/src/request-response-type/bookings/booking.dto';
 
 
 
@@ -81,5 +81,18 @@ export class ManageBookingsGatewayController {
 
         }
     }
+    @Patch("cancel-service-request")
+    async createServiceRequest(@Body() body: CancelServiceRequestBodyDTO, @ActiveUser("providerId") providerID: number) {
+        try {
+            return await lastValueFrom(this.providerClient.send({ cmd: 'cancel-service-request' }, { data: { ...body }, providerID }));
+        } catch (error) {
+            console.log(error);
+
+            handleZodError(error)
+
+
+        }
+    }
+
 
 }
