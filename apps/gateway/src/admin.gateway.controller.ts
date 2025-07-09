@@ -119,7 +119,6 @@ export class AdminGatewayController {
                 type: 'ADMIN_CREATE_USER',
                 data: { ...body, adminId: userId },
             });
-            handlerErrorResponse(data);
             return data;
         } catch (error) {
             if (error instanceof HttpException) throw error;
@@ -187,7 +186,6 @@ export class AdminGatewayController {
                 type: 'ADMIN_DELETE_USER',
                 data: { id, adminId: userId },
             });
-            handlerErrorResponse(data);
             return data;
         } catch (error) {
             if (error instanceof HttpException) throw error;
@@ -208,7 +206,6 @@ export class AdminGatewayController {
                 type: 'ADMIN_BLOCK_USER',
                 data: { id, adminId: userId },
             });
-            handlerErrorResponse(data);
             return data;
         } catch (error) {
             if (error instanceof HttpException) throw error;
