@@ -89,8 +89,6 @@ export class ManageBookingsGatewayController {
             console.log(error);
 
             handleZodError(error)
-
-
         }
     }
 
