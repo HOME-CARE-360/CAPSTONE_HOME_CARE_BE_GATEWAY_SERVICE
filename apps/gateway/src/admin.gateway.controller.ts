@@ -57,7 +57,6 @@ export class AdminGatewayController {
     async getAllUsers(
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
-
     @Query('search') search?: string,
     @Query('role') role?: string,
     @Query('status') status?: string,
