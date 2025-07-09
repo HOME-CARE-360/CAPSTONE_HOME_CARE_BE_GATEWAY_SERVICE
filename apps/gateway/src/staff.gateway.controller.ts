@@ -197,7 +197,7 @@ export class StaffGatewayController {
         }
     }
 
-    @Get('staff-get-inspection-reports')
+    @Get('staff-get-reports')
     async staffGetInspectionReports(@ActiveUser("staffId") staffId: number) {
         try {
             const data = await this.staffRawTcpClient.send({
@@ -242,7 +242,7 @@ export class StaffGatewayController {
         }
     }
 
-    @Get('staff-get-inspection-reports')
+    @Get('staff-get-all-inspection-reports')
     @ApiOperation({ summary: 'Get inspection reports by staff' })
     @ApiQuery({ name: 'page', required: false, type: Number, description: 'Page number (default: 1)' })
     @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Items per page (default: 10)' })
