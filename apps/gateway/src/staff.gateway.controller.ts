@@ -228,34 +228,19 @@ export class StaffGatewayController {
     }
 
     @Get('staff-get-monthly-stats')
-    async staffGetMonthlyStats(@ActiveUser("staffId") staffId: number) {
-        try {
-            const data = await this.staffRawTcpClient.send({
-                type: 'STAFF_GET_MONTHLY_STATS',
-                data: { staffId },
-            });
-            handlerErrorResponse(data);
-            return data;
-        } catch (error) {
-            if (error instanceof HttpException) throw error;
-            handleZodError(error);
-        }
-    }
-
-    @Get('staff-get-all-inspection-reports')
-    @ApiOperation({ summary: 'Get inspection reports by staff' })
-    @ApiQuery({ name: 'page', required: false, type: Number, description: 'Page number (default: 1)' })
-    @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Items per page (default: 10)' })
-    async staffGetInspectionByStaff(
-    @Query('page') page = 1,
-    @Query('limit') limit = 10,
-    @ActiveUser("staffId") staffId: number
+    @ApiQuery({ name: 'month', required: false, type: Number, description: 'Month number (1–12)' })
+    @ApiQuery({ name: 'year', required: false, type: Number, description: '4-digit year (e.g., 2025)' })
+    async staffGetMonthlyStats(
+    @ActiveUser("staffId") staffId: number,
+    @Query('month') month?: number,
+    @Query('year') year?: number,
     ) {
     try {
         const data = await this.staffRawTcpClient.send({
-        type: 'STAFF_GET_INSPECTION_STAFF',
-        data: { staffId, page, limit },
+        type: 'STAFF_GET_MONTHLY_STATS',
+        data: { staffId, month, year },
         });
+
         handlerErrorResponse(data);
         return data;
     } catch (error) {
@@ -263,5 +248,27 @@ export class StaffGatewayController {
         handleZodError(error);
     }
     }
+
+    // @Get('staff-get-all-inspection-reports')
+    // @ApiOperation({ summary: 'Get inspection reports by staff' })
+    // @ApiQuery({ name: 'page', required: false, type: Number, description: 'Page number (default: 1)' })
+    // @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Items per page (default: 10)' })
+    // async staffGetInspectionByStaff(
+    // @Query('page') page = 1,
+    // @Query('limit') limit = 10,
+    // @ActiveUser("staffId") staffId: number
+    // ) {
+    // try {
+    //     const data = await this.staffRawTcpClient.send({
+    //     type: 'STAFF_GET_INSPECTION_STAFF',
+    //     data: { staffId, page, limit },
+    //     });
+    //     handlerErrorResponse(data);
+    //     return data;
+    // } catch (error) {
+    //     if (error instanceof HttpException) throw error;
+    //     handleZodError(error);
+    // }
+    // }
 
 }
