@@ -4,7 +4,7 @@ steps:
       [
         'build',
         '-t',
-        'asia-southeast1-docker.pkg.dev/melodic-media-465615-c6/gateway/production',
+        'asia-southeast1-docker.pkg.dev/homecare360-465809/gateway/production',
         '-f',
         'apps/gateway/Dockerfile',
         '.',
@@ -13,7 +13,7 @@ steps:
     args:
       [
         'push',
-        'asia-southeast1-docker.pkg.dev/melodic-media-465615-c6/gateway/production',
+        'asia-southeast1-docker.pkg.dev/homecare360-465809/gateway/production',
       ]
   - name: 'gcr.io/cloud-builders/kubectl'
     args: ['rollout', 'restart', 'deployment/gateway']
