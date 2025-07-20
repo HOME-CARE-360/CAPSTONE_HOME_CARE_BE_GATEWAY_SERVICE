@@ -66,6 +66,8 @@ export class AuthGatewayController {
             );
             return result;
         } catch (error) {
+            console.log("cc");
+
             console.log(error);
 
             handleZodError(error)
