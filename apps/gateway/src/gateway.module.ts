@@ -28,55 +28,55 @@ import { AdminGatewayController } from './admin.gateway.controller';
         name: AUTH_SERVICE,
         transport: Transport.TCP,
         options: {
-          host: process.env.AUTH_HOST || 'localhost',
-          port: parseInt(process.env.TCP_PORT || '3002'),
+          host: 'localhost',
+          port: parseInt('3002'),
         },
       }, {
         name: MANAGER_SERVICE,
         transport: Transport.TCP,
         options: {
-          host: process.env.MANAGER_HOST || 'localhost',
-          port: parseInt(process.env.MANAGER_TCP_PORT || '3004'),
+          host: 'localhost',
+          port: parseInt('3004'),
         },
       },
       {
         name: MEDIA_SERVICE,
         transport: Transport.TCP,
         options: {
-          host: process.env.MEDIA_HOST || 'localhost',
-          port: parseInt(process.env.MEDIA_TCP_PORT || '3006'),
+          host: 'localhost',
+          port: parseInt('3006'),
         },
       },
       {
         name: PROVIDER_SERVICE,
         transport: Transport.TCP,
         options: {
-          host: process.env.PROVIDER_HOST || 'localhost',
-          port: parseInt(process.env.PROVIDER_TCP_PORT || '3008'),
+          host: 'localhost',
+          port: parseInt('3008'),
         },
       },
       {
         name: SERVICE_SERVICE,
         transport: Transport.TCP,
         options: {
-          host: process.env.SERVICE_HOST || 'localhost',
-          port: parseInt(process.env.SERVICE_TCP_PORT || '3010'),
+          host: 'localhost',
+          port: parseInt('3010'),
         },
       },
       {
         name: USER_SERVICE,
         transport: Transport.TCP,
         options: {
-          host: process.env.USER_HOST || 'localhost',
-          port: parseInt(process.env.USER_TCP_PORT || '4000'),
+          host: 'localhost',
+          port: parseInt('4000'),
         },
       },
       {
         name: BOOKING_SERVICE,
         transport: Transport.TCP,
         options: {
-          host: process.env.BOOKING_HOST || 'localhost',
-          port: parseInt(process.env.BOOKING_TCP_PORT || '3012'),
+          host: 'localhost',
+          port: parseInt('3012'),
         },
       }
     ]),
@@ -89,23 +89,23 @@ import { AdminGatewayController } from './admin.gateway.controller';
   }, {
     provide: USER_SERVICE,
     useFactory: () => {
-      const host = process.env.USER_HOST || 'localhost';
-      const port = parseInt(process.env.USER_TCP_PORT || '4000');
+      const host = 'localhost';
+      const port = parseInt('4000');
       return new RawTcpClientService(host, port);
     },
   }, {
     provide: STAFF_SERVICE,
     useFactory: () => {
-      const host = process.env.STAFF_HOST || 'localhost';
-      const port = parseInt(process.env.STAFF_TCP_PORT || '4002');
+      const host = 'localhost';
+      const port = parseInt('4002');
       return new RawTcpClientService(host, port);
     },
   },
   {
     provide: ADMIN_SERVICE,
     useFactory: () => {
-      const host = process.env.ADMIN_POD_HOST || 'localhost';
-      const port = parseInt(process.env.ADMIN_POD_TCP_PORT || '4003');
+      const host = 'localhost';
+      const port = parseInt('4003');
       return new RawTcpClientService(host, port);
     },
   }]
