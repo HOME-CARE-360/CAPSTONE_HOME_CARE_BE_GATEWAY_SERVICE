@@ -4,7 +4,7 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
 import { AuthGatewayController } from './auth.gateway.controller';
 import { CommonModule } from 'libs/common/src';
 import { ConfigModule } from 'libs/common/src/modules/config.module';
-import { ADMIN_SERVICE, AUTH_SERVICE, BOOKING_SERVICE, MANAGER_SERVICE, MEDIA_SERVICE, PROVIDER_SERVICE, SERVICE_SERVICE, STAFF_SERVICE, USER_SERVICE } from 'libs/common/src/constants/service-name.constant';
+import { ADMIN_SERVICE, AUTH_SERVICE, BOOKING_SERVICE, MANAGER_SERVICE, MEDIA_SERVICE, PAYMENT_SERVICE, PROVIDER_SERVICE, SERVICE_SERVICE, STAFF_SERVICE, USER_SERVICE } from 'libs/common/src/constants/service-name.constant';
 import { ManagerGatewayController } from './manager.gateway.controller';
 import { MediaGatewayController } from './media.gateway.controller';
 import { APP_PIPE } from '@nestjs/core';
@@ -20,6 +20,7 @@ import { PublicGatewayController } from './public.gateway.controller';
 import { ManageBookingsGatewayController } from './provider-gateway-controller/manage-bookings-controller';
 import { StaffGatewayController } from './staff.gateway.controller';
 import { AdminGatewayController } from './admin.gateway.controller';
+import { PaymentGatewayController } from './payment.gateway.controller';
 
 @Module({
   imports: [CommonModule, ConfigModule,
@@ -81,7 +82,7 @@ import { AdminGatewayController } from './admin.gateway.controller';
       }
     ]),
   ],
-  controllers: [AuthGatewayController, ManagerGatewayController, MediaGatewayController, ManageServicesGatewayController, ManageStaffGatewayController, ServiceGatewayController, CategoryGatewayController, UserGatewayController, BookingsGatewayController, PublicGatewayController, ManageBookingsGatewayController, StaffGatewayController, AdminGatewayController],
+  controllers: [AuthGatewayController, ManagerGatewayController, MediaGatewayController, ManageServicesGatewayController, ManageStaffGatewayController, ServiceGatewayController, CategoryGatewayController, UserGatewayController, BookingsGatewayController, PublicGatewayController, ManageBookingsGatewayController, StaffGatewayController, AdminGatewayController, PaymentGatewayController],
   providers: [{
     provide: APP_PIPE,
     useClass: CustomZodValidationPipe,
@@ -108,6 +109,15 @@ import { AdminGatewayController } from './admin.gateway.controller';
       const port = parseInt('4003');
       return new RawTcpClientService(host, port);
     },
+  }
+  , {
+    provide: PAYMENT_SERVICE
+    ,
+    useFactory: () => {
+      const host = 'localhost';
+      const port = parseInt('4001');
+      return new RawTcpClientService(host, port);
+    }
   }]
 })
 export class AppModule { }
