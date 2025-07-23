@@ -29,55 +29,55 @@ import { PaymentGatewayController } from './payment.gateway.controller';
         name: AUTH_SERVICE,
         transport: Transport.TCP,
         options: {
-          host: 'localhost',
-          port: parseInt('3002'),
+          host: process.env.AUTH_HOST || 'localhost',
+          port: parseInt(process.env.TCP_PORT || '3002'),
         },
       }, {
         name: MANAGER_SERVICE,
         transport: Transport.TCP,
         options: {
-          host: 'localhost',
-          port: parseInt('3004'),
+          host: process.env.MANAGER_HOST || 'localhost',
+          port: parseInt(process.env.MANAGER_TCP_PORT || '3004'),
         },
       },
       {
         name: MEDIA_SERVICE,
         transport: Transport.TCP,
         options: {
-          host: 'localhost',
-          port: parseInt('3006'),
+          host: process.env.MEDIA_HOST || 'localhost',
+          port: parseInt(process.env.MEDIA_TCP_PORT || '3006'),
         },
       },
       {
         name: PROVIDER_SERVICE,
         transport: Transport.TCP,
         options: {
-          host: 'localhost',
-          port: parseInt('3008'),
+          host: process.env.PROVIDER_HOST || 'localhost',
+          port: parseInt(process.env.PROVIDER_TCP_PORT || '3008'),
         },
       },
       {
         name: SERVICE_SERVICE,
         transport: Transport.TCP,
         options: {
-          host: 'localhost',
-          port: parseInt('3010'),
+          host: process.env.SERVICE_HOST || 'localhost',
+          port: parseInt(process.env.SERVICE_TCP_PORT || '3010'),
         },
       },
       {
         name: USER_SERVICE,
         transport: Transport.TCP,
         options: {
-          host: 'localhost',
-          port: parseInt('4000'),
+          host: process.env.USER_HOST || 'localhost',
+          port: parseInt(process.env.USER_TCP_PORT || '4000'),
         },
       },
       {
         name: BOOKING_SERVICE,
         transport: Transport.TCP,
         options: {
-          host: 'localhost',
-          port: parseInt('3012'),
+          host: process.env.BOOKING_HOST || 'localhost',
+          port: parseInt(process.env.BOOKING_TCP_PORT || '3012'),
         },
       }
     ]),
@@ -90,34 +90,34 @@ import { PaymentGatewayController } from './payment.gateway.controller';
   }, {
     provide: USER_SERVICE,
     useFactory: () => {
-      const host = 'localhost';
-      const port = parseInt('4000');
+      const host = process.env.USER_HOST || 'localhost';
+      const port = parseInt(process.env.USER_TCP_PORT || '4000');
       return new RawTcpClientService(host, port);
     },
   }, {
     provide: STAFF_SERVICE,
     useFactory: () => {
-      const host = 'localhost';
-      const port = parseInt('4002');
+      const host = process.env.STAFF_HOST || 'localhost';
+      const port = parseInt(process.env.STAFF_TCP_PORT || '4002');
       return new RawTcpClientService(host, port);
     },
   },
   {
     provide: ADMIN_SERVICE,
     useFactory: () => {
-      const host = 'localhost';
-      const port = parseInt('4003');
+      const host = process.env.ADMIN_POD_HOST || 'localhost';
+      const port = parseInt(process.env.ADMIN_POD_TCP_PORT || '4003');
       return new RawTcpClientService(host, port);
     },
   }
   , {
-    provide: PAYMENT_SERVICE
-    ,
+    provide: PAYMENT_SERVICE,
     useFactory: () => {
-      const host = 'localhost';
-      const port = parseInt('4001');
+      const host = process.env.PAYMENT_HOST || 'localhost';
+      const port = parseInt(process.env.PAYMENT_TCP_PORT || '4001');
       return new RawTcpClientService(host, port);
-    }
-  }]
+    },
+  }
+  ],
 })
 export class AppModule { }
