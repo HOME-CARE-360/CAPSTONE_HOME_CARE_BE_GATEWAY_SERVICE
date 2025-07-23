@@ -13,7 +13,6 @@ import { PAYMENT_SERVICE } from 'libs/common/src/constants/service-name.constant
 import { RawTcpClientService } from 'libs/common/src/tcp/raw-tcp-client.service';
 
 import { ActiveUser } from 'libs/common/src/decorator/active-user.decorator';
-import { WalletTopUpDto } from 'libs/common/src/request-response-type/payment/payment.dto';
 
 @Controller('payments')
 export class PaymentGatewayController {
@@ -24,21 +23,21 @@ export class PaymentGatewayController {
 
   @Post('create-topup')
   async createTopUp(
-    @Body() body: WalletTopUpDto,
-    @ActiveUser('userId') userId: number,
+  @Body() body: { amount: number }, 
+  @ActiveUser("userId") userId: number,
   ) {
     try {
       const data = await this.paymentRawTcpClient.send({
         type: 'CREATE_TOPUP',
-        data: { ...body, userId },
+        data: { amount: body.amount, userId },
       });
-      handlerErrorResponse(data);
-      return data;
-    } catch (error) {
-      if (error instanceof HttpException) throw error;
-      handleZodError(error);
-    }
+    handlerErrorResponse(data);
+    return data;
+  } catch (error) {
+    if (error instanceof HttpException) throw error;
+    handleZodError(error);
   }
+}
 
 //   @Get('callback/:orderCode/:status')
 //   async handleCallback(
