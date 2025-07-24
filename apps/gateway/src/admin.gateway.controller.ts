@@ -119,6 +119,7 @@ export class AdminGatewayController {
                 type: 'ADMIN_CREATE_USER',
                 data: { ...body, adminId: userId },
             });
+            handlerErrorResponse(data);
             return data;
         } catch (error) {
             if (error instanceof HttpException) throw error;
@@ -186,6 +187,8 @@ export class AdminGatewayController {
                 type: 'ADMIN_DELETE_USER',
                 data: { id, adminId: userId },
             });
+                    handlerErrorResponse(data);
+
             return data;
         } catch (error) {
             if (error instanceof HttpException) throw error;
@@ -206,6 +209,7 @@ export class AdminGatewayController {
                 type: 'ADMIN_BLOCK_USER',
                 data: { id, adminId: userId },
             });
+                    handlerErrorResponse(data);
             return data;
         } catch (error) {
             if (error instanceof HttpException) throw error;
@@ -407,31 +411,37 @@ export class AdminGatewayController {
 
     
     @Post('roles')
-    @ApiOperation({ summary: 'Create a new role' })
-    @ApiResponse({ status: 201, description: 'Role created successfully' })
-    @ApiResponse({ status: 400, description: 'Bad request - Invalid input data' })
-    @ApiResponse({ status: 401, description: 'Unauthorized' })
-    @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
-    @ApiResponse({ status: 409, description: 'Conflict - Role already exists' })
-    async createRole(
+async createRole(
     @Body() body: CreateRoleDTO,
     @ActiveUser('userId') userId: number
-    ) {
+) {
     try {
+        console.log('=== DEBUG CREATE ROLE ===');
+        console.log('1. Body:', JSON.stringify(body, null, 2));
+        console.log('2. UserId:', userId);
+        console.log('3. About to send TCP request...');
+        
         const data = await this.adminRawTcpClient.send({
-        type: 'ADMIN_CREATE_ROLE',
-        data: {
-            name: body.name,
-            adminId: userId,
-        },
+            type: 'ADMIN_CREATE_ROLE',
+            data: {
+                name: body.name,
+                adminId: userId,
+            },
         });
+        
+        console.log('4. TCP Response:', JSON.stringify(data, null, 2));
+        console.log('5. Status code:', data?.statusCode);
+        
         handlerErrorResponse(data);
         return data;
     } catch (error) {
+        console.error('=== CREATE ROLE ERROR ===');
+        console.error('Error:', error);
+        
         if (error instanceof HttpException) throw error;
         handleZodError(error);
     }
-    }
+}
 
     @Get('roles/:id')
     @ApiOperation({ summary: 'Get role by ID' })
