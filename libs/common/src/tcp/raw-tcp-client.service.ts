@@ -7,7 +7,7 @@ export class RawTcpClientService {
     constructor(
         private readonly host: string,
         private readonly port: number,
-        private readonly timeout = 5000,
+        private readonly timeout = 30000,
     ) { }
 
     send(message: object): Promise<any> {
