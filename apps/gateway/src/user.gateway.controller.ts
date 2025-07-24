@@ -3,7 +3,7 @@ import { handlerErrorResponse, handleZodError } from "libs/common/helpers";
 import { USER_SERVICE } from "libs/common/src/constants/service-name.constant";
 import { ActiveUser } from "libs/common/src/decorator/active-user.decorator";
 import { UpdateUserAndCustomerProfileDTO } from "libs/common/src/request-response-type/customer/customer.dto";
-import { LinkBankAccountDTO } from "libs/common/src/request-response-type/user/user.dto";
+import { CustomerCompleteBookingDTO, LinkBankAccountDTO } from "libs/common/src/request-response-type/user/user.dto";
 
 import { RawTcpClientService } from "libs/common/src/tcp/raw-tcp-client.service";
 
@@ -23,7 +23,7 @@ export class UserGatewayController {
         }
     }
 
-    @Patch('link-bank-account')
+  @Patch('link-bank-account')
   async linkBankAccount(
     @Body() body: LinkBankAccountDTO,
     @ActiveUser('userId') userId: number,
@@ -42,5 +42,23 @@ export class UserGatewayController {
     }
   }
 
+  @Patch('complete-booking')
+    async customerCompleteBooking(
+        @Body() body: CustomerCompleteBookingDTO,
+        @ActiveUser('userId') currentUserId: number,
+    ) {
+        try {
+            const data = await this.userRawTcpClient.send({
+                type: 'CUSTOMER_COMPLETE_BOOKING',
+                bookingId: body.bookingId,
+                currentUserId,
+            });
+            handlerErrorResponse(data);
+            return data;
+        } catch (error) {
+            if (error instanceof HttpException) throw error;
+            handleZodError(error);
+        }
+    }
     
 }
