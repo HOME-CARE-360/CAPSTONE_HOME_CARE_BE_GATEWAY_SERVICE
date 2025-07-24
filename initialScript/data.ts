@@ -5,27 +5,27 @@ import { HashingService } from "libs/common/src/services/hashing.service"
 const prisma = new PrismaClient()
 const main1 = async () => {
     const hashingService = new HashingService()
-    // const roleCount = await prisma.role.count()
-    // if (roleCount > 0) {
-    //     throw new Error('Roles already exist')
-    // }
-    // const roles = await prisma.role.createMany({
-    //     data: [{
-    //         name: RoleName.Admin,
-    //     }, {
-    //         name: RoleName.Customer,
-    //     }, {
-    //         name: RoleName.ServiceProvider,
+    const roleCount = await prisma.role.count()
+    if (roleCount > 0) {
+        throw new Error('Roles already exist')
+    }
+    const roles = await prisma.role.createMany({
+        data: [{
+            name: RoleName.Admin,
+        }, {
+            name: RoleName.Customer,
+        }, {
+            name: RoleName.ServiceProvider,
 
-    //     },
-    //     {
-    //         name: RoleName.Staff,
+        },
+        {
+            name: RoleName.Staff,
 
-    //     }, {
-    //         name: RoleName.Manager,
+        }, {
+            name: RoleName.Manager,
 
-    //     }]
-    // })
+        }]
+    })
     const adminRole = await prisma.role.findFirstOrThrow({
         where: {
             name: RoleName.Admin,
