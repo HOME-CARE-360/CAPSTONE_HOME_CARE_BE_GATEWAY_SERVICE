@@ -416,11 +416,6 @@ async createRole(
     @ActiveUser('userId') userId: number
 ) {
     try {
-        console.log('=== DEBUG CREATE ROLE ===');
-        console.log('1. Body:', JSON.stringify(body, null, 2));
-        console.log('2. UserId:', userId);
-        console.log('3. About to send TCP request...');
-        
         const data = await this.adminRawTcpClient.send({
             type: 'ADMIN_CREATE_ROLE',
             data: {
@@ -428,16 +423,9 @@ async createRole(
                 adminId: userId,
             },
         });
-        
-        console.log('4. TCP Response:', JSON.stringify(data, null, 2));
-        console.log('5. Status code:', data?.statusCode);
-        
         handlerErrorResponse(data);
         return data;
     } catch (error) {
-        console.error('=== CREATE ROLE ERROR ===');
-        console.error('Error:', error);
-        
         if (error instanceof HttpException) throw error;
         handleZodError(error);
     }

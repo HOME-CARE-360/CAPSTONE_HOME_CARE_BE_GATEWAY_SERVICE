@@ -105,8 +105,8 @@ import { PaymentGatewayController } from './payment.gateway.controller';
   {
     provide: ADMIN_SERVICE,
     useFactory: () => {
-      const host = process.env.ADMIN_POD_HOST || 'localhost';
-      const port = parseInt(process.env.ADMIN_POD_TCP_PORT || '4003');
+      const host = 'localhost';
+      const port = parseInt('4003');
       return new RawTcpClientService(host, port);
     },
   }

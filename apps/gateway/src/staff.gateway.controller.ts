@@ -249,26 +249,23 @@ export class StaffGatewayController {
     }
     }
 
-    // @Get('staff-get-all-inspection-reports')
-    // @ApiOperation({ summary: 'Get inspection reports by staff' })
-    // @ApiQuery({ name: 'page', required: false, type: Number, description: 'Page number (default: 1)' })
-    // @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Items per page (default: 10)' })
-    // async staffGetInspectionByStaff(
-    // @Query('page') page = 1,
-    // @Query('limit') limit = 10,
-    // @ActiveUser("staffId") staffId: number
-    // ) {
-    // try {
-    //     const data = await this.staffRawTcpClient.send({
-    //     type: 'STAFF_GET_INSPECTION_STAFF',
-    //     data: { staffId, page, limit },
-    //     });
-    //     handlerErrorResponse(data);
-    //     return data;
-    // } catch (error) {
-    //     if (error instanceof HttpException) throw error;
-    //     handleZodError(error);
-    // }
-    // }
+   @Get('staff-get-proposal/:bookingId')
+   @ApiOperation({ summary: 'Get full proposal' })
+   @ApiParam({ name: 'bookingId', type: Number })
+   async staffGetProposal(
+   @Param('bookingId', ParseIntPipe) bookingId: number,
+   @ActiveUser('staffId') staffId: number) {
+  try {
+    const data = await this.staffRawTcpClient.send({
+      type: 'STAFF_GET_PROPOSAL',
+      data: { staffId, bookingId }
+    });
 
+    handlerErrorResponse(data);
+    return data;
+  } catch (error) {
+    if (error instanceof HttpException) throw error;
+    handleZodError(error);
+  }
+}
 }
