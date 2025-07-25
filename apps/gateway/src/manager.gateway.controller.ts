@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Inject, Param, Patch, Post } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Inject, Param, Patch, Post, Query } from "@nestjs/common";
 import { ClientProxy } from "@nestjs/microservices";
 import { UpdateStatusProviderBodyDTO, UpdateStatusServiceBodyDTO } from "libs/common/src/request-response-type/manager/managers.dto";
 import { handleZodError } from "libs/common/helpers";
@@ -8,6 +8,7 @@ import { ZodSerializerDto } from "nestjs-zod";
 import { lastValueFrom } from "rxjs";
 import { ActiveUser } from "libs/common/src/decorator/active-user.decorator";
 import { CreateCategoryBodyDTO, UpdateCategoryQueryDTO } from "libs/common/src/request-response-type/category/category.dto";
+import { GetListWidthDrawQueryDTO } from "libs/common/src/request-response-type/with-draw/with-draw.dto";
 
 @Controller('managers')
 export class ManagerGatewayController {
@@ -73,6 +74,15 @@ export class ManagerGatewayController {
     async deleteCategory(@Param() params: UpdateCategoryQueryDTO, @ActiveUser("userId") userId: number) {
         try {
             return await lastValueFrom(this.managerClient.send({ cmd: 'delete-category' }, { userId, categoryId: params.categoryId }));
+        } catch (error) {
+            handleZodError(error)
+        }
+    }
+    @Get('get-list-withdraw')
+    @ZodSerializerDto(MessageResDTO)
+    async getListWithDraw(@Query() query: GetListWidthDrawQueryDTO) {
+        try {
+            return await lastValueFrom(this.managerClient.send({ cmd: 'get-list-withdraw' }, { ...query }));
         } catch (error) {
             handleZodError(error)
         }

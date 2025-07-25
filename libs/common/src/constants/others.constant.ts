@@ -19,6 +19,12 @@ export const SortByServiceRequest = {
     PreferredDate: "preferredDate",
     CreatedAt: 'createdAt',
 } as const
+export type SortByWithDrawType = (typeof SortByWithDraw)[keyof typeof SortByWithDraw]
+export const SortByWithDraw = {
+    Amount: 'amount',
+    CreatedAt: 'createdAt',
+    ProcessedAt: 'processedAt'
+} as const
 export type SortByServiceItemType = (typeof SortByServiceItem)[keyof typeof SortByServiceItem]
 
 export type SortByStaffType = (typeof SortByStaff)[keyof typeof SortByStaff]
