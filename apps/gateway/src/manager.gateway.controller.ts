@@ -9,6 +9,9 @@ import { lastValueFrom } from "rxjs";
 import { ActiveUser } from "libs/common/src/decorator/active-user.decorator";
 import { CreateCategoryBodyDTO, UpdateCategoryQueryDTO } from "libs/common/src/request-response-type/category/category.dto";
 import { GetListWidthDrawQueryDTO, GetWidthDrawDetailParamsDTO, UpdateWithDrawalBodyDTO } from "libs/common/src/request-response-type/with-draw/with-draw.dto";
+import { ApiQuery } from "@nestjs/swagger";
+import { WithdrawalStatus } from "@prisma/client";
+import { OrderBy, SortByWithDraw } from "libs/common/src/constants/others.constant";
 
 @Controller('managers')
 export class ManagerGatewayController {
@@ -78,6 +81,31 @@ export class ManagerGatewayController {
             handleZodError(error)
         }
     }
+    @ApiQuery({ name: 'page', required: false, type: Number, example: 1, description: 'Page number (default = 1)' })
+    @ApiQuery({ name: 'limit', required: false, type: Number, example: 10, description: 'Items per page (default = 10)' })
+    @ApiQuery({ name: 'providerName', required: false, type: String, description: 'Filter by provider name (optional)' })
+    @ApiQuery({
+        name: 'status',
+        required: false,
+        isArray: true,
+        enum: WithdrawalStatus,
+        description: 'Filter by withdrawal status (multiple allowed)',
+        example: ['PENDING', 'APPROVED'],
+    })
+    @ApiQuery({
+        name: 'orderBy',
+        required: false,
+        enum: OrderBy,
+        description: 'Sort order: asc | desc',
+        example: OrderBy.Desc,
+    })
+    @ApiQuery({
+        name: 'sortBy',
+        required: false,
+        enum: SortByWithDraw,
+        description: 'Field to sort by: createdAt | amount | processedAt',
+        example: SortByWithDraw.CreatedAt,
+    })
     @Get('get-list-withdraw')
     @ZodSerializerDto(MessageResDTO)
     async getListWithDraw(@Query() query: GetListWidthDrawQueryDTO) {

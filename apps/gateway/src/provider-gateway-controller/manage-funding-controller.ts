@@ -10,6 +10,9 @@ import { Controller, Get, Inject, Param, Query, UseGuards } from '@nestjs/common
 import { ZodSerializerDto } from 'nestjs-zod';
 import { MessageResDTO } from 'libs/common/src/dtos/response.dto';
 import { GetListWidthDrawProviderQueryDTO, GetWidthDrawDetailParamsDTO } from 'libs/common/src/request-response-type/with-draw/with-draw.dto';
+import { ApiQuery } from '@nestjs/swagger';
+import { WithdrawalStatus } from '@prisma/client';
+import { OrderBy, SortByWithDraw } from 'libs/common/src/constants/others.constant';
 
 
 
@@ -17,6 +20,30 @@ import { GetListWidthDrawProviderQueryDTO, GetWidthDrawDetailParamsDTO } from 'l
 @UseGuards(VerifiedProviderGuard)
 export class ManageFundingGatewayController {
     constructor(@Inject(PROVIDER_SERVICE) private readonly providerClient: ClientProxy) { }
+    @ApiQuery({ name: 'page', required: false, type: Number, example: 1, description: 'Page number (default = 1)' })
+    @ApiQuery({ name: 'limit', required: false, type: Number, example: 10, description: 'Items per page (default = 10)' })
+    @ApiQuery({
+        name: 'status',
+        required: false,
+        isArray: true,
+        enum: WithdrawalStatus,
+        description: 'Filter by withdrawal status (multiple allowed)',
+        example: ['PENDING', 'APPROVED'],
+    })
+    @ApiQuery({
+        name: 'orderBy',
+        required: false,
+        enum: OrderBy,
+        description: 'Sort order: asc | desc',
+        example: OrderBy.Desc,
+    })
+    @ApiQuery({
+        name: 'sortBy',
+        required: false,
+        enum: SortByWithDraw,
+        description: 'Field to sort by: createdAt | amount | processedAt',
+        example: SortByWithDraw.CreatedAt,
+    })
     @Get('get-list-withdraw')
     @ZodSerializerDto(MessageResDTO)
     async getListWithDraw(@Query() query: GetListWidthDrawProviderQueryDTO, @ActiveUser("providerId") providerId: number) {
