@@ -21,6 +21,7 @@ import { ManageBookingsGatewayController } from './provider-gateway-controller/m
 import { StaffGatewayController } from './staff.gateway.controller';
 import { AdminGatewayController } from './admin.gateway.controller';
 import { PaymentGatewayController } from './payment.gateway.controller';
+import { ManageFundingGatewayController } from './provider-gateway-controller/manage-funding-controller';
 
 @Module({
   imports: [CommonModule, ConfigModule,
@@ -82,7 +83,7 @@ import { PaymentGatewayController } from './payment.gateway.controller';
       }
     ]),
   ],
-  controllers: [AuthGatewayController, ManagerGatewayController, MediaGatewayController, ManageServicesGatewayController, ManageStaffGatewayController, ServiceGatewayController, CategoryGatewayController, UserGatewayController, BookingsGatewayController, PublicGatewayController, ManageBookingsGatewayController, StaffGatewayController, AdminGatewayController, PaymentGatewayController],
+  controllers: [AuthGatewayController, ManagerGatewayController, MediaGatewayController, ManageServicesGatewayController, ManageStaffGatewayController, ServiceGatewayController, CategoryGatewayController, UserGatewayController, BookingsGatewayController, PublicGatewayController, ManageBookingsGatewayController, StaffGatewayController, AdminGatewayController, PaymentGatewayController, ManageFundingGatewayController],
   providers: [{
     provide: APP_PIPE,
     useClass: CustomZodValidationPipe,
@@ -110,7 +111,7 @@ import { PaymentGatewayController } from './payment.gateway.controller';
       return new RawTcpClientService(host, port);
     },
   }
-  , {
+    , {
     provide: PAYMENT_SERVICE,
     useFactory: () => {
       const host = process.env.PAYMENT_HOST || 'localhost';
