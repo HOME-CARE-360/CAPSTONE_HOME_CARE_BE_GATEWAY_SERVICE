@@ -8,7 +8,7 @@ import { ZodSerializerDto } from "nestjs-zod";
 import { lastValueFrom } from "rxjs";
 import { ActiveUser } from "libs/common/src/decorator/active-user.decorator";
 import { CreateCategoryBodyDTO, UpdateCategoryQueryDTO } from "libs/common/src/request-response-type/category/category.dto";
-import { GetListWidthDrawQueryDTO } from "libs/common/src/request-response-type/with-draw/with-draw.dto";
+import { GetListWidthDrawQueryDTO, GetWidthDrawDetailParamsDTO } from "libs/common/src/request-response-type/with-draw/with-draw.dto";
 
 @Controller('managers')
 export class ManagerGatewayController {
@@ -83,6 +83,15 @@ export class ManagerGatewayController {
     async getListWithDraw(@Query() query: GetListWidthDrawQueryDTO) {
         try {
             return await lastValueFrom(this.managerClient.send({ cmd: 'get-list-withdraw' }, { ...query }));
+        } catch (error) {
+            handleZodError(error)
+        }
+    }
+    @Get('get-withdraw-detail/:id')
+    @ZodSerializerDto(MessageResDTO)
+    async getWithDrawDetail(@Param() param: GetWidthDrawDetailParamsDTO) {
+        try {
+            return await lastValueFrom(this.managerClient.send({ cmd: 'get-withdraw-detail' }, { id: param.id }));
         } catch (error) {
             handleZodError(error)
         }

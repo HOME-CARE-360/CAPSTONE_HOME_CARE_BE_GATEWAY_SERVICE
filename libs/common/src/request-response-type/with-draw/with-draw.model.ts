@@ -12,4 +12,9 @@ export const GetListWidthDrawQuerySchema = z.object({
     orderBy: z.enum([OrderBy.Asc, OrderBy.Desc]).default(OrderBy.Desc),
     sortBy: z.enum([SortByWithDraw.CreatedAt, SortByWithDraw.Amount, SortByWithDraw.ProcessedAt]).default(SortByWithDraw.CreatedAt),
 })
+export const GetWidthDrawDetailParamsSchema = z.object({
+    id: z.coerce.number().int().positive()
+})
+
+export type GetWidthDrawDetailType = z.infer<typeof GetWidthDrawDetailParamsSchema>
 export type GetListWidthDrawQueryType = z.infer<typeof GetListWidthDrawQuerySchema>
