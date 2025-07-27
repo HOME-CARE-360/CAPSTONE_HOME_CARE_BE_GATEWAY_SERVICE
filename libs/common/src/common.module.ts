@@ -26,15 +26,13 @@ const sharedServices = [
   EmailService,
   SharedUserRepository,
   TwoFactorService,
-  SharedProviderRepository
-  , SharedRoleRepository,
+  SharedProviderRepository,
+  SharedRoleRepository,
   S3Service,
   ShareStaffRepository,
   SharedCategoryRepository,
   SharedUserRepository,
-
-
-]
+];
 
 @Global()
 @Module({
@@ -49,4 +47,4 @@ const sharedServices = [
   exports: sharedServices,
   imports: [JwtModule],
 })
-export class CommonModule { }
+export class CommonModule {}

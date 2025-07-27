@@ -1,9 +1,8 @@
-import { NotFoundException } from "@nestjs/common"
+import { NotFoundException } from '@nestjs/common';
 
 export const ShiftTemplateNotFoundException = new NotFoundException([
-    {
-        message: 'Error.ShiftTemplateNotFound',
-        path: ['shiftTemplateId'],
-    },
-])
-
+  {
+    message: 'Error.ShiftTemplateNotFound',
+    path: ['shiftTemplateId'],
+  },
+]);

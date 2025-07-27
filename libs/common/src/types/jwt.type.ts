@@ -1,25 +1,22 @@
-
 export interface AccessTokenPayloadCreate {
-    userId: number,
-    deviceId: number,
-    providerId?: number,
-    customerId?: number,
-    staffId?: number,
-    roles: {
-        id: number,
-        name: string
-    }[]
+  userId: number;
+  deviceId: number;
+  providerId?: number;
+  customerId?: number;
+  staffId?: number;
+  roles: {
+    id: number;
+    name: string;
+  }[];
 }
 export interface AccessTokenPayload extends AccessTokenPayloadCreate {
-    exp: number
-    iat: number
+  exp: number;
+  iat: number;
 }
 export interface RefreshTokenPayloadCreate {
-    userId: number,
-
+  userId: number;
 }
 export interface RefreshTokenPayload extends RefreshTokenPayloadCreate {
-    exp: number
-    iat: number
-
+  exp: number;
+  iat: number;
 }

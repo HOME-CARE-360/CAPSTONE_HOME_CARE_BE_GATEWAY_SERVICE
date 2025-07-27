@@ -1,4 +1,8 @@
-import { ClientProxy, ClientProxyFactory, Transport } from '@nestjs/microservices';
+import {
+  ClientProxy,
+  ClientProxyFactory,
+  Transport,
+} from '@nestjs/microservices';
 
 export const notificationClient: ClientProxy = ClientProxyFactory.create({
   transport: Transport.RMQ,

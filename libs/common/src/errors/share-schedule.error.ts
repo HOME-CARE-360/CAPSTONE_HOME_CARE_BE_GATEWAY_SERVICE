@@ -1,8 +1,8 @@
-import { NotFoundException } from '@nestjs/common'
+import { NotFoundException } from '@nestjs/common';
 
 export const StaffAlreadyAssignedToShiftException = new NotFoundException([
-    {
-        message: 'Error.StaffAlreadyAssignedToShift',
-        path: ['staffId', 'shiftTemplateId'],
-    },
-])
+  {
+    message: 'Error.StaffAlreadyAssignedToShift',
+    path: ['staffId', 'shiftTemplateId'],
+  },
+]);

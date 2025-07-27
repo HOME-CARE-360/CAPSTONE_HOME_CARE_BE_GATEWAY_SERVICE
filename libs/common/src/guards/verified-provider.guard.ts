@@ -1,45 +1,42 @@
 // src/common/guards/verified-provider.guard.ts
-import {
-    Injectable,
-    CanActivate,
-    ExecutionContext,
-} from '@nestjs/common';
+import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
 import { PrismaService } from '../services/prisma.service';
 import { REQUEST_USER_KEY } from '../constants/auth.constant';
 import { AccessTokenPayload } from '../types/jwt.type';
-import { ProviderNotVerifiedException, ServiceProviderNotFoundException } from '../errors/share-provider.error';
+import {
+  ProviderNotVerifiedException,
+  ServiceProviderNotFoundException,
+} from '../errors/share-provider.error';
 import { VerificationStatus } from '@prisma/client';
 
 @Injectable()
 export class VerifiedProviderGuard implements CanActivate {
-    constructor(private readonly prisma: PrismaService) { }
+  constructor(private readonly prisma: PrismaService) {}
 
-    async canActivate(context: ExecutionContext): Promise<boolean> {
-        const req = context.switchToHttp().getRequest();
+  async canActivate(context: ExecutionContext): Promise<boolean> {
+    const req = context.switchToHttp().getRequest();
 
+    const user = req[REQUEST_USER_KEY] as AccessTokenPayload;
+    const providerId = user.providerId;
+    console.log(user);
 
-        const user = req[REQUEST_USER_KEY] as AccessTokenPayload;
-        const providerId = user.providerId;
-        console.log(user);
-
-        if (!providerId) {
-            throw ServiceProviderNotFoundException;
-        }
-        console.log("a");
-
-
-        const provider = await this.prisma.serviceProvider.findUnique({
-            where: { id: providerId },
-            select: { verificationStatus: true },
-        });
-        if (!provider) {
-            throw ServiceProviderNotFoundException;
-        }
-        console.log("a1");
-        if (provider.verificationStatus !== VerificationStatus.VERIFIED) {
-            throw ProviderNotVerifiedException;
-        }
-
-        return true;
+    if (!providerId) {
+      throw ServiceProviderNotFoundException;
     }
+    console.log('a');
+
+    const provider = await this.prisma.serviceProvider.findUnique({
+      where: { id: providerId },
+      select: { verificationStatus: true },
+    });
+    if (!provider) {
+      throw ServiceProviderNotFoundException;
+    }
+    console.log('a1');
+    if (provider.verificationStatus !== VerificationStatus.VERIFIED) {
+      throw ProviderNotVerifiedException;
+    }
+
+    return true;
+  }
 }

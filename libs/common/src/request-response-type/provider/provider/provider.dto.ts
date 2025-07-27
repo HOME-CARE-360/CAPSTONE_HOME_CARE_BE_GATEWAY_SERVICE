@@ -1,4 +1,6 @@
-import { createZodDto } from "nestjs-zod";
-import { updateUserAndServiceProviderProfileSchema } from "./provider.model";
+import { createZodDto } from 'nestjs-zod';
+import { updateUserAndServiceProviderProfileSchema } from './provider.model';
 
-export class UpdateUserAndServiceProviderProfileDTO extends createZodDto(updateUserAndServiceProviderProfileSchema) { }
+export class UpdateUserAndServiceProviderProfileDTO extends createZodDto(
+  updateUserAndServiceProviderProfileSchema,
+) {}

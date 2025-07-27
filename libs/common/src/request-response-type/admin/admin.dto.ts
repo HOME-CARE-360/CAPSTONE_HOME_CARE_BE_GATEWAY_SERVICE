@@ -1,17 +1,17 @@
 import { createZodDto } from 'nestjs-zod';
-import { 
-    AssignPermissionsToRoleSchema, 
-    AssignRolesSchema, 
-    CreateRoleSchema, 
-    CreateUserSchema, 
-    DeleteRoleSchema, 
-    GetUsersQuerySchema, 
-    IdParamSchema, 
-    MonthlyReportSchema, 
-    MultiMonthReportSchema, 
-    ResetPasswordSchema, 
-    UpdateRoleSchema, 
-    UpdateUserSchema 
+import {
+  AssignPermissionsToRoleSchema,
+  AssignRolesSchema,
+  CreateRoleSchema,
+  CreateUserSchema,
+  DeleteRoleSchema,
+  GetUsersQuerySchema,
+  IdParamSchema,
+  MonthlyReportSchema,
+  MultiMonthReportSchema,
+  ResetPasswordSchema,
+  UpdateRoleSchema,
+  UpdateUserSchema,
 } from 'libs/common/src/request-response-type/admin/admin.model';
 
 // === USER MANAGEMENT DTOs ===
@@ -23,7 +23,9 @@ export class ResetPasswordDTO extends createZodDto(ResetPasswordSchema) {}
 export class CreateRoleDTO extends createZodDto(CreateRoleSchema) {}
 export class UpdateRoleDTO extends createZodDto(UpdateRoleSchema) {}
 export class DeleteRoleDTO extends createZodDto(DeleteRoleSchema) {}
-export class AssignPermissionsToRoleDTO extends createZodDto(AssignPermissionsToRoleSchema) {}
+export class AssignPermissionsToRoleDTO extends createZodDto(
+  AssignPermissionsToRoleSchema,
+) {}
 
 // === USER ROLE ASSIGNMENT DTOs ===
 export class AssignRolesDTO extends createZodDto(AssignRolesSchema) {}
