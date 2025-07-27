@@ -8,7 +8,7 @@ import { ZodSerializerDto } from "nestjs-zod";
 import { lastValueFrom } from "rxjs";
 import { ActiveUser } from "libs/common/src/decorator/active-user.decorator";
 import { CreateCategoryBodyDTO, UpdateCategoryQueryDTO } from "libs/common/src/request-response-type/category/category.dto";
-import { GetListWidthDrawQueryDTO, GetWidthDrawDetailParamsDTO } from "libs/common/src/request-response-type/with-draw/with-draw.dto";
+import { GetListWidthDrawQueryDTO, GetWidthDrawDetailParamsDTO, UpdateWithDrawalBodyDTO } from "libs/common/src/request-response-type/with-draw/with-draw.dto";
 
 @Controller('managers')
 export class ManagerGatewayController {
@@ -96,4 +96,14 @@ export class ManagerGatewayController {
             handleZodError(error)
         }
     }
+    @Patch('update-withdraw')
+    @ZodSerializerDto(MessageResDTO)
+    async updateWithdraw(@Body() body: UpdateWithDrawalBodyDTO, @ActiveUser("userId") userId: number) {
+        try {
+            return await lastValueFrom(this.managerClient.send({ cmd: 'update-withdraw' }, { body, userId }));
+        } catch (error) {
+            handleZodError(error)
+        }
+    }
+
 }

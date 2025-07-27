@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { OrderBy, SortByWithDraw } from "../../constants/others.constant";
+import { WithdrawalRequestSchema } from "../../models/withdrawal.model";
 
 export const GetListWidthDrawQuerySchema = z.object({
     page: z.coerce.number().int().positive().default(1),
@@ -15,6 +16,11 @@ export const GetListWidthDrawQuerySchema = z.object({
 export const GetWidthDrawDetailParamsSchema = z.object({
     id: z.coerce.number().int().positive()
 })
-
+export const UpdateWithDrawalBodySchema = WithdrawalRequestSchema.pick({
+    note: true,
+    id: true,
+    status: true
+})
+export type UpdateWithDrawalBodyType = z.infer<typeof UpdateWithDrawalBodySchema>
 export type GetWidthDrawDetailType = z.infer<typeof GetWidthDrawDetailParamsSchema>
 export type GetListWidthDrawQueryType = z.infer<typeof GetListWidthDrawQuerySchema>
