@@ -1,5 +1,6 @@
 generator client {
   provider      = "prisma-client-js"
+        // output        = "../node_modules/.prisma/client"
   binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
 }
 
@@ -32,6 +33,7 @@ model User {
   createdPermissions Permission[]        @relation("PermissionCreatedBy")
   deletedPermissions Permission[]        @relation("PermissionDeletedBy")
   updatedPermissions Permission[]        @relation("PermissionUpdatedBy")
+  ProviderReport     ProviderReport[]
   refreshTokens      RefreshToken[]
   createdRoles       Role[]              @relation("RoleCreatedBy")
   deletedRoles       Role[]              @relation("RoleDeletedBy")
@@ -168,6 +170,7 @@ model CustomerProfile {
   chatMessages           ChatMessage[]
   user                   User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
   packageRecommendations PackageRecommendation[]
+  ProviderReport         ProviderReport[]
   recurringBookings      RecurringBooking[]
   reviews                Review[]
   rewardPoints           RewardPoint[]
@@ -215,6 +218,7 @@ model ServiceProvider {
   verifiedAt          DateTime?
   verifiedById        Int?
   bookings            Booking[]
+  ProviderReport      ProviderReport[]
   services            Service[]
   ServiceItem         ServiceItem[]
   user                User                         @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -316,6 +320,7 @@ model Booking {
   staff            Staff?            @relation("StaffBooking", fields: [staffId], references: [id], onDelete: Cascade)
   inspectionReport InspectionReport?
   Proposal         Proposal?
+  ProviderReport   ProviderReport[]
   transaction      Transaction?
   workLogs         WorkLog[]
 }
@@ -522,6 +527,29 @@ model WithdrawalRequest {
   @@index([status])
 }
 
+model ProviderReport {
+  id              Int             @id @default(autoincrement())
+  customerId      Int
+  providerId      Int
+  bookingId       Int
+  reason          String          @db.VarChar(255)
+  description     String?         @db.VarChar(2000)
+  imageUrls       String[]
+  status          ReportStatus    @default(PENDING)
+  createdAt       DateTime        @default(now())
+  reviewedAt      DateTime?
+  reviewedById    Int?
+  note            String?         @db.VarChar(1000)
+  Booking         Booking         @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  CustomerProfile CustomerProfile @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  ServiceProvider ServiceProvider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  User            User?           @relation(fields: [reviewedById], references: [id])
+
+  @@index([customerId])
+  @@index([providerId])
+  @@index([status])
+}
+
 enum UserStatus {
   ACTIVE
   INACTIVE
@@ -651,4 +679,11 @@ enum WithdrawalStatus {
   REJECTED
   CANCELLED
   COMPLETED
+}
+
+enum ReportStatus {
+  PENDING
+  UNDER_REVIEW
+  RESOLVED
+  REJECTED
 }
