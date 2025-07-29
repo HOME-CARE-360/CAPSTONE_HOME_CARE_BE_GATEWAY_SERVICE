@@ -30,22 +30,23 @@ export class PaymentGatewayController {
     }
   }
 
-  //   @Get('callback/:orderCode/:status')
-  //   async handleCallback(
-  //     @Param('orderCode') orderCode: string,
-  //     @Param('status') status: 'PAID' | 'FAILED',
-  //   ) {
-  //     try {
-  //       const data = await this.paymentRawTcpClient.send({
-  //         type: 'HANDLE_CALLBACK',
-  //         orderCode,
-  //         status,
-  //       });
-  //       handlerErrorResponse(data);
-  //       return data;
-  //     } catch (error) {
-  //       if (error instanceof HttpException) throw error;
-  //       handleZodError(error);
-  //     }
-  //   }
+  @Post('callback')
+  async handlePayOSCallback(
+    @Body() payload: { orderCode: string; status: 'PAID' | 'FAILED' },
+  ) {
+    try {
+      const data = await this.paymentRawTcpClient.send({
+        type: 'HANDLE_PAYOS_CALLBACK',
+        data: {
+          orderCode: payload.orderCode,
+          status: payload.status,
+        },
+      });
+      handlerErrorResponse(data);
+      return data;
+    } catch (error) {
+      if (error instanceof HttpException) throw error;
+      handleZodError(error);
+    }
+  }
 }
