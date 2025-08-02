@@ -44,7 +44,7 @@ import {
 export class ManageServicesGatewayController {
   constructor(
     @Inject(PROVIDER_SERVICE) private readonly providerClient: ClientProxy,
-  ) {}
+  ) { }
   @Post('/create-service')
   @ZodSerializerDto(CreateServicesBodyDTO)
   async createService(
@@ -73,6 +73,8 @@ export class ManageServicesGatewayController {
     @ActiveUser() user: AccessTokenPayload,
   ) {
     try {
+      console.log(user);
+
       return await lastValueFrom(
         this.providerClient.send(
           { cmd: 'create-service-item' },

@@ -15,10 +15,12 @@ export class AccessTokenGuard implements CanActivate {
   constructor(
     private readonly tokenService: TokenService,
     private readonly prismaService: PrismaService,
-  ) {}
+  ) { }
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
     const decodedAccessToken = await this.extractAndValidateToken(request);
+
+
     console.log(decodedAccessToken);
 
     await this.validateUserPermission(decodedAccessToken, request);

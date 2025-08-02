@@ -11,6 +11,7 @@ import {
   Controller,
   Get,
   Inject,
+  Param,
   Patch,
   Post,
   Query,
@@ -28,7 +29,7 @@ import {
 export class ManageBookingsGatewayController {
   constructor(
     @Inject(PROVIDER_SERVICE) private readonly providerClient: ClientProxy,
-  ) {}
+  ) { }
   @Get('/list-service-request')
   @ApiQuery({
     name: 'page',
@@ -86,6 +87,24 @@ export class ManageBookingsGatewayController {
       return await lastValueFrom(
         this.providerClient.send(
           { cmd: 'get-request-service' },
+          { data, providerID },
+        ),
+      );
+    } catch (error) {
+      console.log(error);
+
+      handleZodError(error);
+    }
+  }
+  @Get('/service-request-detail/:id')
+  async detail(
+    @Param() data: CancelServiceRequestBodyDTO,
+    @ActiveUser('providerId') providerID: number,
+  ) {
+    try {
+      return await lastValueFrom(
+        this.providerClient.send(
+          { cmd: 'get-request-service-detail' },
           { data, providerID },
         ),
       );
