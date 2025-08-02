@@ -12,9 +12,7 @@ import {
 import { handlerErrorResponse, handleZodError } from 'libs/common/helpers';
 import { USER_SERVICE } from 'libs/common/src/constants/service-name.constant';
 import { ActiveUser } from 'libs/common/src/decorator/active-user.decorator';
-import {
-  UpdateUserAndCustomerProfileDTO,
-} from 'libs/common/src/request-response-type/customer/customer.dto';
+import { UpdateUserAndCustomerProfileDTO } from 'libs/common/src/request-response-type/customer/customer.dto';
 import {
   createCustomerReportDTO,
   CustomerCompleteBookingDTO,
@@ -142,7 +140,7 @@ export class UserGatewayController {
     }
   }
 
-   @Patch('proposal/:bookingId')
+  @Patch('proposal/:bookingId')
   async updateProposalStatus(
     @Param('bookingId', ParseIntPipe) bookingId: number,
     @ActiveUser('customerId') customerId: number,

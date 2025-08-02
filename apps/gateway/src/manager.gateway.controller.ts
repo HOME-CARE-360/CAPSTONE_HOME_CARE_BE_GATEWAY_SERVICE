@@ -35,14 +35,17 @@ import {
   OrderBy,
   SortByWithDraw,
 } from 'libs/common/src/constants/others.constant';
-import { GetListReportQueryDTO, UpdateProviderReportDTO } from 'libs/common/src/request-response-type/report/report.dto';
+import {
+  GetListReportQueryDTO,
+  UpdateProviderReportDTO,
+} from 'libs/common/src/request-response-type/report/report.dto';
 import { AccessTokenPayload } from 'libs/common/src/types/jwt.type';
 
 @Controller('managers')
 export class ManagerGatewayController {
   constructor(
     @Inject(MANAGER_SERVICE) private readonly managerClient: ClientProxy,
-  ) { }
+  ) {}
   @Patch('change-status-provider')
   @ZodSerializerDto(MessageResDTO)
   async changeStatusProvider(
@@ -221,10 +224,16 @@ export class ManagerGatewayController {
   }
   @Patch('update-report')
   @ZodSerializerDto(MessageResDTO)
-  async updateReport(@Body() data: UpdateProviderReportDTO, @ActiveUser() user: AccessTokenPayload) {
+  async updateReport(
+    @Body() data: UpdateProviderReportDTO,
+    @ActiveUser() user: AccessTokenPayload,
+  ) {
     try {
       return await lastValueFrom(
-        this.managerClient.send({ cmd: 'update-report' }, { data, userId: user.userId }),
+        this.managerClient.send(
+          { cmd: 'update-report' },
+          { data, userId: user.userId },
+        ),
       );
     } catch (error) {
       handleZodError(error);

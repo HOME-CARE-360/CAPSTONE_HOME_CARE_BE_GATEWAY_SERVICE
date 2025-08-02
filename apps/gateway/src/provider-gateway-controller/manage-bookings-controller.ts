@@ -29,7 +29,7 @@ import {
 export class ManageBookingsGatewayController {
   constructor(
     @Inject(PROVIDER_SERVICE) private readonly providerClient: ClientProxy,
-  ) { }
+  ) {}
   @Get('/list-service-request')
   @ApiQuery({
     name: 'page',
