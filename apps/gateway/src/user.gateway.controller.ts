@@ -142,7 +142,7 @@ export class UserGatewayController {
     }
   }
 
-   @Post('proposal/:bookingId')
+   @Patch('proposal/:bookingId')
   async updateProposalStatus(
     @Param('bookingId', ParseIntPipe) bookingId: number,
     @ActiveUser('customerId') customerId: number,

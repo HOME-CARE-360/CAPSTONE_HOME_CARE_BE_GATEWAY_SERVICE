@@ -4,6 +4,7 @@ import { PAYMENT_SERVICE } from 'libs/common/src/constants/service-name.constant
 import { RawTcpClientService } from 'libs/common/src/tcp/raw-tcp-client.service';
 
 import { ActiveUser } from 'libs/common/src/decorator/active-user.decorator';
+import { IsPublic } from 'libs/common/src/decorator/auth.decorator';
 
 @Controller('payments')
 export class PaymentGatewayController {
@@ -30,6 +31,7 @@ export class PaymentGatewayController {
     }
   }
 
+  @IsPublic()
   @Post('callback')
   async handlePayOSCallback(
     @Body() payload: { orderCode: string; status: 'PAID' | 'FAILED' },
