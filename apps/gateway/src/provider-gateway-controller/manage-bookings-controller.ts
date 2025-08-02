@@ -96,7 +96,7 @@ export class ManageBookingsGatewayController {
       handleZodError(error);
     }
   }
-  @Get('/service-request-detail/:id')
+  @Get('/service-request-detail/:serviceRequestId')
   async detail(
     @Param() data: CancelServiceRequestBodyDTO,
     @ActiveUser('providerId') providerID: number,
