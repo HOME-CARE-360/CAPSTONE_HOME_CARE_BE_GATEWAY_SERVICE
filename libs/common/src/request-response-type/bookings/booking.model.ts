@@ -54,7 +54,7 @@ export const CreateBookingBodySchema = BookingSchema.omit({
 }).strict();
 export const CancelServiceRequestBodySchema = z
   .object({
-    serviceRequestId: z.number(),
+    serviceRequestId: z.coerce.number().int().positive(),
   })
   .strict();
 export type CancelServiceRequestBodySchema = z.infer<
