@@ -32,23 +32,28 @@ export class PaymentGatewayController {
   }
 
   @IsPublic()
-  @Post('callback')
-  async handlePayOSCallback(
-    @Body() payload: { orderCode: string; status: 'PAID' | 'FAILED' },
-  ) {
-    try {
-      const data = await this.paymentRawTcpClient.send({
-        type: 'HANDLE_PAYOS_CALLBACK',
-        data: {
-          orderCode: payload.orderCode,
-          status: payload.status,
-        },
-      });
-      handlerErrorResponse(data);
-      return data;
-    } catch (error) {
-      if (error instanceof HttpException) throw error;
-      handleZodError(error);
-    }
+@Post('callback')
+async handlePayOSCallback(@Body() payload: any) {
+  console.log('🔥 PayOS callback received:', payload);
+  if (!payload.orderCode || !payload.status) {
+    console.warn('⚠️ Webhook thiếu orderCode hoặc status');
+    return { success: false };
   }
+
+  try {
+    const data = await this.paymentRawTcpClient.send({
+      type: 'HANDLE_PAYOS_CALLBACK',
+      data: {
+        orderCode: payload.orderCode,
+        status: payload.status,
+      },
+    });
+    handlerErrorResponse(data);
+    return data;
+  } catch (error) {
+    if (error instanceof HttpException) throw error;
+    handleZodError(error);
+  }
+}
+
 }
