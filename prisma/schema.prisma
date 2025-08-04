@@ -1,6 +1,6 @@
 generator client {
   provider      = "prisma-client-js"
-        // output        = "../node_modules/.prisma/client"
+      //  output        = "../node_modules/.prisma/client"
   binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
 }
 
@@ -168,6 +168,7 @@ model CustomerProfile {
   updatedAt              DateTime                @updatedAt
   bookings               Booking[]
   chatMessages           ChatMessage[]
+  Conversation           Conversation[]
   user                   User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
   packageRecommendations PackageRecommendation[]
   ProviderReport         ProviderReport[]
@@ -218,6 +219,7 @@ model ServiceProvider {
   verifiedAt          DateTime?
   verifiedById        Int?
   bookings            Booking[]
+  Conversation        Conversation[]
   ProviderReport      ProviderReport[]
   services            Service[]
   ServiceItem         ServiceItem[]
@@ -550,6 +552,38 @@ model ProviderReport {
   @@index([status])
 }
 
+model Conversation {
+  id               Int             @id @default(autoincrement())
+  customerId       Int
+  providerId       Int
+  lastMessage      String?         @db.VarChar(500)
+  lastMessageAt    DateTime?
+  unreadByCustomer Int             @default(0)
+  unreadByProvider Int             @default(0)
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime
+  CustomerProfile  CustomerProfile @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  ServiceProvider  ServiceProvider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  Message          Message[]
+
+  @@unique([customerId, providerId])
+  @@index([lastMessageAt])
+}
+
+model Message {
+  id             Int            @id @default(autoincrement())
+  conversationId Int
+  senderType     ChatSenderType
+  senderId       Int
+  content        String?        @db.VarChar(2000)
+  imageUrl       String?        @db.VarChar(1000)
+  isRead         Boolean        @default(false)
+  sentAt         DateTime       @default(now())
+  Conversation   Conversation   @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId, sentAt])
+}
+
 enum UserStatus {
   ACTIVE
   INACTIVE
@@ -686,4 +720,9 @@ enum ReportStatus {
   UNDER_REVIEW
   RESOLVED
   REJECTED
+}
+
+enum ChatSenderType {
+  CUSTOMER
+  PROVIDER
 }

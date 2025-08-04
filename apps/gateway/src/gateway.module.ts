@@ -33,6 +33,7 @@ import { StaffGatewayController } from './staff.gateway.controller';
 import { AdminGatewayController } from './admin.gateway.controller';
 import { PaymentGatewayController } from './payment.gateway.controller';
 import { ManageFundingGatewayController } from './provider-gateway-controller/manage-funding-controller';
+import { ChatGateway } from './chat.gateway.controller';
 
 @Module({
   imports: [
@@ -113,8 +114,10 @@ import { ManageFundingGatewayController } from './provider-gateway-controller/ma
     AdminGatewayController,
     PaymentGatewayController,
     ManageFundingGatewayController,
+
   ],
   providers: [
+    ChatGateway,
     {
       provide: APP_PIPE,
       useClass: CustomZodValidationPipe,
@@ -153,4 +156,4 @@ import { ManageFundingGatewayController } from './provider-gateway-controller/ma
     },
   ],
 })
-export class AppModule {}
+export class AppModule { }

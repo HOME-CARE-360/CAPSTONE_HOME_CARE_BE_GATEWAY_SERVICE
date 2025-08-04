@@ -9,3 +9,13 @@ export const ActiveUser = createParamDecorator(
     return field ? user?.[field] : user;
   },
 );
+
+
+
+export const WsUser = createParamDecorator(
+  (field: keyof AccessTokenPayload | undefined, context: ExecutionContext) => {
+    const client = context.switchToWs().getClient();
+    const user: AccessTokenPayload | undefined = client?.data?.user;
+    return field ? user?.[field] : user;
+  },
+);

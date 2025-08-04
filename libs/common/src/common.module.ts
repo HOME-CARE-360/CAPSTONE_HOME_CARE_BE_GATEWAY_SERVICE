@@ -47,4 +47,4 @@ const sharedServices = [
   exports: sharedServices,
   imports: [JwtModule],
 })
-export class CommonModule {}
+export class CommonModule { }

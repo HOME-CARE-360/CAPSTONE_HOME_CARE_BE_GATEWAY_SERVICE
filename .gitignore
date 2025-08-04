@@ -2,7 +2,7 @@
 /dist
 /node_modules
 /build
-
+/test-socket.js
 # Logs
 logs
 *.log
