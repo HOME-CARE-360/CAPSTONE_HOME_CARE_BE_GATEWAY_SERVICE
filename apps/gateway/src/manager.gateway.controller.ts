@@ -11,6 +11,7 @@ import {
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import {
+  GetListProviderQueryDTO,
   UpdateStatusProviderBodyDTO,
   UpdateStatusServiceBodyDTO,
 } from 'libs/common/src/request-response-type/manager/managers.dto';
@@ -30,7 +31,7 @@ import {
   UpdateWithDrawalBodyDTO,
 } from 'libs/common/src/request-response-type/with-draw/with-draw.dto';
 import { ApiQuery } from '@nestjs/swagger';
-import { WithdrawalStatus } from '@prisma/client';
+import { CompanyType, VerificationStatus, WithdrawalStatus } from '@prisma/client';
 import {
   OrderBy,
   SortByWithDraw,
@@ -45,7 +46,7 @@ import { AccessTokenPayload } from 'libs/common/src/types/jwt.type';
 export class ManagerGatewayController {
   constructor(
     @Inject(MANAGER_SERVICE) private readonly managerClient: ClientProxy,
-  ) {}
+  ) { }
   @Patch('change-status-provider')
   @ZodSerializerDto(MessageResDTO)
   async changeStatusProvider(
@@ -233,6 +234,60 @@ export class ManagerGatewayController {
         this.managerClient.send(
           { cmd: 'update-report' },
           { data, userId: user.userId },
+        ),
+      );
+    } catch (error) {
+      handleZodError(error);
+    }
+  }
+  @ApiQuery({
+    name: 'verificationStatus',
+    required: false,
+    enum: VerificationStatus,
+    description: 'Filter by verification status (e.g., PENDING, VERIFIED, REJECTED)',
+  })
+  @ApiQuery({
+    name: 'companyType',
+    required: false,
+    enum: CompanyType,
+    description: 'Filter by company type',
+  })
+  @ApiQuery({
+    name: 'taxId',
+    required: false,
+    type: String,
+    description: 'Search by tax ID (partial match supported)',
+  })
+  @ApiQuery({
+    name: 'licenseNo',
+    required: false,
+    type: String,
+    description: 'Filter by license number',
+  })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    example: 1,
+    description: 'Page number (default = 1)',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    example: 10,
+    description: 'Items per page (default = 10)',
+  })
+  @Get('get-list-provider')
+  @ZodSerializerDto(MessageResDTO)
+  async getListProvider(
+    @Query() query: GetListProviderQueryDTO
+  ) {
+    try {
+      return await lastValueFrom(
+        this.managerClient.send(
+          { cmd: 'get-list-provider' },
+          { query },
         ),
       );
     } catch (error) {
