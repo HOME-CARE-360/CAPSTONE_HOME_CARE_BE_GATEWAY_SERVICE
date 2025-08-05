@@ -72,6 +72,8 @@ export class ChatGateway implements OnGatewayInit {
         @WsUser() user: AccessTokenPayload,
         @ConnectedSocket() socket: Socket,
     ) {
+        console.log("json ne");
+
         const isParticipant = await this.chatClient.send({ cmd: 'check-conversation-participant' }, {
             conversationId,
             user
