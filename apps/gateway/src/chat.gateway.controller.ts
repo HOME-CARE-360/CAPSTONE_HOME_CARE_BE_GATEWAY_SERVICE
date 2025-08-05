@@ -76,11 +76,14 @@ export class ChatGateway implements OnGatewayInit {
             conversationId,
             user
         }).toPromise();
+        console.log(isParticipant);
+
 
         if (!isParticipant) {
             socket.emit('chat:error', { message: 'Access denied to conversation' });
             return;
         }
+        console.log("jói");
 
         socket.join(`conversation:${conversationId}`);
     }

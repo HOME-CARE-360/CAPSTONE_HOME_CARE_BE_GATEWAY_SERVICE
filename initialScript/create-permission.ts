@@ -43,6 +43,13 @@ async function bootstrap() {
             module: 'CHATMESSAGES',
             name: 'SOCKET chat:read',
         },
+        {
+            path: '/socket/chat:joinConversation',
+            method: HTTPMethod.POST,
+            module: 'CHATMESSAGES',
+            name: 'SOCKET chat:joinConversation',
+        },
+
     ];
 
     const routes: RouteInfo[] = [...httpRoutes, ...socketRoutes];
