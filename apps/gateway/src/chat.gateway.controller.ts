@@ -66,4 +66,23 @@ export class ChatGateway implements OnGatewayInit {
             .to(`conversation:${dto.conversationId}`)
             .emit('chat:seen', { conversationId: dto.conversationId, user });
     }
+    @SubscribeMessage('chat:joinConversation')
+    async handleJoinConversation(
+        @MessageBody() { conversationId }: { conversationId: number },
+        @WsUser() user: AccessTokenPayload,
+        @ConnectedSocket() socket: Socket,
+    ) {
+        const isParticipant = await this.chatClient.send({ cmd: 'check-conversation-participant' }, {
+            conversationId,
+            user
+        }).toPromise();
+
+        if (!isParticipant) {
+            socket.emit('chat:error', { message: 'Access denied to conversation' });
+            return;
+        }
+
+        socket.join(`conversation:${conversationId}`);
+    }
+
 }
