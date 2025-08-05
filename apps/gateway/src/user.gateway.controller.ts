@@ -8,7 +8,13 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiQuery,
+  ApiTags,
+} from '@nestjs/swagger';
 import { handlerErrorResponse, handleZodError } from 'libs/common/helpers';
 import { USER_SERVICE } from 'libs/common/src/constants/service-name.constant';
 import { ActiveUser } from 'libs/common/src/decorator/active-user.decorator';
@@ -19,7 +25,17 @@ import {
   LinkBankAccountDTO,
 } from 'libs/common/src/request-response-type/user/user.dto';
 import { RawTcpClientService } from 'libs/common/src/tcp/raw-tcp-client.service';
+import { z } from 'zod';
 
+export const PaginationSchema = z.object({
+  page: z.number().int().positive().optional(),
+  pageSize: z.number().int().positive().optional(),
+});
+
+export type PaginationDTO = z.infer<typeof PaginationSchema>;
+
+@ApiTags('Users')
+@ApiBearerAuth()
 @Controller('users')
 export class UserGatewayController {
   constructor(
@@ -107,11 +123,18 @@ export class UserGatewayController {
   }
 
   @Get('my-reports')
-  async getCustomerReports(@ActiveUser('customerId') customerId: number) {
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'pageSize', required: false, type: Number })
+  async getCustomerReports(
+    @ActiveUser('customerId') customerId: number,
+    @Query() query: PaginationDTO,
+  ) {
     try {
       const data = await this.userRawTcpClient.send({
         type: 'GET_CUSTOMER_REPORTS',
         customerId,
+        page: query.page,
+        pageSize: query.pageSize,
       });
       handlerErrorResponse(data);
       return data;
@@ -168,6 +191,83 @@ export class UserGatewayController {
     } catch (error) {
       if (error instanceof HttpException) throw error;
       throw new HttpException('Unexpected error occurred', 500);
+    }
+  }
+
+  @Get('my-favorite-services')
+  async getFavoriteServices(
+    @ActiveUser('customerId') customerId: number,
+  ) {
+    try {
+      const data = await this.userRawTcpClient.send({
+        type: 'GET_CUSTOMER_FAVORITES',
+        customerId,
+      });
+      handlerErrorResponse(data);
+      return data;
+    } catch (error) {
+      if (error instanceof HttpException) throw error;
+      handleZodError(error);
+    }
+  }
+
+  @Patch('my-favorite-services/:serviceId')
+  async toggleFavoriteService(
+    @Param('serviceId', ParseIntPipe) serviceId: number,
+    @ActiveUser('customerId') customerId: number,
+  ) {
+    try {
+      const data = await this.userRawTcpClient.send({
+        type: 'TOGGLE_FAVORITE_SERVICE',
+        customerId,
+        serviceId,
+      });
+      handlerErrorResponse(data);
+      return data;
+    } catch (error) {
+      if (error instanceof HttpException) throw error;
+      handleZodError(error);
+    }
+  }
+
+  @Get('my-bookings')
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'pageSize', required: false, type: Number })
+  async getMyBookings(
+    @ActiveUser('customerId') customerId: number,
+    @Query() query: PaginationDTO,
+  ) {
+    try {
+      const data = await this.userRawTcpClient.send({
+        type: 'GET_BOOKING_BY_CUSTOMER',
+        customerId,
+        page: query.page,
+        pageSize: query.pageSize,
+      });
+      handlerErrorResponse(data);
+      return data;
+    } catch (error) {
+      if (error instanceof HttpException) throw error;
+      handleZodError(error);
+    }
+  }
+
+  @Get('my-bookings/:bookingId')
+  async getMyBookingById(
+    @Param('bookingId', ParseIntPipe) bookingId: number,
+    @ActiveUser('customerId') customerId: number,
+  ) {
+    try {
+      const data = await this.userRawTcpClient.send({
+        type: 'GET_CUSTOMER_BOOKING_BY_ID',
+        bookingId,
+        customerId,
+      });
+      handlerErrorResponse(data);
+      return data;
+    } catch (error) {
+      if (error instanceof HttpException) throw error;
+      handleZodError(error);
     }
   }
 }

@@ -141,8 +141,8 @@ import { ChatGateway } from './chat.gateway.controller';
     {
       provide: ADMIN_SERVICE,
       useFactory: () => {
-        const host = 'localhost';
-        const port = parseInt('4003');
+        const host = process.env.ADMIN_POD_TCP_PORT || 'localhost';
+        const port = parseInt(process.env.ADMIN_POD_TCP_PORT || '4003');
         return new RawTcpClientService(host, port);
       },
     },
