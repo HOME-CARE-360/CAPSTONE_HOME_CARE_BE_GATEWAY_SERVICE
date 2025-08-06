@@ -23,8 +23,6 @@ export const CustomerCompleteBookingSchema = z.object({
 });
 
 export const createCustomerReportSchema = z.object({
-  bookingId: z.number().int().positive(),
-  customerId: z.number().int().positive(),
   reason: z.string().min(3).max(255),
   description: z.string().max(2000).optional(),
   imageUrls: z.array(z.string().url()).optional(),

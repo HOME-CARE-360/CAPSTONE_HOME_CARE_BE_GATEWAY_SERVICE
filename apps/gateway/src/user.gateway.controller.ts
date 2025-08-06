@@ -118,13 +118,14 @@ export class UserGatewayController {
 
   @Post('create-customer-report')
   async createCustomerReport(
+    @Param('bookingId', ParseIntPipe) bookingId: number,
     @Body() body: createCustomerReportDTO,
     @ActiveUser('customerId') customerId: number,
   ) {
     try {
       const data = await this.userRawTcpClient.send({
         type: 'CREATE_CUSTOMER_REPORT',
-        bookingId: body.bookingId,
+        bookingId: bookingId,
         customerId,
         reason: body.reason,
         description: body.description,
