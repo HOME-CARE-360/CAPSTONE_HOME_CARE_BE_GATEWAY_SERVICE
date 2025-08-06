@@ -125,7 +125,7 @@ export class UserGatewayController {
     try {
       const data = await this.userRawTcpClient.send({
         type: 'CREATE_CUSTOMER_REPORT',
-        bookingId: bookingId,
+        bookingId,
         customerId,
         reason: body.reason,
         description: body.description,
