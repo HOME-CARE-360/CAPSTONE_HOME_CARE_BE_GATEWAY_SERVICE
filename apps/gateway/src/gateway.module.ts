@@ -114,7 +114,6 @@ import { ChatGateway } from './chat.gateway.controller';
     AdminGatewayController,
     PaymentGatewayController,
     ManageFundingGatewayController,
-
   ],
   providers: [
     ChatGateway,
@@ -156,4 +155,4 @@ import { ChatGateway } from './chat.gateway.controller';
     },
   ],
 })
-export class AppModule { }
+export class AppModule {}
