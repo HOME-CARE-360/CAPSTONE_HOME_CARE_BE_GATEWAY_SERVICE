@@ -10,7 +10,7 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiProperty, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { handlerErrorResponse, handleZodError } from 'libs/common/helpers';
 import { USER_SERVICE } from 'libs/common/src/constants/service-name.constant';
 import { ActiveUser } from 'libs/common/src/decorator/active-user.decorator';
@@ -32,7 +32,8 @@ export const PaginationZodSchema = z.object({
 });
 
 export type PaginationDTO = z.infer<typeof PaginationZodSchema>;
-class UpdateProposalStatusDTO {
+export class UpdateProposalStatusDto {
+  @ApiProperty({ enum: ['ACCEPT', 'REJECT'] })
   action: 'ACCEPT' | 'REJECT';
 }
 
@@ -191,7 +192,7 @@ export class UserGatewayController {
   async updateProposalStatus(
     @Param('bookingId', ParseIntPipe) bookingId: number,
     @ActiveUser('customerId') customerId: number,
-    @Body() body: UpdateProposalStatusDTO,
+    @Body() body: UpdateProposalStatusDto,
   ) {
     const { action } = body;
 
@@ -252,40 +253,51 @@ export class UserGatewayController {
     }
   }
 
-  @Get('my-bookings')
-  @ApiQuery({ name: 'page', required: false, type: Number })
-  @ApiQuery({ name: 'limit', required: false, type: Number })
-  @ApiQuery({ name: 'search', required: false, type: String })
-  @ApiQuery({ name: 'sortBy', required: false, type: String })
-  @ApiQuery({ name: 'sortOrder', required: false, enum: ['asc', 'desc'] })
-  async getMyBookings(
-    @ActiveUser('customerId') customerId: number,
-    @Query() query: PaginationDTO,
-  ) {
-    try {
-      const data = await this.userRawTcpClient.send({
-        type: 'GET_BOOKING_BY_CUSTOMER',
-        customerId,
-        page: query.page,
-        limit: query.limit,
-        search: query.search,
-        sortBy: query.sortBy,
-        sortOrder: query.sortOrder,
-      });
+@Get('my-bookings')
+@ApiQuery({ name: 'page', required: false, type: Number })
+@ApiQuery({ name: 'limit', required: false, type: Number })
+@ApiQuery({ name: 'search', required: false, type: String })
+@ApiQuery({ name: 'sortBy', required: false, type: String })
+@ApiQuery({ name: 'sortOrder', required: false, enum: ['asc', 'desc'] })
+async getMyBookings(
+  @ActiveUser('customerId') customerId: number,
+  @Query() rawQuery: any,
+) {
+  const result = PaginationZodSchema.safeParse(rawQuery);
 
-      handlerErrorResponse(data);
-      return data;
-    } catch (error) {
-      if (error instanceof HttpException) throw error;
-      handleZodError(error);
-    }
+  if (!result.success) {
+    console.error('❌ Zod validation failed:', result.error.flatten());
+    throw new HttpException(
+      {
+        message: 'Invalid query parameters',
+        details: result.error.flatten().fieldErrors,
+      },
+      400,
+    );
   }
 
-  @Get('my-bookings/:bookingId')
-  async getMyBookingById(
-    @Param('bookingId', ParseIntPipe) bookingId: number,
-    @ActiveUser('customerId') customerId: number,
-  ) {
+  const query: PaginationDTO = result.data;
+
+  try {
+    const data = await this.userRawTcpClient.send({
+      type: 'GET_BOOKING_BY_CUSTOMER',
+      customerId,
+      ...query, // includes: page, limit, search, sortBy, sortOrder
+    });
+
+    handlerErrorResponse(data);
+    return data;
+  } catch (error) {
+    if (error instanceof HttpException) throw error;
+    handleZodError(error);
+  }
+}
+
+@Get('my-bookings/:bookingId')
+async getMyBookingById(
+  @Param('bookingId', ParseIntPipe) bookingId: number,
+  @ActiveUser('customerId') customerId: number,
+) {
     try {
       const data = await this.userRawTcpClient.send({
         type: 'GET_CUSTOMER_BOOKING_BY_ID',
