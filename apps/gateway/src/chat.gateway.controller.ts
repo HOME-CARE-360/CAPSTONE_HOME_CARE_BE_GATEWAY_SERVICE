@@ -1,10 +1,10 @@
 import {
-    WebSocketGateway,
-    SubscribeMessage,
-    OnGatewayInit,
-    MessageBody,
-    ConnectedSocket,
-    WebSocketServer,
+  WebSocketGateway,
+  SubscribeMessage,
+  OnGatewayInit,
+  MessageBody,
+  ConnectedSocket,
+  WebSocketServer,
 } from '@nestjs/websockets';
 import { Inject, Logger, UseGuards } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
@@ -17,44 +17,54 @@ import { CreateMessageBodyType } from 'libs/common/src/request-response-type/cha
 @UseGuards(WsAccessTokenGuard)
 @WebSocketGateway({ cors: true })
 export class ChatGateway implements OnGatewayInit {
-    private readonly logger = new Logger(ChatGateway.name);
+  private readonly logger = new Logger(ChatGateway.name);
 
-    @WebSocketServer()
-    server: Server;
+  @WebSocketServer()
+  server: Server;
 
-    constructor(@Inject(BOOKING_SERVICE) private chatClient: ClientProxy) { }
+  constructor(@Inject(BOOKING_SERVICE) private chatClient: ClientProxy) {}
 
-    async afterInit(server: Server) {
-        console.log(server);
+  async afterInit(server: Server) {
+    console.log(server);
 
-        await this.chatClient.connect();
-        this.logger.log('ChatGateway initialized with Socket.IO server');
-    }
+    await this.chatClient.connect();
+    this.logger.log('ChatGateway initialized with Socket.IO server');
+  }
 
-    @SubscribeMessage('chat:sendMessage')
-    async sendMessage(
-        @MessageBody()
-        body: CreateMessageBodyType,
-        @ConnectedSocket() socket: Socket,
-        @WsUser() user: AccessTokenPayload
-    ) {
-        const message = await this.chatClient
-            .send({ cmd: 'create-message' }, {
-                body,
-                user
-            })
-            .toPromise();
+  @SubscribeMessage('chat:sendMessage')
+  async sendMessage(
+    @MessageBody()
+    body: CreateMessageBodyType,
+    @ConnectedSocket() socket: Socket,
+    @WsUser() user: AccessTokenPayload,
+  ) {
+    const message = await this.chatClient
+      .send(
+        { cmd: 'create-message' },
+        {
+          body,
+          user,
+        },
+      )
+      .toPromise();
 
-        socket
-            .to(`conversation:${body.conversationId}`)
-            .emit('chat:newMessage', message);
-    }
+    socket
+      .to(`conversation:${body.conversationId}`)
+      .emit('chat:newMessage', message);
+  }
 
-    @SubscribeMessage('chat:read')
-    markRead(
-        @MessageBody() dto: { conversationId: number },
-        @WsUser() user: AccessTokenPayload
-    ) {
+  @SubscribeMessage('chat:read')
+  markRead(
+    @MessageBody() dto: { conversationId: number },
+    @WsUser() user: AccessTokenPayload,
+  ) {
+    this.chatClient.emit(
+      { cmd: 'mark-messages-as-read' },
+      {
+        conversationId: dto.conversationId,
+        user,
+      },
+    );
 
 
         this.chatClient.emit({ cmd: 'mark-messages-as-read' }, {

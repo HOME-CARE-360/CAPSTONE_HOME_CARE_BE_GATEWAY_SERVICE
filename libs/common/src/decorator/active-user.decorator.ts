@@ -10,8 +10,6 @@ export const ActiveUser = createParamDecorator(
   },
 );
 
-
-
 export const WsUser = createParamDecorator(
   (field: keyof AccessTokenPayload | undefined, context: ExecutionContext) => {
     const client = context.switchToWs().getClient();

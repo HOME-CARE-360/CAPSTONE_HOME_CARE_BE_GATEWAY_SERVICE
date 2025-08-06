@@ -10,11 +10,7 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
-import {
-  ApiBearerAuth,
-  ApiQuery,
-  ApiTags,
-} from '@nestjs/swagger';
+import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { handlerErrorResponse, handleZodError } from 'libs/common/helpers';
 import { USER_SERVICE } from 'libs/common/src/constants/service-name.constant';
 import { ActiveUser } from 'libs/common/src/decorator/active-user.decorator';
@@ -27,12 +23,31 @@ import {
 import { RawTcpClientService } from 'libs/common/src/tcp/raw-tcp-client.service';
 import { z } from 'zod';
 
-export const PaginationSchema = z.object({
-  page: z.number().int().positive().optional(),
-  pageSize: z.number().int().positive().optional(),
+export const PaginationZodSchema = z.object({
+  page: z.coerce.number().int().positive().optional().default(1),
+  limit: z.coerce.number().int().positive().optional().default(10),
+  search: z.string().optional(),
+  sortBy: z.string().optional().default('createdAt'),
+  sortOrder: z.enum(['asc', 'desc']).optional().default('desc'),
 });
 
-export type PaginationDTO = z.infer<typeof PaginationSchema>;
+export type PaginationDTO = z.infer<typeof PaginationZodSchema>;
+class UpdateProposalStatusDTO {
+  action: 'ACCEPT' | 'REJECT';
+}
+
+export const ReportQuerySchema = z.object({
+  page: z.coerce.number().int().positive().optional().default(1),
+  limit: z.coerce.number().int().positive().optional().default(10),
+  search: z.string().optional(),
+  sortBy: z
+    .enum(['createdAt', 'status', 'reason'])
+    .optional()
+    .default('createdAt'),
+  sortOrder: z.enum(['asc', 'desc']).optional().default('desc'),
+});
+
+export type ReportQueryDTO = z.infer<typeof ReportQuerySchema>;
 
 @ApiTags('Users')
 @ApiBearerAuth()
@@ -124,18 +139,27 @@ export class UserGatewayController {
 
   @Get('my-reports')
   @ApiQuery({ name: 'page', required: false, type: Number })
-  @ApiQuery({ name: 'pageSize', required: false, type: Number })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  @ApiQuery({ name: 'search', required: false, type: String })
+  @ApiQuery({
+    name: 'sortBy',
+    required: false,
+    enum: ['createdAt', 'status', 'reason'],
+  })
+  @ApiQuery({ name: 'sortOrder', required: false, enum: ['asc', 'desc'] })
   async getCustomerReports(
     @ActiveUser('customerId') customerId: number,
-    @Query() query: PaginationDTO,
+    @Query() rawQuery: any,
   ) {
     try {
+      const query = ReportQuerySchema.parse(rawQuery);
+
       const data = await this.userRawTcpClient.send({
         type: 'GET_CUSTOMER_REPORTS',
         customerId,
-        page: query.page,
-        pageSize: query.pageSize,
+        ...query, // includes page, limit, search, sortBy, sortOrder
       });
+
       handlerErrorResponse(data);
       return data;
     } catch (error) {
@@ -167,7 +191,7 @@ export class UserGatewayController {
   async updateProposalStatus(
     @Param('bookingId', ParseIntPipe) bookingId: number,
     @ActiveUser('customerId') customerId: number,
-    @Body() body: { action: 'ACCEPT' | 'REJECT' },
+    @Body() body: UpdateProposalStatusDTO,
   ) {
     const { action } = body;
 
@@ -195,9 +219,7 @@ export class UserGatewayController {
   }
 
   @Get('my-favorite-services')
-  async getFavoriteServices(
-    @ActiveUser('customerId') customerId: number,
-  ) {
+  async getFavoriteServices(@ActiveUser('customerId') customerId: number) {
     try {
       const data = await this.userRawTcpClient.send({
         type: 'GET_CUSTOMER_FAVORITES',
@@ -232,7 +254,10 @@ export class UserGatewayController {
 
   @Get('my-bookings')
   @ApiQuery({ name: 'page', required: false, type: Number })
-  @ApiQuery({ name: 'pageSize', required: false, type: Number })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  @ApiQuery({ name: 'search', required: false, type: String })
+  @ApiQuery({ name: 'sortBy', required: false, type: String })
+  @ApiQuery({ name: 'sortOrder', required: false, enum: ['asc', 'desc'] })
   async getMyBookings(
     @ActiveUser('customerId') customerId: number,
     @Query() query: PaginationDTO,
@@ -242,8 +267,12 @@ export class UserGatewayController {
         type: 'GET_BOOKING_BY_CUSTOMER',
         customerId,
         page: query.page,
-        pageSize: query.pageSize,
+        limit: query.limit,
+        search: query.search,
+        sortBy: query.sortBy,
+        sortOrder: query.sortOrder,
       });
+
       handlerErrorResponse(data);
       return data;
     } catch (error) {
