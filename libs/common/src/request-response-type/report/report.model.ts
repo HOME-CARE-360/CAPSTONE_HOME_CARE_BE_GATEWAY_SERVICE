@@ -25,10 +25,8 @@ export const GetListReportQuerySchema = z.object({
       ReportStatus.UNDER_REVIEW,
     ])
     .optional(),
-  totalItems: z.number(),
-  page: z.number(),
-  limit: z.number(),
-  totalPages: z.number(),
+  page: z.coerce.number().int().positive().default(1),
+  limit: z.coerce.number().int().positive().default(10),
   orderBy: z.enum([OrderBy.Asc, OrderBy.Desc]).default(OrderBy.Desc),
   sortBy: z.enum([SortByWithDraw.CreatedAt]).default(SortByWithDraw.CreatedAt),
 });
