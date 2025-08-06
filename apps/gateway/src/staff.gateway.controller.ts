@@ -33,7 +33,22 @@ import {
   ApiQuery,
   ApiTags,
   ApiParam,
+  ApiProperty,
+  ApiBody,
 } from '@nestjs/swagger';
+
+export class WorkLogImageDto {
+  @ApiProperty({
+    description: 'Danh sách URL hình ảnh minh chứng (tối đa 5)',
+    type: [String],
+    required: false,
+    example: [
+      'https://cdn.site.com/images/checkin1.jpg',
+      'https://cdn.site.com/images/checkin2.jpg',
+    ],
+  })
+  imageUrls?: string[];
+}
 
 @Controller('staffs')
 @ApiTags('Staff Management')
@@ -245,16 +260,22 @@ export class StaffGatewayController {
     }
   }
 
-  @Post('staff-checkin/:bookingId')
+    @Post('staff-checkin/:bookingId')
   @ApiParam({ name: 'bookingId', type: Number })
+  @ApiBody({ type: WorkLogImageDto })
   async staffCreateWorkLogs(
     @Param('bookingId', ParseIntPipe) bookingId: number,
     @ActiveUser('staffId') staffId: number,
+    @Body() body: WorkLogImageDto,
   ) {
     try {
       const data = await this.staffRawTcpClient.send({
         type: 'STAFF_CREATE_WORK_LOG',
-        data: { bookingId, staffId },
+        data: {
+          bookingId,
+          staffId,
+          imageUrls: body.imageUrls ?? [],
+        },
       });
       handlerErrorResponse(data);
       return data;
@@ -264,13 +285,21 @@ export class StaffGatewayController {
     }
   }
 
+  // ✅ Staff Check-out
   @Patch('staff-checkout/:bookingId')
   @ApiParam({ name: 'bookingId', type: Number })
-  async staffCheckOut(@Param('bookingId', ParseIntPipe) bookingId: number) {
+  @ApiBody({ type: WorkLogImageDto })
+  async staffCheckOut(
+    @Param('bookingId', ParseIntPipe) bookingId: number,
+    @Body() body: WorkLogImageDto,
+  ) {
     try {
       const data = await this.staffRawTcpClient.send({
         type: 'STAFF_CHECK_OUT',
-        data: { bookingId },
+        data: {
+          bookingId,
+          imageUrls: body.imageUrls ?? [],
+        },
       });
       handlerErrorResponse(data);
       return data;
@@ -279,7 +308,6 @@ export class StaffGatewayController {
       handleZodError(error);
     }
   }
-
   @Get('staff-get-performance')
   async staffGetPerformance(@ActiveUser('staffId') staffId: number) {
     try {
