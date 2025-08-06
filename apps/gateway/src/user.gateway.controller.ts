@@ -116,7 +116,7 @@ export class UserGatewayController {
     }
   }
 
-  @Post('create-customer-report')
+  @Post('create-customer-report/:bookingId')
   async createCustomerReport(
     @Param('bookingId', ParseIntPipe) bookingId: number,
     @Body() body: createCustomerReportDTO,
