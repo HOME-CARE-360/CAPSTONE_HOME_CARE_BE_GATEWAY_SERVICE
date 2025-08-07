@@ -5,6 +5,7 @@ import { RawTcpClientService } from 'libs/common/src/tcp/raw-tcp-client.service'
 
 import { ActiveUser } from 'libs/common/src/decorator/active-user.decorator';
 import { IsPublic } from 'libs/common/src/decorator/auth.decorator';
+import { ApiBody } from '@nestjs/swagger';
 
 @Controller('payments')
 export class PaymentGatewayController {
@@ -14,6 +15,15 @@ export class PaymentGatewayController {
   ) {}
 
   @Post('create-topup')
+  @ApiBody({
+  schema: {
+    type: 'object',
+    properties: {
+      amount: { type: 'number', example: 100000 },
+    },
+    required: ['amount'],
+  },
+})
   async createTopUp(
     @Body() body: { amount: number },
     @ActiveUser('userId') userId: number,
@@ -21,7 +31,10 @@ export class PaymentGatewayController {
     try {
       const data = await this.paymentRawTcpClient.send({
         type: 'CREATE_TOPUP',
-        data: { amount: body.amount, userId },
+   data: {
+          ...body,
+          userId,
+        },
       });
       handlerErrorResponse(data);
       return data;
