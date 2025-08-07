@@ -44,7 +44,7 @@ import {
 export class ManageServicesGatewayController {
   constructor(
     @Inject(PROVIDER_SERVICE) private readonly providerClient: ClientProxy,
-  ) {}
+  ) { }
   @Post('/create-service')
   @ZodSerializerDto(CreateServicesBodyDTO)
   async createService(
@@ -241,12 +241,11 @@ export class ManageServicesGatewayController {
     description: 'Filter by service name (partial match)',
   })
   @ApiQuery({
-    name: 'categories',
+    name: 'categoryId',
     required: false,
-    isArray: true,
     type: Number,
-    description: 'List of category IDs to filter by',
-    example: [4, 7],
+    description: 'Category ID to filter by',
+    example: 1,
   })
   @ApiQuery({
     name: 'minPrice',
