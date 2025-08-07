@@ -114,6 +114,7 @@ import { ChatGateway } from './chat.gateway.controller';
     AdminGatewayController,
     PaymentGatewayController,
     ManageFundingGatewayController,
+
   ],
   providers: [
     ChatGateway,
@@ -140,8 +141,8 @@ import { ChatGateway } from './chat.gateway.controller';
     {
       provide: ADMIN_SERVICE,
       useFactory: () => {
-        const host = process.env.ADMIN_POD_HOST || 'localhost';
-        const port = parseInt(process.env.ADMIN_POD_TCP_PORT || '4003');
+        const host = 'localhost';
+        const port = parseInt('4003');
         return new RawTcpClientService(host, port);
       },
     },
@@ -155,4 +156,4 @@ import { ChatGateway } from './chat.gateway.controller';
     },
   ],
 })
-export class AppModule {}
+export class AppModule { }
