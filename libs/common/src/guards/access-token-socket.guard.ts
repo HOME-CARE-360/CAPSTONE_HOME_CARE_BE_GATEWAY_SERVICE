@@ -60,9 +60,10 @@ export class WsAccessTokenGuard implements CanActivate {
         const handler = context.getHandler();
         const eventName = Reflect.getMetadata('message', handler);
 
+
         const path = `/socket/${eventName || 'unknown'}`;
         const method = HTTPMethod.POST;
-        console.log(method, path);
+
 
         const roleIds = decodedAccessToken.roles.map((r) => r.id);
         const roles = await this.prismaService.role.findMany({
@@ -79,8 +80,6 @@ export class WsAccessTokenGuard implements CanActivate {
         });
 
         const permissions = roles.flatMap((r) => r.permissions)
-        console.log(roles);
-        console.log(permissions);
 
 
         if (!permissions.length) {
