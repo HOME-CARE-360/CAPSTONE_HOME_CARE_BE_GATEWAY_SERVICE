@@ -5,8 +5,10 @@ import { RawTcpClientService } from 'libs/common/src/tcp/raw-tcp-client.service'
 
 import { ActiveUser } from 'libs/common/src/decorator/active-user.decorator';
 import { IsPublic } from 'libs/common/src/decorator/auth.decorator';
-import { ApiBody } from '@nestjs/swagger';
+import { ApiBody, ApiTags } from '@nestjs/swagger';
+import { PaymentMethod } from '@prisma/client';
 
+@ApiTags('payments') // Add Swagger tag for better organization
 @Controller('payments')
 export class PaymentGatewayController {
   constructor(
@@ -16,14 +18,14 @@ export class PaymentGatewayController {
 
   @Post('create-topup')
   @ApiBody({
-  schema: {
-    type: 'object',
-    properties: {
-      amount: { type: 'number', example: 100000 },
+    schema: {
+      type: 'object',
+      properties: {
+        amount: { type: 'number', example: 100000 },
+      },
+      required: ['amount'],
     },
-    required: ['amount'],
-  },
-})
+  })
   async createTopUp(
     @Body() body: { amount: number },
     @ActiveUser('userId') userId: number,
@@ -31,7 +33,7 @@ export class PaymentGatewayController {
     try {
       const data = await this.paymentRawTcpClient.send({
         type: 'CREATE_TOPUP',
-   data: {
+        data: {
           ...body,
           userId,
         },
@@ -46,9 +48,24 @@ export class PaymentGatewayController {
 
   @IsPublic()
   @Post('callback')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        orderCode: { type: 'string', example: '1234567890' },
+        status: { type: 'string', enum: ['PAID', 'FAILED'], example: 'PAID' },
+      },
+      required: ['orderCode', 'status'],
+    },
+  })
   async handlePayOSCallback(@Body() payload: any) {
     if (!payload.orderCode || !payload.status) {
-      return { success: false };
+      // Return a structured error response for invalid payload
+      throw new HttpException({
+        success: false,
+        message: 'Missing orderCode or status in callback payload',
+        error: 'Bad Request',
+      }, 400);
     }
     try {
       const data = await this.paymentRawTcpClient.send({
@@ -56,6 +73,43 @@ export class PaymentGatewayController {
         data: {
           orderCode: payload.orderCode,
           status: payload.status,
+        },
+      });
+      handlerErrorResponse(data);
+      return data;
+    } catch (error) {
+      if (error instanceof HttpException) throw error;
+      handleZodError(error);
+    }
+  }
+
+  @Post('create-proposal-transaction')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        bookingId: { type: 'number', example: 123 },
+        method: {
+          type: 'string',
+          // Aligning with PaymentMethod enum used in service layer
+          enum: Object.values(PaymentMethod),
+          example: PaymentMethod.BANK_TRANSFER,
+        },
+      },
+      required: ['bookingId'],
+    },
+  })
+  async createProposalTransaction(
+    @Body() body: { bookingId: number; method?: PaymentMethod }, // Use PaymentMethod enum for type safety
+    @ActiveUser('userId') userId: number,
+  ) {
+    try {
+      const data = await this.paymentRawTcpClient.send({
+        type: 'CREATE_PROPOSAL_TRANSACTION',
+        data: {
+          bookingId: body.bookingId,
+          method: body.method,
+          userId,
         },
       });
       handlerErrorResponse(data);
