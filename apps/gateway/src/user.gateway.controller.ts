@@ -171,23 +171,24 @@ export class UserGatewayController {
   }
 
   @Get('my-proposal/:bookingId')
-  async getProposalByBookingId(
-    @Param('bookingId', ParseIntPipe) bookingId: number,
-    @ActiveUser('customerId') customerId: number,
-  ) {
-    try {
-      const data = await this.userRawTcpClient.send({
-        type: 'GET_PROPOSAL_BY_CUSTOMER',
-        bookingId,
-        customerId,
-      });
-      handlerErrorResponse(data);
-      return data;
-    } catch (error) {
-      if (error instanceof HttpException) throw error;
-      handleZodError(error);
-    }
+async getProposalByBookingId(
+  @Param('bookingId', ParseIntPipe) bookingId: number,
+  @ActiveUser('userId') userId: number,
+) {
+  try {
+    const data = await this.userRawTcpClient.send({
+      type: 'GET_PROPOSAL_BY_BOOKING_ID',
+      bookingId,
+      userId,
+    });
+    handlerErrorResponse(data);
+    return data;
+  } catch (error) {
+    if (error instanceof HttpException) throw error;
+    handleZodError(error);
   }
+}
+
 
   @Patch('proposal/:bookingId')
   async updateProposalStatus(
