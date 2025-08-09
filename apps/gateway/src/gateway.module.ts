@@ -35,7 +35,6 @@ import { AdminGatewayController } from './admin.gateway.controller';
 import { PaymentGatewayController } from './payment.gateway.controller';
 import { ManageFundingGatewayController } from './provider-gateway-controller/manage-funding-controller';
 import { NotificationGatewayController } from './notification.gateway.controller';
-import { ChatGateway } from './chat.gateway.controller';
 
 @Module({
   imports: [
@@ -119,7 +118,7 @@ import { ChatGateway } from './chat.gateway.controller';
     NotificationGatewayController
   ],
   providers: [
-    ChatGateway,
+    // ChatGateway,
     {
       provide: APP_PIPE,
       useClass: CustomZodValidationPipe,
@@ -127,8 +126,8 @@ import { ChatGateway } from './chat.gateway.controller';
     {
       provide: USER_SERVICE,
       useFactory: () => {
-        const host = 'localhost';
-        const port = parseInt('4000');
+        const host = process.env.USER_HOST || 'localhost';
+        const port = parseInt(process.env.USER_TCP_PORT || '4000');
         return new RawTcpClientService(host, port);
       },
     },
@@ -159,8 +158,8 @@ import { ChatGateway } from './chat.gateway.controller';
     {
       provide: NOTIFICATION_SERVICE,
       useFactory: () => {
-        const host = process.env.NOTIFICATION_HOST || 'localhost';
-        const port = parseInt(process.env.NOTIFICATION_TCP_PORT || '4004');
+        const host = 'localhost';
+        const port = parseInt('4004');
         return new RawTcpClientService(host, port);
       },
     },
