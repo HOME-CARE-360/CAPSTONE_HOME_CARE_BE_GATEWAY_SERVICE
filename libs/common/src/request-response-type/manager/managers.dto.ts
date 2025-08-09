@@ -7,11 +7,11 @@ import {
 
 export class UpdateStatusProviderBodyDTO extends createZodDto(
   UpdateStatusProviderBodySchema,
-) { }
+) {}
 export class UpdateStatusServiceBodyDTO extends createZodDto(
   UpdateStatusServiceBodySchema,
-) { }
+) {}
 
 export class GetListProviderQueryDTO extends createZodDto(
-  GetListProviderQuerySchema
-) { }
+  GetListProviderQuerySchema,
+) {}

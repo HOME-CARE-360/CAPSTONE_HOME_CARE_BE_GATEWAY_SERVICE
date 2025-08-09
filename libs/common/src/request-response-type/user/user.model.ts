@@ -15,7 +15,6 @@ export const LinkBankAccountSchema = z.object({
   accountNumber: z.string().min(6),
 });
 
-
 export const CustomerCompleteBookingSchema = z.object({
   bookingId: z
     .number()

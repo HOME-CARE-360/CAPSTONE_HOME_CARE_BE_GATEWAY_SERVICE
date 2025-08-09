@@ -6,14 +6,15 @@ export const GetListWidthDrawQuerySchema = z.object({
   page: z.coerce.number().int().positive().default(1),
   limit: z.coerce.number().int().positive().default(10),
   providerName: z.string().optional(),
-  status:
-    z
-      .union([
+  status: z
+    .union([
+      z.enum(['APPROVED', 'CANCELLED', 'COMPLETED', 'PENDING', 'REJECTED']),
+      z.array(
         z.enum(['APPROVED', 'CANCELLED', 'COMPLETED', 'PENDING', 'REJECTED']),
-        z.array(z.enum(['APPROVED', 'CANCELLED', 'COMPLETED', 'PENDING', 'REJECTED']))
-      ])
+      ),
+    ])
 
-      .array(),
+    .array(),
 
   orderBy: z.enum([OrderBy.Asc, OrderBy.Desc]).default(OrderBy.Desc),
   sortBy: z

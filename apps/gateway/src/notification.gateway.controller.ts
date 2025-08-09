@@ -88,7 +88,9 @@ export class NotificationGatewayController {
   ) {
     try {
       const parsed = NotificationQuerySchema.safeParse(rawQuery ?? {});
-      const { page, limit } = parsed.success ? parsed.data : { page: 1, limit: 10 };
+      const { page, limit } = parsed.success
+        ? parsed.data
+        : { page: 1, limit: 10 };
 
       const data = await this.notificationRawTcpClient.send({
         type: 'GET_UNREAD_IN_APP_NOTIFICATIONS',
@@ -113,7 +115,9 @@ export class NotificationGatewayController {
   ) {
     try {
       const parsed = NotificationQuerySchema.safeParse(rawQuery ?? {});
-      const { page, limit } = parsed.success ? parsed.data : { page: 1, limit: 10 };
+      const { page, limit } = parsed.success
+        ? parsed.data
+        : { page: 1, limit: 10 };
 
       const data = await this.notificationRawTcpClient.send({
         type: 'GET_ALL_IN_APP_NOTIFICATIONS',
@@ -130,9 +134,7 @@ export class NotificationGatewayController {
   }
 
   @Patch('read-all')
-  async markAllNotificationsAsRead(
-    @ActiveUser('userId') userId: number,
-  ) {
+  async markAllNotificationsAsRead(@ActiveUser('userId') userId: number) {
     try {
       const data = await this.notificationRawTcpClient.send({
         type: 'MARK_ALL_IN_APP_NOTIFICATIONS_AS_READ_FOR_USER',

@@ -260,7 +260,7 @@ export class StaffGatewayController {
     }
   }
 
-    @Post('staff-checkin/:bookingId')
+  @Post('staff-checkin/:bookingId')
   @ApiParam({ name: 'bookingId', type: Number })
   @ApiBody({ type: WorkLogImageDto })
   async staffCreateWorkLogs(

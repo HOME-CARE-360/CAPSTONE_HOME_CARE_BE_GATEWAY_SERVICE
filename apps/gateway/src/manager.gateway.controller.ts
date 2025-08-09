@@ -31,7 +31,11 @@ import {
   UpdateWithDrawalBodyDTO,
 } from 'libs/common/src/request-response-type/with-draw/with-draw.dto';
 import { ApiQuery } from '@nestjs/swagger';
-import { CompanyType, VerificationStatus, WithdrawalStatus } from '@prisma/client';
+import {
+  CompanyType,
+  VerificationStatus,
+  WithdrawalStatus,
+} from '@prisma/client';
 import {
   OrderBy,
   SortByWithDraw,
@@ -46,7 +50,7 @@ import { AccessTokenPayload } from 'libs/common/src/types/jwt.type';
 export class ManagerGatewayController {
   constructor(
     @Inject(MANAGER_SERVICE) private readonly managerClient: ClientProxy,
-  ) { }
+  ) {}
   @Patch('change-status-provider')
   @ZodSerializerDto(MessageResDTO)
   async changeStatusProvider(
@@ -244,7 +248,8 @@ export class ManagerGatewayController {
     name: 'verificationStatus',
     required: false,
     enum: VerificationStatus,
-    description: 'Filter by verification status (e.g., PENDING, VERIFIED, REJECTED)',
+    description:
+      'Filter by verification status (e.g., PENDING, VERIFIED, REJECTED)',
   })
   @ApiQuery({
     name: 'companyType',
@@ -280,15 +285,10 @@ export class ManagerGatewayController {
   })
   @Get('get-list-provider')
   @ZodSerializerDto(MessageResDTO)
-  async getListProvider(
-    @Query() query: GetListProviderQueryDTO
-  ) {
+  async getListProvider(@Query() query: GetListProviderQueryDTO) {
     try {
       return await lastValueFrom(
-        this.managerClient.send(
-          { cmd: 'get-list-provider' },
-          { query },
-        ),
+        this.managerClient.send({ cmd: 'get-list-provider' }, { query }),
       );
     } catch (error) {
       handleZodError(error);

@@ -190,24 +190,23 @@ export class UserGatewayController {
   }
 
   @Get('my-proposal/:bookingId')
-async getProposalByBookingId(
-  @Param('bookingId', ParseIntPipe) bookingId: number,
-  @ActiveUser('userId') userId: number,
-) {
-  try {
-    const data = await this.userRawTcpClient.send({
-      type: 'GET_PROPOSAL_BY_BOOKING_ID',
-      bookingId,
-      userId,
-    });
-    handlerErrorResponse(data);
-    return data;
-  } catch (error) {
-    if (error instanceof HttpException) throw error;
-    handleZodError(error);
+  async getProposalByBookingId(
+    @Param('bookingId', ParseIntPipe) bookingId: number,
+    @ActiveUser('userId') userId: number,
+  ) {
+    try {
+      const data = await this.userRawTcpClient.send({
+        type: 'GET_PROPOSAL_BY_BOOKING_ID',
+        bookingId,
+        userId,
+      });
+      handlerErrorResponse(data);
+      return data;
+    } catch (error) {
+      if (error instanceof HttpException) throw error;
+      handleZodError(error);
+    }
   }
-}
-
 
   @Patch('proposal/:bookingId')
   async updateProposalStatus(
@@ -274,51 +273,51 @@ async getProposalByBookingId(
     }
   }
 
-@Get('my-bookings')
-@ApiQuery({ name: 'page', required: false, type: Number })
-@ApiQuery({ name: 'limit', required: false, type: Number })
-@ApiQuery({ name: 'search', required: false, type: String })
-@ApiQuery({ name: 'sortBy', required: false, type: String })
-@ApiQuery({ name: 'sortOrder', required: false, enum: ['asc', 'desc'] })
-async getMyBookings(
-  @ActiveUser('customerId') customerId: number,
-  @Query() rawQuery: any,
-) {
-  const result = PaginationZodSchema.safeParse(rawQuery);
+  @Get('my-bookings')
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  @ApiQuery({ name: 'search', required: false, type: String })
+  @ApiQuery({ name: 'sortBy', required: false, type: String })
+  @ApiQuery({ name: 'sortOrder', required: false, enum: ['asc', 'desc'] })
+  async getMyBookings(
+    @ActiveUser('customerId') customerId: number,
+    @Query() rawQuery: any,
+  ) {
+    const result = PaginationZodSchema.safeParse(rawQuery);
 
-  if (!result.success) {
-    console.error('❌ Zod validation failed:', result.error.flatten());
-    throw new HttpException(
-      {
-        message: 'Invalid query parameters',
-        details: result.error.flatten().fieldErrors,
-      },
-      400,
-    );
+    if (!result.success) {
+      console.error('❌ Zod validation failed:', result.error.flatten());
+      throw new HttpException(
+        {
+          message: 'Invalid query parameters',
+          details: result.error.flatten().fieldErrors,
+        },
+        400,
+      );
+    }
+
+    const query: PaginationDTO = result.data;
+
+    try {
+      const data = await this.userRawTcpClient.send({
+        type: 'GET_BOOKING_BY_CUSTOMER',
+        customerId,
+        ...query, // includes: page, limit, search, sortBy, sortOrder
+      });
+
+      handlerErrorResponse(data);
+      return data;
+    } catch (error) {
+      if (error instanceof HttpException) throw error;
+      handleZodError(error);
+    }
   }
 
-  const query: PaginationDTO = result.data;
-
-  try {
-    const data = await this.userRawTcpClient.send({
-      type: 'GET_BOOKING_BY_CUSTOMER',
-      customerId,
-      ...query, // includes: page, limit, search, sortBy, sortOrder
-    });
-
-    handlerErrorResponse(data);
-    return data;
-  } catch (error) {
-    if (error instanceof HttpException) throw error;
-    handleZodError(error);
-  }
-}
-
-@Get('my-bookings/:bookingId')
-async getMyBookingById(
-  @Param('bookingId', ParseIntPipe) bookingId: number,
-  @ActiveUser('customerId') customerId: number,
-) {
+  @Get('my-bookings/:bookingId')
+  async getMyBookingById(
+    @Param('bookingId', ParseIntPipe) bookingId: number,
+    @ActiveUser('customerId') customerId: number,
+  ) {
     try {
       const data = await this.userRawTcpClient.send({
         type: 'GET_CUSTOMER_BOOKING_BY_ID',

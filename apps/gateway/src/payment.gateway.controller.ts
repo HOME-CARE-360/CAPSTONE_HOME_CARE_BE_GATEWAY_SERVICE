@@ -1,11 +1,19 @@
-import { Body, Controller, HttpException, Inject, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpException,
+  Inject,
+  Post,
+  Query,
+} from '@nestjs/common';
 import { handlerErrorResponse, handleZodError } from 'libs/common/helpers';
 import { PAYMENT_SERVICE } from 'libs/common/src/constants/service-name.constant';
 import { RawTcpClientService } from 'libs/common/src/tcp/raw-tcp-client.service';
 
 import { ActiveUser } from 'libs/common/src/decorator/active-user.decorator';
 import { IsPublic } from 'libs/common/src/decorator/auth.decorator';
-import { ApiBody, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { PaymentMethod } from '@prisma/client';
 
 @ApiTags('payments') // Add Swagger tag for better organization
@@ -60,11 +68,14 @@ export class PaymentGatewayController {
   })
   async handlePayOSCallback(@Body() payload: any) {
     if (!payload.orderCode || !payload.status) {
-      throw new HttpException({
-        success: false,
-        message: 'Missing orderCode or status in callback payload',
-        error: 'Bad Request',
-      }, 400);
+      throw new HttpException(
+        {
+          success: false,
+          message: 'Missing orderCode or status in callback payload',
+          error: 'Bad Request',
+        },
+        400,
+      );
     }
     try {
       const data = await this.paymentRawTcpClient.send({
@@ -83,41 +94,58 @@ export class PaymentGatewayController {
   }
 
   @Post('create-proposal-transaction')
-@ApiBody({
-  schema: {
-    type: 'object',
-    properties: {
-      bookingId: { type: 'number', example: 123 },
-      method: {
-        type: 'string',
-        enum: Object.values(PaymentMethod),
-        example: PaymentMethod.BANK_TRANSFER,
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        bookingId: { type: 'number', example: 123 },
+        method: {
+          type: 'string',
+          enum: Object.values(PaymentMethod),
+          example: PaymentMethod.BANK_TRANSFER,
+        },
       },
+      required: ['bookingId'],
     },
-    required: ['bookingId'],
-  },
-})
-async createProposalTransaction(
-  @Body() body: { bookingId: number; method?: PaymentMethod },
-  @ActiveUser('userId') userId: number,
-) {
-  try {
-    console.log('Creating proposal transaction with body:', body);
-    const data = await this.paymentRawTcpClient.send({
-      type: 'CREATE_PROPOSAL_TRANSACTION',
-      data: {
-        bookingId: body.bookingId,
-        method: body.method,
-        userId,
-      },
-    });
-    console.log('Proposal transaction created successfully:', data);
-    handlerErrorResponse(data);
-    return data;
-  } catch (error) {
-    if (error instanceof HttpException) throw error;
-    handleZodError(error);
+  })
+  async createProposalTransaction(
+    @Body() body: { bookingId: number; method?: PaymentMethod },
+    @ActiveUser('userId') userId: number,
+  ) {
+    try {
+      console.log('Creating proposal transaction with body:', body);
+      const data = await this.paymentRawTcpClient.send({
+        type: 'CREATE_PROPOSAL_TRANSACTION',
+        data: {
+          bookingId: body.bookingId,
+          method: body.method,
+          userId,
+        },
+      });
+      console.log('Proposal transaction created successfully:', data);
+      handlerErrorResponse(data);
+      return data;
+    } catch (error) {
+      if (error instanceof HttpException) throw error;
+      handleZodError(error);
+    }
   }
-}
-
+  @Get('status')
+  @ApiQuery({ name: 'orderCode', required: true, example: '1234567890' })
+  async getPaymentStatus(
+    @Query('orderCode') orderCode: string,
+    @ActiveUser('userId') userId: number,
+  ) {
+    try {
+      const data = await this.paymentRawTcpClient.send({
+        type: 'GET_PAYMENT_STATUS',
+        data: { orderCode, userId },
+      });
+      handlerErrorResponse(data);
+      return data;
+    } catch (error) {
+      if (error instanceof HttpException) throw error;
+      handleZodError(error);
+    }
+  }
 }

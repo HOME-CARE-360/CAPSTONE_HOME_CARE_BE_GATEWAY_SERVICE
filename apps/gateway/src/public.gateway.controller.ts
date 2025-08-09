@@ -20,7 +20,7 @@ export class PublicGatewayController {
   constructor(
     @Inject(USER_SERVICE)
     private readonly userRawTcpClient: RawTcpClientService,
-  ) { }
+  ) {}
   @Get('get-staff-information/:staffId')
   async getStaffInformation(@Param('staffId') staffId: number) {
     try {
@@ -100,6 +100,4 @@ export class PublicGatewayController {
       handleZodError(error);
     }
   }
-
-
 }

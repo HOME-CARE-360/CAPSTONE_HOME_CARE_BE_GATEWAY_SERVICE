@@ -44,7 +44,7 @@ import {
 export class ManageServicesGatewayController {
   constructor(
     @Inject(PROVIDER_SERVICE) private readonly providerClient: ClientProxy,
-  ) { }
+  ) {}
   @Post('/create-service')
   @ZodSerializerDto(CreateServicesBodyDTO)
   async createService(

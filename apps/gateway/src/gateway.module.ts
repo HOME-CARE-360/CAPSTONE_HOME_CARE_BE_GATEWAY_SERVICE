@@ -115,7 +115,7 @@ import { NotificationGatewayController } from './notification.gateway.controller
     AdminGatewayController,
     PaymentGatewayController,
     ManageFundingGatewayController,
-    NotificationGatewayController
+    NotificationGatewayController,
   ],
   providers: [
     // ChatGateway,
@@ -165,4 +165,4 @@ import { NotificationGatewayController } from './notification.gateway.controller
     },
   ],
 })
-export class AppModule { }
+export class AppModule {}

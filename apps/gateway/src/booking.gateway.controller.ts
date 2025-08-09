@@ -8,13 +8,16 @@ import { GetListCategoryResDTO } from 'libs/common/src/request-response-type/cat
 import { ActiveUser } from 'libs/common/src/decorator/active-user.decorator';
 import { AccessTokenPayload } from 'libs/common/src/types/jwt.type';
 import { CreateServiceRequestBodySchemaDTO } from 'libs/common/src/request-response-type/bookings/booking.dto';
-import { CreateConversationBodyDTO, GetListMessageQueryDTO } from 'libs/common/src/request-response-type/chat/chat.dto';
+import {
+  CreateConversationBodyDTO,
+  GetListMessageQueryDTO,
+} from 'libs/common/src/request-response-type/chat/chat.dto';
 
 @Controller('bookings')
 export class BookingsGatewayController {
   constructor(
     @Inject(BOOKING_SERVICE) private readonly bookingClient: ClientProxy,
-  ) { }
+  ) {}
   @Post('create-service-request')
   @ZodSerializerDto(GetListCategoryResDTO)
   async getListService(
@@ -38,15 +41,10 @@ export class BookingsGatewayController {
     }
   }
   @Get('get-user-conversation')
-  async getUserConversation(
-    @ActiveUser() user: AccessTokenPayload,
-  ) {
+  async getUserConversation(@ActiveUser() user: AccessTokenPayload) {
     try {
       return await lastValueFrom(
-        this.bookingClient.send(
-          { cmd: 'get-user-conversation' },
-          { user },
-        ),
+        this.bookingClient.send({ cmd: 'get-user-conversation' }, { user }),
       );
     } catch (error) {
       console.log(error);
@@ -90,6 +88,4 @@ export class BookingsGatewayController {
       handleZodError(error);
     }
   }
-
-
 }

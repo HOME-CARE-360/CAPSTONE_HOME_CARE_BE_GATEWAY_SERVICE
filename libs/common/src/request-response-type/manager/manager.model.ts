@@ -13,12 +13,16 @@ export const GetListProviderQuerySchema = ServiceProviderSchema.pick({
   verificationStatus: true,
   taxId: true,
   licenseNo: true,
-  companyType: true
-}).extend({
-  page: z.coerce.number().int().positive().default(1),
-  limit: z.coerce.number().int().positive().default(10),
-}).partial()
-export type GetListProviderQueryType = z.infer<typeof GetListProviderQuerySchema>
+  companyType: true,
+})
+  .extend({
+    page: z.coerce.number().int().positive().default(1),
+    limit: z.coerce.number().int().positive().default(10),
+  })
+  .partial();
+export type GetListProviderQueryType = z.infer<
+  typeof GetListProviderQuerySchema
+>;
 export type UpdateStatusServiceBodyType = z.infer<
   typeof UpdateStatusServiceBodySchema
 >;
