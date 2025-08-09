@@ -35,6 +35,7 @@ import { AdminGatewayController } from './admin.gateway.controller';
 import { PaymentGatewayController } from './payment.gateway.controller';
 import { ManageFundingGatewayController } from './provider-gateway-controller/manage-funding-controller';
 import { NotificationGatewayController } from './notification.gateway.controller';
+import { ChatGateway } from './chat.gateway.controller';
 
 @Module({
   imports: [
@@ -118,6 +119,7 @@ import { NotificationGatewayController } from './notification.gateway.controller
     NotificationGatewayController
   ],
   providers: [
+    ChatGateway,
     {
       provide: APP_PIPE,
       useClass: CustomZodValidationPipe,
