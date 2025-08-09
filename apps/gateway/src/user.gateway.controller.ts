@@ -97,6 +97,25 @@ export class UserGatewayController {
     }
   }
 
+  @Patch('change-bank-account')
+  async changeBankAccount(
+    @Body() body: LinkBankAccountDTO,
+    @ActiveUser('userId') userId: number,
+  ) {
+    try {
+      const data = await this.userRawTcpClient.send({
+        type: 'CHANGE_BANK_ACCOUNT',
+        userId,
+        ...body,
+      });
+      handlerErrorResponse(data);
+      return data;
+    } catch (error) {
+      if (error instanceof HttpException) throw error;
+      handleZodError(error);
+    }
+  }
+
   @Patch('complete-booking')
   async customerCompleteBooking(
     @Body() body: CustomerCompleteBookingDTO,
