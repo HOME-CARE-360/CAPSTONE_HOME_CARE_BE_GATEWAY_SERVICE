@@ -60,7 +60,6 @@ export class PaymentGatewayController {
   })
   async handlePayOSCallback(@Body() payload: any) {
     if (!payload.orderCode || !payload.status) {
-      // Return a structured error response for invalid payload
       throw new HttpException({
         success: false,
         message: 'Missing orderCode or status in callback payload',
@@ -84,39 +83,41 @@ export class PaymentGatewayController {
   }
 
   @Post('create-proposal-transaction')
-  @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        bookingId: { type: 'number', example: 123 },
-        method: {
-          type: 'string',
-          // Aligning with PaymentMethod enum used in service layer
-          enum: Object.values(PaymentMethod),
-          example: PaymentMethod.BANK_TRANSFER,
-        },
+@ApiBody({
+  schema: {
+    type: 'object',
+    properties: {
+      bookingId: { type: 'number', example: 123 },
+      method: {
+        type: 'string',
+        enum: Object.values(PaymentMethod),
+        example: PaymentMethod.BANK_TRANSFER,
       },
-      required: ['bookingId'],
     },
-  })
-  async createProposalTransaction(
-    @Body() body: { bookingId: number; method?: PaymentMethod }, // Use PaymentMethod enum for type safety
-    @ActiveUser('userId') userId: number,
-  ) {
-    try {
-      const data = await this.paymentRawTcpClient.send({
-        type: 'CREATE_PROPOSAL_TRANSACTION',
-        data: {
-          bookingId: body.bookingId,
-          method: body.method,
-          userId,
-        },
-      });
-      handlerErrorResponse(data);
-      return data;
-    } catch (error) {
-      if (error instanceof HttpException) throw error;
-      handleZodError(error);
-    }
+    required: ['bookingId'],
+  },
+})
+async createProposalTransaction(
+  @Body() body: { bookingId: number; method?: PaymentMethod },
+  @ActiveUser('userId') userId: number,
+) {
+  try {
+    console.log('Creating proposal transaction with body:', body);
+    const data = await this.paymentRawTcpClient.send({
+      type: 'CREATE_PROPOSAL_TRANSACTION',
+      data: {
+        bookingId: body.bookingId,
+        method: body.method,
+        userId,
+      },
+    });
+    console.log('Proposal transaction created successfully:', data);
+    handlerErrorResponse(data);
+    return data;
+  } catch (error) {
+    if (error instanceof HttpException) throw error;
+    handleZodError(error);
   }
+}
+
 }
