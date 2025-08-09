@@ -217,9 +217,9 @@ async getProposalByBookingId(
   ) {
     const { action } = body;
 
-    if (!['ACCEPTED', 'REJECTED'].includes(action)) {
+    if (!['ACCEPTED', 'REJECT'].includes(action)) {
       throw new HttpException(
-        "Invalid action. Must be either 'ACCEPTED' or 'REJECTED'",
+        "Invalid action. Must be either 'ACCEPTED' or 'REJECT'",
         400,
       );
     }
