@@ -8,3 +8,4 @@ export const BOOKING_SERVICE = 'booking';
 export const PAYMENT_SERVICE = 'payment';
 export const STAFF_SERVICE = 'staff';
 export const ADMIN_SERVICE = 'admin';
+export const NOTIFICATION_SERVICE = 'notification';

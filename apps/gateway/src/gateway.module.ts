@@ -10,6 +10,7 @@ import {
   BOOKING_SERVICE,
   MANAGER_SERVICE,
   MEDIA_SERVICE,
+  NOTIFICATION_SERVICE,
   PAYMENT_SERVICE,
   PROVIDER_SERVICE,
   SERVICE_SERVICE,
@@ -33,7 +34,7 @@ import { StaffGatewayController } from './staff.gateway.controller';
 import { AdminGatewayController } from './admin.gateway.controller';
 import { PaymentGatewayController } from './payment.gateway.controller';
 import { ManageFundingGatewayController } from './provider-gateway-controller/manage-funding-controller';
-import { ChatGateway } from './chat.gateway.controller';
+import { NotificationGatewayController } from './notification.gateway.controller';
 
 @Module({
   imports: [
@@ -114,7 +115,7 @@ import { ChatGateway } from './chat.gateway.controller';
     AdminGatewayController,
     PaymentGatewayController,
     ManageFundingGatewayController,
-
+    NotificationGatewayController
   ],
   providers: [
     ChatGateway,
@@ -125,8 +126,8 @@ import { ChatGateway } from './chat.gateway.controller';
     {
       provide: USER_SERVICE,
       useFactory: () => {
-        const host = process.env.USER_HOST || 'localhost';
-        const port = parseInt(process.env.USER_TCP_PORT || '4000');
+        const host = 'localhost';
+        const port = parseInt('4000');
         return new RawTcpClientService(host, port);
       },
     },
@@ -151,6 +152,14 @@ import { ChatGateway } from './chat.gateway.controller';
       useFactory: () => {
         const host = process.env.PAYMENT_HOST || 'localhost';
         const port = parseInt(process.env.PAYMENT_TCP_PORT || '4001');
+        return new RawTcpClientService(host, port);
+      },
+    },
+    {
+      provide: NOTIFICATION_SERVICE,
+      useFactory: () => {
+        const host = process.env.NOTIFICATION_HOST || 'localhost';
+        const port = parseInt(process.env.NOTIFICATION_TCP_PORT || '4004');
         return new RawTcpClientService(host, port);
       },
     },
