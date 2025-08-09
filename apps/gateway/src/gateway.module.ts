@@ -118,7 +118,6 @@ import { NotificationGatewayController } from './notification.gateway.controller
     NotificationGatewayController
   ],
   providers: [
-    ChatGateway,
     {
       provide: APP_PIPE,
       useClass: CustomZodValidationPipe,
