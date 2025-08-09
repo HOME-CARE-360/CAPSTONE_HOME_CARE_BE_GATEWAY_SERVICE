@@ -142,8 +142,8 @@ import { NotificationGatewayController } from './notification.gateway.controller
     {
       provide: ADMIN_SERVICE,
       useFactory: () => {
-        const host = 'localhost';
-        const port = parseInt('4003');
+        const host = process.env.ADMIN_HOST || 'localhost';
+        const port = parseInt(process.env.ADMIN_TCP_PORT || '4003');
         return new RawTcpClientService(host, port);
       },
     },
@@ -158,8 +158,8 @@ import { NotificationGatewayController } from './notification.gateway.controller
     {
       provide: NOTIFICATION_SERVICE,
       useFactory: () => {
-        const host = 'localhost';
-        const port = parseInt('4004');
+        const host = process.env.NOTIFICATION_HOST || 'localhost';
+        const port = parseInt(process.env.NOTIFICATION_TCP_PORT || '4004');
         return new RawTcpClientService(host, port);
       },
     },
