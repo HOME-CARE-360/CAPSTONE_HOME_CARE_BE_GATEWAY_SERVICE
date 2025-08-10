@@ -17,7 +17,10 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { CreateProposedServiceDTO, EditProposedServiceDTO } from 'libs/common/src/request-response-type/proposed/proposed.dto';
+import {
+  CreateProposedServiceDTO,
+  EditProposedServiceDTO,
+} from 'libs/common/src/request-response-type/proposed/proposed.dto';
 import {
   AssignStaffToBookingBodyDTO,
   CancelServiceRequestBodyDTO,
@@ -29,7 +32,7 @@ import {
 export class ManageBookingsGatewayController {
   constructor(
     @Inject(PROVIDER_SERVICE) private readonly providerClient: ClientProxy,
-  ) { }
+  ) {}
   @Get('/list-service-request')
   @ApiQuery({
     name: 'page',

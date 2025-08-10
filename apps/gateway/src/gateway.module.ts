@@ -167,4 +167,4 @@ import { ChatGateway } from './chat.gateway.controller';
     // },
   ],
 })
-export class AppModule { }
+export class AppModule {}

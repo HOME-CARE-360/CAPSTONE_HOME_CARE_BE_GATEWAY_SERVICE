@@ -54,58 +54,57 @@ export class PaymentGatewayController {
     }
   }
 
-@IsPublic()
-@Post('callback')
-@ApiBody({
-  schema: {
-    type: 'object',
-    properties: {
-      code: { type: 'string', example: '00' }, // Thêm code vào schema
-      data: {
-        type: 'object',
-        properties: {
-          orderCode: { type: 'number', example: 1234567890 },
+  @IsPublic()
+  @Post('callback')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        code: { type: 'string', example: '00' }, // Thêm code vào schema
+        data: {
+          type: 'object',
+          properties: {
+            orderCode: { type: 'number', example: 1234567890 },
+          },
         },
       },
+      required: ['code', 'data'],
     },
-    required: ['code', 'data'],
-  },
-})
-async handlePayOSCallback(@Body() payload: any) {
-  const orderCode = payload.data?.orderCode;
-  const responseCode = payload.code;
+  })
+  async handlePayOSCallback(@Body() payload: any) {
+    const orderCode = payload.data?.orderCode;
+    const responseCode = payload.code;
 
-  if (!orderCode || !responseCode) {
-    throw new HttpException(
-      {
-        success: false,
-        message: 'Missing orderCode or code in callback payload',
-        error: 'Bad Request',
-      },
-      400,
-    );
-  }
-
-  try {
-    const status = responseCode === '00' ? 'PAID' : 'FAILED';
-    const data = await this.paymentRawTcpClient.send({
-      type: 'HANDLE_PAYOS_CALLBACK',
-      data: {
-        orderCode: orderCode,
-        status: status,
-      },
-    });
-    
-    handlerErrorResponse(data);
-    return data;
-
-  } catch (error) {
-    if (error instanceof HttpException) {
-      throw error;
+    if (!orderCode || !responseCode) {
+      throw new HttpException(
+        {
+          success: false,
+          message: 'Missing orderCode or code in callback payload',
+          error: 'Bad Request',
+        },
+        400,
+      );
     }
-    handleZodError(error);
+
+    try {
+      const status = responseCode === '00' ? 'PAID' : 'FAILED';
+      const data = await this.paymentRawTcpClient.send({
+        type: 'HANDLE_PAYOS_CALLBACK',
+        data: {
+          orderCode: orderCode,
+          status: status,
+        },
+      });
+
+      handlerErrorResponse(data);
+      return data;
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      handleZodError(error);
+    }
   }
-}
   @Post('create-proposal-transaction')
   @ApiBody({
     schema: {
