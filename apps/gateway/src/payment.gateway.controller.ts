@@ -60,51 +60,39 @@ export class PaymentGatewayController {
     schema: {
       type: 'object',
       properties: {
-        code: { type: 'string', example: '00' }, // Thêm code vào schema
-        data: {
-          type: 'object',
-          properties: {
-            orderCode: { type: 'number', example: 1234567890 },
-          },
-        },
+        orderCode: { type: 'string', example: '1234567890' },
+        status: { type: 'string', enum: ['PAID', 'FAILED'], example: 'PAID' },
       },
-      required: ['code', 'data'],
+      required: ['orderCode', 'status'],
     },
   })
   async handlePayOSCallback(@Body() payload: any) {
-    const orderCode = payload.data?.orderCode;
-    const responseCode = payload.code;
-
-    if (!orderCode || !responseCode) {
+    if (!payload.orderCode || !payload.status) {
       throw new HttpException(
         {
           success: false,
-          message: 'Missing orderCode or code in callback payload',
+          message: 'Missing orderCode or status in callback payload',
           error: 'Bad Request',
         },
         400,
       );
     }
-
     try {
-      const status = responseCode === '00' ? 'PAID' : 'FAILED';
       const data = await this.paymentRawTcpClient.send({
         type: 'HANDLE_PAYOS_CALLBACK',
         data: {
-          orderCode: orderCode,
-          status: status,
+          orderCode: payload.orderCode,
+          status: payload.status,
         },
       });
-
       handlerErrorResponse(data);
       return data;
     } catch (error) {
-      if (error instanceof HttpException) {
-        throw error;
-      }
+      if (error instanceof HttpException) throw error;
       handleZodError(error);
     }
   }
+
   @Post('create-proposal-transaction')
   @ApiBody({
     schema: {
@@ -152,6 +140,94 @@ export class PaymentGatewayController {
       const data = await this.paymentRawTcpClient.send({
         type: 'GET_PAYMENT_STATUS',
         data: { orderCode, userId },
+      });
+      handlerErrorResponse(data);
+      return data;
+    } catch (error) {
+      if (error instanceof HttpException) throw error;
+      handleZodError(error);
+    }
+  }
+
+  @IsPublic()
+  @Get('success')
+  @ApiQuery({
+    name: 'orderCode',
+    required: true,
+    description: 'Order code from PayOS for successful transaction.',
+    example: '1754847847506',
+  })
+  @ApiQuery({
+    name: 'status',
+    required: true,
+    description: 'Status of the transaction (e.g., PAID).',
+    example: 'PAID',
+  })
+  async handlePayOSSuccessManual(
+    @Query('orderCode') orderCode: string,
+    @Query('status') status: string,
+  ) {
+    try {
+      console.log(`Received manual PayOS success callback: orderCode=${orderCode}, status=${status}`);
+
+      if (!orderCode || !orderCode.trim()) {
+        throw new HttpException(
+          {
+            success: false,
+            message: 'Order code is required for successful payment callback.',
+            error: 'Bad Request',
+          },
+          400,
+        );
+      }
+
+      const data = await this.paymentRawTcpClient.send({
+        type: 'HANDLE_PAYOS_SUCCESS_MANUAL',
+        data: { orderCode },
+      });
+      handlerErrorResponse(data);
+      return data;
+    } catch (error) {
+      if (error instanceof HttpException) throw error;
+      handleZodError(error);
+    }
+  }
+
+  @IsPublic()
+  @Get('failed')
+  @ApiQuery({
+    name: 'orderCode',
+    required: true,
+    description: 'Order code from PayOS for failed transaction.',
+    example: '1754847847506',
+  })
+  @ApiQuery({
+    name: 'status',
+    required: true,
+    description: 'Status of the transaction (e.g., FAILED).',
+    example: 'FAILED',
+  })
+  async handlePayOSFailedManual(
+    @Query('orderCode') orderCode: string,
+    @Query('status') status: string,
+  ) {
+    try {
+      console.log(`Received manual PayOS failed callback: orderCode=${orderCode}, status=${status}`);
+
+      if (!orderCode || !orderCode.trim()) {
+        throw new HttpException(
+          {
+            success: false,
+            message: 'Order code is required for failed payment callback.',
+            error: 'Bad Request',
+          },
+          400,
+        );
+      }
+
+      const data = await this.paymentRawTcpClient.send({
+        type: 'HANDLE_PAYOS_FAILED_MANUAL',
+        data: { orderCode },
       });
       handlerErrorResponse(data);
       return data;
