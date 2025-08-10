@@ -34,7 +34,7 @@ import { StaffGatewayController } from './staff.gateway.controller';
 import { AdminGatewayController } from './admin.gateway.controller';
 import { PaymentGatewayController } from './payment.gateway.controller';
 import { ManageFundingGatewayController } from './provider-gateway-controller/manage-funding-controller';
-import { NotificationGatewayController } from './notification.gateway.controller';
+// import { NotificationGatewayController } from './notification.gateway.controller';
 
 @Module({
   imports: [
@@ -115,7 +115,7 @@ import { NotificationGatewayController } from './notification.gateway.controller
     AdminGatewayController,
     PaymentGatewayController,
     ManageFundingGatewayController,
-    NotificationGatewayController,
+    // NotificationGatewayController,
   ],
   providers: [
     // ChatGateway,
@@ -165,4 +165,4 @@ import { NotificationGatewayController } from './notification.gateway.controller
     },
   ],
 })
-export class AppModule {}
+export class AppModule { }
