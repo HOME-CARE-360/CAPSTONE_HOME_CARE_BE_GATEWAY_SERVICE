@@ -17,7 +17,7 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { CreateProposedServiceDTO } from 'libs/common/src/request-response-type/proposed/proposed.dto';
+import { CreateProposedServiceDTO, EditProposedServiceDTO } from 'libs/common/src/request-response-type/proposed/proposed.dto';
 import {
   AssignStaffToBookingBodyDTO,
   CancelServiceRequestBodyDTO,
@@ -29,7 +29,7 @@ import {
 export class ManageBookingsGatewayController {
   constructor(
     @Inject(PROVIDER_SERVICE) private readonly providerClient: ClientProxy,
-  ) {}
+  ) { }
   @Get('/list-service-request')
   @ApiQuery({
     name: 'page',
@@ -141,6 +141,24 @@ export class ManageBookingsGatewayController {
       return await lastValueFrom(
         this.providerClient.send(
           { cmd: 'create-proposed' },
+          { data: { ...body }, providerID },
+        ),
+      );
+    } catch (error) {
+      console.log(error);
+
+      handleZodError(error);
+    }
+  }
+  @Patch('edit-proposed')
+  async editProposed(
+    @Body() body: EditProposedServiceDTO,
+    @ActiveUser('providerId') providerID: number,
+  ) {
+    try {
+      return await lastValueFrom(
+        this.providerClient.send(
+          { cmd: 'edit-proposed' },
           { data: { ...body }, providerID },
         ),
       );
