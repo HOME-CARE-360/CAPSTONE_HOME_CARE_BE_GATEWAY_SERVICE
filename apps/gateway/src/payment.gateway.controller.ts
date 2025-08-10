@@ -54,45 +54,58 @@ export class PaymentGatewayController {
     }
   }
 
-  @IsPublic()
-  @Post('callback')
-  @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        orderCode: { type: 'string', example: '1234567890' },
-        status: { type: 'string', enum: ['PAID', 'FAILED'], example: 'PAID' },
+@IsPublic()
+@Post('callback')
+@ApiBody({
+  schema: {
+    type: 'object',
+    properties: {
+      code: { type: 'string', example: '00' }, // Thêm code vào schema
+      data: {
+        type: 'object',
+        properties: {
+          orderCode: { type: 'number', example: 1234567890 },
+        },
       },
-      required: ['orderCode', 'status'],
     },
-  })
-  async handlePayOSCallback(@Body() payload: any) {
-    if (!payload.orderCode || !payload.status) {
-      throw new HttpException(
-        {
-          success: false,
-          message: 'Missing orderCode or status in callback payload',
-          error: 'Bad Request',
-        },
-        400,
-      );
-    }
-    try {
-      const data = await this.paymentRawTcpClient.send({
-        type: 'HANDLE_PAYOS_CALLBACK',
-        data: {
-          orderCode: payload.orderCode,
-          status: payload.status,
-        },
-      });
-      handlerErrorResponse(data);
-      return data;
-    } catch (error) {
-      if (error instanceof HttpException) throw error;
-      handleZodError(error);
-    }
+    required: ['code', 'data'],
+  },
+})
+async handlePayOSCallback(@Body() payload: any) {
+  const orderCode = payload.data?.orderCode;
+  const responseCode = payload.code;
+
+  if (!orderCode || !responseCode) {
+    throw new HttpException(
+      {
+        success: false,
+        message: 'Missing orderCode or code in callback payload',
+        error: 'Bad Request',
+      },
+      400,
+    );
   }
 
+  try {
+    const status = responseCode === '00' ? 'PAID' : 'FAILED';
+    const data = await this.paymentRawTcpClient.send({
+      type: 'HANDLE_PAYOS_CALLBACK',
+      data: {
+        orderCode: orderCode,
+        status: status,
+      },
+    });
+    
+    handlerErrorResponse(data);
+    return data;
+
+  } catch (error) {
+    if (error instanceof HttpException) {
+      throw error;
+    }
+    handleZodError(error);
+  }
+}
   @Post('create-proposal-transaction')
   @ApiBody({
     schema: {
