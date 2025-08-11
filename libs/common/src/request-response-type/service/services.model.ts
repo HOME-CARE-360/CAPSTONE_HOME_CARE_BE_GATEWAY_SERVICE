@@ -118,11 +118,21 @@ export const GetServiceParamsSchema = z
     serviceId: z.coerce.number().int().positive(),
   })
   .strict();
-export const UpdateServiceBodySchema = ServiceBodyPrototype.merge(
-  ServiceSchema.pick({
+export const UpdateServiceBodySchema = ServiceBodyPrototype.partial()
+  .merge(ServiceSchema.pick({
     id: true,
-  }),
-);
+  }))
+  .strict()
+  .refine(
+    (data) =>
+      data.virtualPrice === undefined ||
+      data.basePrice === undefined ||
+      data.virtualPrice < data.basePrice,
+    {
+      message: 'Virtual price must be less than base price',
+      path: ['virtualPrice'],
+    },
+  );
 export type GetServicesForManagerQueryType = z.infer<typeof GetServicesForManagerQuerySchema>
 
 export type CreateServiceType = z.infer<typeof CreateServiceBodySchema>;

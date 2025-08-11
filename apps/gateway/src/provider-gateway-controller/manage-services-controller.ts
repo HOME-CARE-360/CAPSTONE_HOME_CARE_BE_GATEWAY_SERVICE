@@ -68,6 +68,26 @@ export class ManageServicesGatewayController {
       handleZodError(error);
     }
   }
+  @Post('/update-service')
+  async updateService(
+    @Body() body: UpdateServicesBodyDTO,
+    @ActiveUser() user: AccessTokenPayload,
+  ) {
+    console.log(user);
+
+    try {
+      return await lastValueFrom(
+        this.providerClient.send(
+          { cmd: '/update-service' },
+          { body, user },
+        ),
+      );
+    } catch (error) {
+      console.log(error);
+
+      handleZodError(error);
+    }
+  }
   @Post('/create-service-item')
   @ZodSerializerDto(CreateServicesBodyDTO)
   async createServiceItem(
