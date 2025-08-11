@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { ServiceSchema } from '../../models/shared-services.model';
 import { OrderBy, SortBy } from '../../constants/others.constant';
+import { ServiceStatus } from '@prisma/client';
 
 export const ServiceBodyPrototype = ServiceSchema.pick({
   basePrice: true,
@@ -75,6 +76,43 @@ export const GetServicesQuerySchema = z.object({
 export const GetServicesForProviderQuerySchema = GetServicesQuerySchema.omit({
   providerIds: true,
 });
+export const GetServicesForManagerQuerySchema = z.object({
+  page: z.coerce.number().int().positive().default(1),
+  limit: z.coerce.number().int().positive().default(10),
+  name: z.string().optional(),
+  providerIds: z
+    .preprocess((value) => {
+      if (typeof value === 'string') {
+        return [Number(value)]
+      }
+      return value
+    }, z.array(z.coerce.number().int().positive()))
+    .optional(),
+  categoryId: z
+    .preprocess((value) => {
+      if (typeof value === 'string') {
+        return [Number(value)]
+      }
+      return value
+    }, z.coerce.number().int().positive())
+    .optional(),
+  status: z.preprocess((value) => {
+    if (!value) return undefined;
+    if (typeof value === 'string') {
+      return [value];
+    }
+    return value;
+  }, z.array(z.enum([
+    ServiceStatus.ACCEPTED,
+    ServiceStatus.PENDING,
+    ServiceStatus.REJECTED
+  ])))
+    .optional(),
+  minPrice: z.coerce.number().positive().optional(),
+  maxPrice: z.coerce.number().positive().optional(),
+  orderBy: z.enum([OrderBy.Asc, OrderBy.Desc]).default(OrderBy.Desc),
+  sortBy: z.enum([SortBy.CreatedAt, SortBy.Price, SortBy.Discount]).default(SortBy.CreatedAt),
+})
 export const GetServiceParamsSchema = z
   .object({
     serviceId: z.coerce.number().int().positive(),
@@ -85,6 +123,7 @@ export const UpdateServiceBodySchema = ServiceBodyPrototype.merge(
     id: true,
   }),
 );
+export type GetServicesForManagerQueryType = z.infer<typeof GetServicesForManagerQuerySchema>
 
 export type CreateServiceType = z.infer<typeof CreateServiceBodySchema>;
 export type GetServicesResType = z.infer<typeof GetServicesResSchema>;

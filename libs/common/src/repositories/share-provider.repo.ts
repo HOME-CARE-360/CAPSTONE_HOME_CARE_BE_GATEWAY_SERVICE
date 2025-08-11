@@ -4,7 +4,7 @@ import { ServiceProviderType } from '../models/shared-provider.model';
 
 @Injectable()
 export class SharedProviderRepository {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(private readonly prismaService: PrismaService) { }
   async findUnique({
     id,
   }: {
@@ -21,5 +21,7 @@ export class SharedProviderRepository {
       where: { id: body.id },
       data: { ...body },
     });
+
   }
+
 }
