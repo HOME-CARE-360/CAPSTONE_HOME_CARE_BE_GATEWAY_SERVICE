@@ -37,6 +37,7 @@ import {
   CreateServiceItemDTO,
   GetServiceItemParamsDTO,
   GetServiceItemsQueryDTO,
+  UpdateServiceItemDTO,
 } from 'libs/common/src/request-response-type/provider/service-item/service-item.dto';
 
 @Controller('manage-services')
@@ -44,7 +45,7 @@ import {
 export class ManageServicesGatewayController {
   constructor(
     @Inject(PROVIDER_SERVICE) private readonly providerClient: ClientProxy,
-  ) {}
+  ) { }
   @Post('/create-service')
   @ZodSerializerDto(CreateServicesBodyDTO)
   async createService(
@@ -90,7 +91,7 @@ export class ManageServicesGatewayController {
   @Patch('/update-service-item')
   @ZodSerializerDto(CreateServicesBodyDTO)
   async updateServiceItem(
-    @Body() body: CreateServiceItemDTO,
+    @Body() body: UpdateServiceItemDTO,
     @ActiveUser() user: AccessTokenPayload,
   ) {
     try {
