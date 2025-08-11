@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Inject,
   Param,
@@ -183,7 +184,7 @@ export class ManageServicesGatewayController {
       handleZodError(error);
     }
   }
-  @Get('/delete-service-item/:serviceItemId')
+  @Delete('/delete-service-item/:serviceItemId')
   async deleteServiceItem(
     @Param() param: GetServiceItemParamsDTO,
     @ActiveUser() user: AccessTokenPayload,
