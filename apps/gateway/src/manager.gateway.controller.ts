@@ -274,7 +274,7 @@ export class ManagerGatewayController {
     isArray: true,
     enum: ServiceStatus,
     description:
-      'Filter by service status. Nhiều giá trị: ?status=PENDING&status=ACCEPTED',
+      'Filter by service status. Một hoặc nhiều giá trị: ?status=PENDING&status=ACCEPTED or ?status=PENDING',
     example: [ServiceStatus.PENDING, ServiceStatus.ACCEPTED],
   })
   @ApiQuery({
@@ -308,6 +308,8 @@ export class ManagerGatewayController {
   @ZodSerializerDto(MessageResDTO)
   async getListService(@Query() query: GetServicesForManagerQueryDTO) {
     try {
+      console.log(query);
+
       return await lastValueFrom(
         this.managerClient.send({ cmd: 'get-list-service' }, { ...query }),
       );

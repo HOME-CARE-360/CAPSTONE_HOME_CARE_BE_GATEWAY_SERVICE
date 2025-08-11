@@ -96,7 +96,18 @@ export const GetServicesForManagerQuerySchema = z.object({
       return value
     }, z.coerce.number().int().positive())
     .optional(),
-  status: z.array(z.enum([ServiceStatus.ACCEPTED, ServiceStatus.PENDING, ServiceStatus.REJECTED])),
+  status: z.preprocess((value) => {
+    if (!value) return undefined;
+    if (typeof value === 'string') {
+      return [value];
+    }
+    return value;
+  }, z.array(z.enum([
+    ServiceStatus.ACCEPTED,
+    ServiceStatus.PENDING,
+    ServiceStatus.REJECTED
+  ])))
+    .optional(),
   minPrice: z.coerce.number().positive().optional(),
   maxPrice: z.coerce.number().positive().optional(),
   orderBy: z.enum([OrderBy.Asc, OrderBy.Desc]).default(OrderBy.Desc),
