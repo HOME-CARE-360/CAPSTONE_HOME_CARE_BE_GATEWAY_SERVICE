@@ -7,12 +7,18 @@ import {
   GetRecentWorkLogsSchema,
   StaffGetReviewQuerySchema,
   UpdateInspectionReportSchema,
+  updateUserAndStaffForProviderSchema,
   updateUserAndStaffProfileSchema,
 } from './staff.model';
 
 export class UpdateUserAndStaffProfileDTO extends createZodDto(
   updateUserAndStaffProfileSchema,
 ) {}
+
+export class UpdateUserAndStaffForProviderDTO extends createZodDto(
+  updateUserAndStaffForProviderSchema,
+) {}
+
 export class GetBookingBelongToStaffQueryDTO extends createZodDto(
   GetBookingBelongToStaffQuerySchema,
 ) {}

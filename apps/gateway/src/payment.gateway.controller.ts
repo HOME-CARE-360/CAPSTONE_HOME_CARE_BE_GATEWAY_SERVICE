@@ -168,7 +168,9 @@ export class PaymentGatewayController {
     @Query('status') status: string,
   ) {
     try {
-      console.log(`Received manual PayOS success callback: orderCode=${orderCode}, status=${status}`);
+      console.log(
+        `Received manual PayOS success callback: orderCode=${orderCode}, status=${status}`,
+      );
 
       if (!orderCode || !orderCode.trim()) {
         throw new HttpException(
@@ -212,7 +214,9 @@ export class PaymentGatewayController {
     @Query('status') status: string,
   ) {
     try {
-      console.log(`Received manual PayOS failed callback: orderCode=${orderCode}, status=${status}`);
+      console.log(
+        `Received manual PayOS failed callback: orderCode=${orderCode}, status=${status}`,
+      );
 
       if (!orderCode || !orderCode.trim()) {
         throw new HttpException(

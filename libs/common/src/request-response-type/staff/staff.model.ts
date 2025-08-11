@@ -30,6 +30,18 @@ export const updateUserAndStaffProfileSchema = z.object({
   staff: updateStaffSchema.optional(),
 });
 
+export const updateStaffForProviderSchema = z.object({
+  staffId: z.number(),
+  providerId: z.number(),
+  isActive: z.boolean().optional(),
+  updatedAt: zodDate().optional(),
+  categoryIds: z.array(z.number()).optional(),
+});
+export const updateUserAndStaffForProviderSchema = z.object({
+  user: updateUserSchema.optional(),
+  staff: updateStaffForProviderSchema.optional(),
+});
+
 export type UpdateUserAndStaffProfileType = z.infer<
   typeof updateUserAndStaffProfileSchema
 >;

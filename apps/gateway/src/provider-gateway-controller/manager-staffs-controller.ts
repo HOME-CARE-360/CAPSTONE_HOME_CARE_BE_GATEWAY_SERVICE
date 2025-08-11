@@ -31,7 +31,10 @@ import {
   SortByStaff,
 } from 'libs/common/src/constants/others.constant';
 import { RawTcpClientService } from 'libs/common/src/tcp/raw-tcp-client.service';
-import { UpdateUserAndStaffProfileDTO } from 'libs/common/src/request-response-type/staff/staff.dto';
+import {
+  UpdateUserAndStaffForProviderDTO,
+  UpdateUserAndStaffProfileDTO,
+} from 'libs/common/src/request-response-type/staff/staff.dto';
 @Controller('manage-staffs')
 @UseGuards(VerifiedProviderGuard)
 export class ManageStaffGatewayController {
@@ -160,26 +163,34 @@ export class ManageStaffGatewayController {
     //     }
     // }
   }
+@Patch('update-staff-information')
+async updateStaffInformation(
+  @Body() body: UpdateUserAndStaffForProviderDTO,
+  @ActiveUser('providerId') providerId: number,
+) {
+  try {
+    const payloadBody = {
+      ...body,
+      staff: {
+        ...body.staff,
+        providerId,
+      },
+    };
 
-  @Patch('update-staff-information')
-  async getUserInformation(
-    @Body() body: UpdateUserAndStaffProfileDTO,
-    @ActiveUser('userId') userId: number,
-  ) {
-    try {
-      const data = await this.userRawTcpClient.send({
-        type: 'UPDATE_STAFF',
-        userId,
-        data: { ...body },
-      });
-      console.log(data);
-      handlerErrorResponse(data);
-      return data;
-    } catch (error) {
-      if (error instanceof HttpException) throw error;
-      handleZodError(error);
-    }
+    const data = await this.userRawTcpClient.send({
+      type: 'UPDATE_USER_AND_STAFF_FOR_PROVIDER',
+      data: payloadBody,
+    });
+
+    handlerErrorResponse(data);
+    return data;
+
+  } catch (error) {
+    if (error instanceof HttpException) throw error;
+    handleZodError(error);
   }
+}
+
   @Get('get-available-staff')
   async getAvailableStaff(
     @Query() query: GetStaffsQueryDTO,
