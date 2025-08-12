@@ -46,7 +46,7 @@ import {
 export class ManageServicesGatewayController {
   constructor(
     @Inject(PROVIDER_SERVICE) private readonly providerClient: ClientProxy,
-  ) { }
+  ) {}
   @Post('/create-service')
   @ZodSerializerDto(CreateServicesBodyDTO)
   async createService(
@@ -77,10 +77,7 @@ export class ManageServicesGatewayController {
 
     try {
       return await lastValueFrom(
-        this.providerClient.send(
-          { cmd: '/update-service' },
-          { body, user },
-        ),
+        this.providerClient.send({ cmd: '/update-service' }, { body, user }),
       );
     } catch (error) {
       console.log(error);

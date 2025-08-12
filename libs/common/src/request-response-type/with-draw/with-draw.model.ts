@@ -7,11 +7,12 @@ export const GetListWidthDrawQuerySchema = z.object({
   limit: z.coerce.number().int().positive().default(10),
   providerName: z.string().optional(),
   status: z
-    .preprocess((value) =>
-      typeof value === 'string' ? [value] : value
-      , z.array(
-        z.enum(['APPROVED', 'CANCELLED', 'COMPLETED', 'PENDING', 'REJECTED'])
-      ))
+    .preprocess(
+      (value) => (typeof value === 'string' ? [value] : value),
+      z.array(
+        z.enum(['APPROVED', 'CANCELLED', 'COMPLETED', 'PENDING', 'REJECTED']),
+      ),
+    )
     .optional(),
   orderBy: z.enum([OrderBy.Asc, OrderBy.Desc]).default(OrderBy.Desc),
   sortBy: z

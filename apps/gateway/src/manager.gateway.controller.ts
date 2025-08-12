@@ -53,7 +53,7 @@ import { GetServicesForManagerQueryDTO } from 'libs/common/src/request-response-
 export class ManagerGatewayController {
   constructor(
     @Inject(MANAGER_SERVICE) private readonly managerClient: ClientProxy,
-  ) { }
+  ) {}
   @Patch('change-status-provider')
   @ZodSerializerDto(MessageResDTO)
   async changeStatusProvider(
@@ -303,7 +303,8 @@ export class ManagerGatewayController {
     required: false,
     enum: SortBy,
     example: SortBy.CreatedAt,
-    description: 'Sort field: createdAt | price | discount (default = createdAt)',
+    description:
+      'Sort field: createdAt | price | discount (default = createdAt)',
   })
   @ZodSerializerDto(MessageResDTO)
   async getListService(@Query() query: GetServicesForManagerQueryDTO) {

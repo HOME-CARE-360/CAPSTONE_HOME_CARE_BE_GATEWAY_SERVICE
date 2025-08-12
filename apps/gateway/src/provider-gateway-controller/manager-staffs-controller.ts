@@ -163,33 +163,32 @@ export class ManageStaffGatewayController {
     //     }
     // }
   }
-@Patch('update-staff-information')
-async updateStaffInformation(
-  @Body() body: UpdateUserAndStaffForProviderDTO,
-  @ActiveUser('providerId') providerId: number,
-) {
-  try {
-    const payloadBody = {
-      ...body,
-      staff: {
-        ...body.staff,
-        providerId,
-      },
-    };
+  @Patch('update-staff-information')
+  async updateStaffInformation(
+    @Body() body: UpdateUserAndStaffForProviderDTO,
+    @ActiveUser('providerId') providerId: number,
+  ) {
+    try {
+      const payloadBody = {
+        ...body,
+        staff: {
+          ...body.staff,
+          providerId,
+        },
+      };
 
-    const data = await this.userRawTcpClient.send({
-      type: 'UPDATE_USER_AND_STAFF_FOR_PROVIDER',
-      data: payloadBody,
-    });
+      const data = await this.userRawTcpClient.send({
+        type: 'UPDATE_USER_AND_STAFF_FOR_PROVIDER',
+        data: payloadBody,
+      });
 
-    handlerErrorResponse(data);
-    return data;
-
-  } catch (error) {
-    if (error instanceof HttpException) throw error;
-    handleZodError(error);
+      handlerErrorResponse(data);
+      return data;
+    } catch (error) {
+      if (error instanceof HttpException) throw error;
+      handleZodError(error);
+    }
   }
-}
 
   @Get('get-available-staff')
   async getAvailableStaff(

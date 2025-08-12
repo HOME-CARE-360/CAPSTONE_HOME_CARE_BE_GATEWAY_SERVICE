@@ -13,20 +13,22 @@ import {
 
 export class CreateServicesBodyDTO extends createZodDto(
   CreateServiceBodySchema,
-) { }
-export class GetServicesQueryDTO extends createZodDto(GetServicesQuerySchema) { }
-export class GetServicesResDTO extends createZodDto(GetServicesResSchema) { }
+) {}
+export class GetServicesQueryDTO extends createZodDto(GetServicesQuerySchema) {}
+export class GetServicesResDTO extends createZodDto(GetServicesResSchema) {}
 export class GetServicesForProviderResDTO extends createZodDto(
   GetServicesForProviderResSchema,
-) { }
+) {}
 export class UpdateServicesBodyDTO extends createZodDto(
   UpdateServiceBodySchema,
-) { }
+) {}
 export class DeleteServicesParamDTO extends createZodDto(
   GetServiceParamsSchema,
-) { }
+) {}
 export class GetServicesForProviderQueryDTO extends createZodDto(
   GetServicesForProviderQuerySchema,
-) { }
-export class GetServiceResDTO extends createZodDto(ServiceBodyPrototype) { }
-export class GetServicesForManagerQueryDTO extends createZodDto(GetServicesForManagerQuerySchema) { }
+) {}
+export class GetServiceResDTO extends createZodDto(ServiceBodyPrototype) {}
+export class GetServicesForManagerQueryDTO extends createZodDto(
+  GetServicesForManagerQuerySchema,
+) {}

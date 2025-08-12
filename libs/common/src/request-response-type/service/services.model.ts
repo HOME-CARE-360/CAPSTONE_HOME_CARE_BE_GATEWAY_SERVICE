@@ -83,45 +83,55 @@ export const GetServicesForManagerQuerySchema = z.object({
   providerIds: z
     .preprocess((value) => {
       if (typeof value === 'string') {
-        return [Number(value)]
+        return [Number(value)];
       }
-      return value
+      return value;
     }, z.array(z.coerce.number().int().positive()))
     .optional(),
   categoryId: z
     .preprocess((value) => {
       if (typeof value === 'string') {
-        return [Number(value)]
+        return [Number(value)];
       }
-      return value
+      return value;
     }, z.coerce.number().int().positive())
     .optional(),
-  status: z.preprocess((value) => {
-    if (!value) return undefined;
-    if (typeof value === 'string') {
-      return [value];
-    }
-    return value;
-  }, z.array(z.enum([
-    ServiceStatus.ACCEPTED,
-    ServiceStatus.PENDING,
-    ServiceStatus.REJECTED
-  ])))
+  status: z
+    .preprocess(
+      (value) => {
+        if (!value) return undefined;
+        if (typeof value === 'string') {
+          return [value];
+        }
+        return value;
+      },
+      z.array(
+        z.enum([
+          ServiceStatus.ACCEPTED,
+          ServiceStatus.PENDING,
+          ServiceStatus.REJECTED,
+        ]),
+      ),
+    )
     .optional(),
   minPrice: z.coerce.number().positive().optional(),
   maxPrice: z.coerce.number().positive().optional(),
   orderBy: z.enum([OrderBy.Asc, OrderBy.Desc]).default(OrderBy.Desc),
-  sortBy: z.enum([SortBy.CreatedAt, SortBy.Price, SortBy.Discount]).default(SortBy.CreatedAt),
-})
+  sortBy: z
+    .enum([SortBy.CreatedAt, SortBy.Price, SortBy.Discount])
+    .default(SortBy.CreatedAt),
+});
 export const GetServiceParamsSchema = z
   .object({
     serviceId: z.coerce.number().int().positive(),
   })
   .strict();
 export const UpdateServiceBodySchema = ServiceBodyPrototype.partial()
-  .merge(ServiceSchema.pick({
-    id: true,
-  }))
+  .merge(
+    ServiceSchema.pick({
+      id: true,
+    }),
+  )
   .strict()
   .refine(
     (data) =>
@@ -133,7 +143,9 @@ export const UpdateServiceBodySchema = ServiceBodyPrototype.partial()
       path: ['virtualPrice'],
     },
   );
-export type GetServicesForManagerQueryType = z.infer<typeof GetServicesForManagerQuerySchema>
+export type GetServicesForManagerQueryType = z.infer<
+  typeof GetServicesForManagerQuerySchema
+>;
 
 export type CreateServiceType = z.infer<typeof CreateServiceBodySchema>;
 export type GetServicesResType = z.infer<typeof GetServicesResSchema>;
