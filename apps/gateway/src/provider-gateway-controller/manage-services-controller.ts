@@ -206,11 +206,13 @@ export class ManageServicesGatewayController {
     @Param() param: GetServiceItemParamsDTO,
     @ActiveUser() user: AccessTokenPayload,
   ) {
+    console.log(param);
+
     try {
       return await lastValueFrom(
         this.providerClient.send(
           { cmd: 'delete-service-item' },
-          { param, providerId: user.providerId as number },
+          { param, user },
         ),
       );
     } catch (error) {
