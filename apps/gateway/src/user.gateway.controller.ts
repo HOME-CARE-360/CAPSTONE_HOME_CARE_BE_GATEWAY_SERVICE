@@ -49,7 +49,13 @@ export const ReportQuerySchema = z.object({
 });
 
 export type ReportQueryDTO = z.infer<typeof ReportQuerySchema>;
+class CreateReviewDto {
+  @ApiProperty({ description: 'Rating from 1 to 5', minimum: 1, maximum: 5 })
+  rating: number;
 
+  @ApiProperty({ description: 'Optional comment for the review', required: false })
+  comment?: string;
+}
 @ApiTags('Users')
 @ApiBearerAuth()
 @Controller('users')
@@ -353,35 +359,34 @@ export class UserGatewayController {
       handleZodError(error);
     }
   }
-  @Post('create-review/:bookingId')
-  async createReview(
-    @Param('bookingId', ParseIntPipe) bookingId: number,
-    @ActiveUser('customerId') customerId: number,
-    @Body() body: { rating: number; comment?: string },
-  ) {
-    try {
-      const { rating, comment } = body;
+@Post('create-review/:bookingId')
+async createReview(
+  @Param('bookingId', ParseIntPipe) bookingId: number,
+  @ActiveUser('customerId') customerId: number,
+  @Body() body: CreateReviewDto,
+) {
+  try {
+    const { rating, comment } = body;
 
-      // Kiểm tra rating hợp lệ (ví dụ 1-5)
-      if (rating < 1 || rating > 5) {
-        throw new HttpException('Rating must be between 1 and 5', 400);
-      }
-
-      const data = await this.userRawTcpClient.send({
-        type: 'CREATE_REVIEW',
-        payload: {
-          customerId,
-          bookingId,
-          rating,
-          comment,
-        },
-      });
-
-      handlerErrorResponse(data);
-      return data;
-    } catch (error) {
-      if (error instanceof HttpException) throw error;
-      handleZodError(error);
+    if (rating < 1 || rating > 5) {
+      throw new HttpException('Rating must be between 1 and 5', 400);
     }
+
+    const data = await this.userRawTcpClient.send({
+      type: 'CREATE_REVIEW',
+      payload: {
+        customerId,
+        bookingId,
+        rating,
+        comment,
+      },
+    });
+
+    handlerErrorResponse(data);
+    return data;
+  } catch (error) {
+    if (error instanceof HttpException) throw error;
+    handleZodError(error);
   }
+}
 }
