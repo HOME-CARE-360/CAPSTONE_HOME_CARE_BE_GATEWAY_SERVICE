@@ -331,4 +331,26 @@ export class UserGatewayController {
       handleZodError(error);
     }
   }
+
+  @Patch('cancel-service-request/:serviceRequestId')
+async cancelServiceRequest(
+  @Param('serviceRequestId', ParseIntPipe) serviceRequestId: number,
+  @ActiveUser('customerId') customerId: number,
+) {
+  try {
+    const data = await this.userRawTcpClient.send({
+      type: 'CANCEL_SERVICE_REQUEST',
+      payload: {
+        customerId,
+        serviceRequestId,
+      },
+    });
+
+    handlerErrorResponse(data);
+    return data
+  } catch (error) {
+    if (error instanceof HttpException) throw error;
+    handleZodError(error);
+  }
+}
 }
