@@ -17,7 +17,7 @@ import {
 export class BookingsGatewayController {
   constructor(
     @Inject(BOOKING_SERVICE) private readonly bookingClient: ClientProxy,
-  ) {}
+  ) { }
   @Post('create-service-request')
   @ZodSerializerDto(GetListCategoryResDTO)
   async getListService(
@@ -70,7 +70,7 @@ export class BookingsGatewayController {
       handleZodError(error);
     }
   }
-  @Get('get-or-create-conversation')
+  @Post('get-or-create-conversation')
   async getOrCreateConversation(
     @Body() body: CreateConversationBodyDTO,
     @ActiveUser() user: AccessTokenPayload,
