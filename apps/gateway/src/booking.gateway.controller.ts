@@ -12,12 +12,13 @@ import {
   CreateConversationBodyDTO,
   GetListMessageQueryDTO,
 } from 'libs/common/src/request-response-type/chat/chat.dto';
+import { ApiQuery } from '@nestjs/swagger';
 
 @Controller('bookings')
 export class BookingsGatewayController {
   constructor(
     @Inject(BOOKING_SERVICE) private readonly bookingClient: ClientProxy,
-  ) {}
+  ) { }
   @Post('create-service-request')
   @ZodSerializerDto(GetListCategoryResDTO)
   async getListService(
@@ -52,6 +53,10 @@ export class BookingsGatewayController {
       handleZodError(error);
     }
   }
+  @ApiQuery({
+    name: 'conversationId',
+    required: true,
+  })
   @Get('get-messages')
   async getMessages(
     @Query() query: GetListMessageQueryDTO,
@@ -70,7 +75,7 @@ export class BookingsGatewayController {
       handleZodError(error);
     }
   }
-  @Get('get-or-create-conversation')
+  @Post('get-or-create-conversation')
   async getOrCreateConversation(
     @Body() body: CreateConversationBodyDTO,
     @ActiveUser() user: AccessTokenPayload,

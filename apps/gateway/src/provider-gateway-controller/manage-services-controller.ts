@@ -46,7 +46,7 @@ import {
 export class ManageServicesGatewayController {
   constructor(
     @Inject(PROVIDER_SERVICE) private readonly providerClient: ClientProxy,
-  ) {}
+  ) { }
   @Post('/create-service')
   @ZodSerializerDto(CreateServicesBodyDTO)
   async createService(
@@ -68,7 +68,7 @@ export class ManageServicesGatewayController {
       handleZodError(error);
     }
   }
-  @Post('/update-service')
+  @Patch('/update-service')
   async updateService(
     @Body() body: UpdateServicesBodyDTO,
     @ActiveUser() user: AccessTokenPayload,
@@ -206,11 +206,13 @@ export class ManageServicesGatewayController {
     @Param() param: GetServiceItemParamsDTO,
     @ActiveUser() user: AccessTokenPayload,
   ) {
+    console.log(param);
+
     try {
       return await lastValueFrom(
         this.providerClient.send(
           { cmd: 'delete-service-item' },
-          { param, providerId: user.providerId as number },
+          { param, user },
         ),
       );
     } catch (error) {
