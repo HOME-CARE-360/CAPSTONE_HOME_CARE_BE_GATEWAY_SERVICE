@@ -346,10 +346,8 @@ export class UserGatewayController {
     try {
       const data = await this.userRawTcpClient.send({
         type: 'CANCEL_SERVICE_REQUEST',
-        payload: {
-          customerId,
-          serviceRequestId,
-        },
+        customerId,
+        serviceRequestId,
       });
 
       handlerErrorResponse(data);
