@@ -333,24 +333,55 @@ export class UserGatewayController {
   }
 
   @Patch('cancel-service-request/:serviceRequestId')
-async cancelServiceRequest(
-  @Param('serviceRequestId', ParseIntPipe) serviceRequestId: number,
-  @ActiveUser('customerId') customerId: number,
-) {
-  try {
-    const data = await this.userRawTcpClient.send({
-      type: 'CANCEL_SERVICE_REQUEST',
-      payload: {
-        customerId,
-        serviceRequestId,
-      },
-    });
+  async cancelServiceRequest(
+    @Param('serviceRequestId', ParseIntPipe) serviceRequestId: number,
+    @ActiveUser('customerId') customerId: number,
+  ) {
+    try {
+      const data = await this.userRawTcpClient.send({
+        type: 'CANCEL_SERVICE_REQUEST',
+        payload: {
+          customerId,
+          serviceRequestId,
+        },
+      });
 
-    handlerErrorResponse(data);
-    return data
-  } catch (error) {
-    if (error instanceof HttpException) throw error;
-    handleZodError(error);
+      handlerErrorResponse(data);
+      return data;
+    } catch (error) {
+      if (error instanceof HttpException) throw error;
+      handleZodError(error);
+    }
   }
-}
+  @Post('create-review/:bookingId')
+  async createReview(
+    @Param('bookingId', ParseIntPipe) bookingId: number,
+    @ActiveUser('customerId') customerId: number,
+    @Body() body: { rating: number; comment?: string },
+  ) {
+    try {
+      const { rating, comment } = body;
+
+      // Kiểm tra rating hợp lệ (ví dụ 1-5)
+      if (rating < 1 || rating > 5) {
+        throw new HttpException('Rating must be between 1 and 5', 400);
+      }
+
+      const data = await this.userRawTcpClient.send({
+        type: 'CREATE_REVIEW',
+        payload: {
+          customerId,
+          bookingId,
+          rating,
+          comment,
+        },
+      });
+
+      handlerErrorResponse(data);
+      return data;
+    } catch (error) {
+      if (error instanceof HttpException) throw error;
+      handleZodError(error);
+    }
+  }
 }

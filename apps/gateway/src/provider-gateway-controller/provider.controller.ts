@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Get,
   HttpException,
   Inject,
   Patch,
@@ -33,6 +34,22 @@ export class UserGatewayController {
         data: { ...body },
       });
       console.log(data);
+      handlerErrorResponse(data);
+      return data;
+    } catch (error) {
+      if (error instanceof HttpException) throw error;
+      handleZodError(error);
+    }
+  }
+
+  @Get('reviews')
+  async getReviewsByProviderId(@ActiveUser('providerId') providerId: number) {
+    try {
+      const data = await this.userRawTcpClient.send({
+        type: 'GET_REVIEWS_BY_PROVIDER_ID',
+        providerId,
+      });
+      console.log('[getReviewsByProviderId]', data);
       handlerErrorResponse(data);
       return data;
     } catch (error) {
