@@ -53,7 +53,10 @@ class CreateReviewDto {
   @ApiProperty({ description: 'Rating from 1 to 5', minimum: 1, maximum: 5 })
   rating: number;
 
-  @ApiProperty({ description: 'Optional comment for the review', required: false })
+  @ApiProperty({
+    description: 'Optional comment for the review',
+    required: false,
+  })
   comment?: string;
 }
 @ApiTags('Users')
@@ -357,31 +360,136 @@ export class UserGatewayController {
       handleZodError(error);
     }
   }
-@Post('create-review/:bookingId')
-async createReview(
-  @Param('bookingId', ParseIntPipe) bookingId: number,
-  @ActiveUser('customerId') customerId: number,
-  @Body() body: CreateReviewDto,
-) {
-  try {
-    const { rating, comment } = body;
+  @Post('create-review/:bookingId')
+  async createReview(
+    @Param('bookingId', ParseIntPipe) bookingId: number,
+    @ActiveUser('customerId') customerId: number,
+    @Body() body: CreateReviewDto,
+  ) {
+    try {
+      const { rating, comment } = body;
 
-    if (rating < 1 || rating > 5) {
-      throw new HttpException('Rating must be between 1 and 5', 400);
+      if (rating < 1 || rating > 5) {
+        throw new HttpException('Rating must be between 1 and 5', 400);
+      }
+
+      const data = await this.userRawTcpClient.send({
+        type: 'CREATE_REVIEW',
+        payload: {
+          customerId,
+          bookingId,
+          rating,
+          comment,
+        },
+      });
+
+      handlerErrorResponse(data);
+      return data;
+    } catch (error) {
+      if (error instanceof HttpException) throw error;
+      handleZodError(error);
+    }
+  }
+
+  @Get('transactions')
+  async getTransactions(
+    @ActiveUser('userId') userId: number,
+    @Query('page') page = 1,
+    @Query('limit') limit = 10,
+    @Query('sortBy') sortBy = 'createdAt',
+    @Query('sortOrder') sortOrder: 'asc' | 'desc' = 'desc',
+  ) {
+    try {
+      const data = await this.userRawTcpClient.send({
+        type: 'GET_TRANSACTIONS_BY_USERID',
+        userId,
+        page: Number(page),
+        limit: Number(limit),
+        sortBy,
+        sortOrder,
+      });
+
+      handlerErrorResponse(data);
+
+      return {
+        success: true,
+        message: 'Transactions retrieved successfully',
+        data,
+      };
+    } catch (error) {
+      if (error instanceof HttpException) throw error;
+
+      handleZodError(error);
+    }
+  }
+
+  private parseRatingQuery(
+    rating: string | string[] | undefined,
+  ): number | number[] | undefined {
+    if (typeof rating === 'undefined') return undefined;
+
+    const toNum = (v: string) => Number(v);
+    if (typeof rating === 'string') {
+      if (rating.includes(',')) {
+        const arr = rating
+          .split(',')
+          .map((x) => x.trim())
+          .filter(Boolean)
+          .map(toNum)
+          .filter((n) => !Number.isNaN(n));
+        return arr.length === 1 ? arr[0] : arr;
+      }
+      const n = Number(rating);
+      return Number.isNaN(n) ? undefined : n;
     }
 
-    const data = await this.userRawTcpClient.send({
-      type: 'CREATE_REVIEW',
-      payload: {
-        customerId,
-        bookingId,
-        rating,
-        comment,
-      },
-    });
+    // rating=3&rating=5 -> ["3","5"]
+    const arr = rating
+      .map((x) => x.trim())
+      .filter(Boolean)
+      .map(toNum)
+      .filter((n) => !Number.isNaN(n));
+    return arr.length === 1 ? arr[0] : arr;
+  }
 
+@Get('reviews')
+@ApiQuery({ name: 'page', required: false, type: Number })
+@ApiQuery({ name: 'limit', required: false, type: Number })
+@ApiQuery({ name: 'search', required: false, type: String })
+@ApiQuery({ name: 'rating', required: false, type: Number, isArray: true })
+@ApiQuery({ name: 'sortBy', required: false, enum: ['createdAt', 'rating'] })
+@ApiQuery({ name: 'sortOrder', required: false, enum: ['asc', 'desc'] })
+async getMyReviews(
+  @ActiveUser('customerId') customerId: number,
+  @Query('page') page?: number,
+  @Query('limit') limit?: number,
+  @Query('search') search?: string,
+  @Query('rating') rating?: string | string[],
+  @Query('sortBy') sortBy?: 'createdAt' | 'rating',
+  @Query('sortOrder') sortOrder?: 'asc' | 'desc',
+) {
+  try {
+    const parsedRating = this.parseRatingQuery(rating);
+
+    const payload = {
+      type: 'GET_REVIEWS_BY_CUSTOMERID',
+      customerId: Number(customerId),
+      page: Number(page ?? 1),
+      limit: Number(limit ?? 10),
+      search,
+      rating: parsedRating,
+      sortBy: sortBy ?? 'createdAt',
+      sortOrder: sortOrder ?? 'desc',
+    };
+
+    const data = await this.userRawTcpClient.send(payload);
     handlerErrorResponse(data);
-    return data;
+
+    return {
+      success: true,
+      message: 'Customer reviews retrieved successfully',
+      data,
+    };
   } catch (error) {
     if (error instanceof HttpException) throw error;
     handleZodError(error);
