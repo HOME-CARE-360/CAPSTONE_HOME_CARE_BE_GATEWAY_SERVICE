@@ -148,17 +148,17 @@ export class PaymentGatewayController {
       handleZodError(error);
     }
   }
-
+  
+  @IsPublic()
   @Get('status')
   @ApiQuery({ name: 'orderCode', required: true, example: '1234567890' })
   async getPaymentStatus(
     @Query('orderCode') orderCode: string,
-    @ActiveUser('userId') userId: number,
   ) {
     try {
       const data = await this.paymentRawTcpClient.send({
         type: 'GET_PAYMENT_STATUS',
-        data: { orderCode, userId },
+        data: { orderCode },
       });
       handlerErrorResponse(data);
       return data;
