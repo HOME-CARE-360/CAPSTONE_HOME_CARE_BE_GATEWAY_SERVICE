@@ -147,8 +147,7 @@ console.log(`Payment status determined: ${status}`, 'Type:', typeof status);
       handleZodError(error);
     }
   }
-  
-  @IsPublic()
+
   @Get('status')
   @ApiQuery({ name: 'orderCode', required: true, example: '1234567890' })
   async getPaymentStatus(
