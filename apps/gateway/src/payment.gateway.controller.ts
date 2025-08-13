@@ -75,11 +75,11 @@ export class PaymentGatewayController {
       typeof orderCodeStr,
     );
 
-    let status: 'PAID' | 'FAILED';
+    let status: 'PAID' | 'CANCELLED';
     if (payload.code === '00') {
       status = 'PAID';
     } else {
-      status = 'FAILED';
+      status = 'CANCELLED';
     }
 
     console.log(`Payment status determined: ${status}`, 'Type:', typeof status);
