@@ -95,20 +95,20 @@ export class PaymentGatewayController {
       );
     }
 
-    try {
-      const data = await this.paymentRawTcpClient.send({
-        type: 'HANDLE_PAYOS_CALLBACK',
-        data: {
-          orderCode: payload.data.orderCode,
-          status,
-        },
-      });
-      handlerErrorResponse(data);
-      return data;
-    } catch (error) {
-      if (error instanceof HttpException) throw error;
-      handleZodError(error);
-    }
+    // try {
+    //   const data = await this.paymentRawTcpClient.send({
+    //     type: 'HANDLE_PAYOS_CALLBACK',
+    //     data: {
+    //       orderCode: payload.data.orderCode,
+    //       status,
+    //     },
+    //   });
+    //   handlerErrorResponse(data);
+    //   return data;
+    // } catch (error) {
+    //   if (error instanceof HttpException) throw error;
+    //   handleZodError(error);
+    // }
   }
 
   @Post('create-proposal-transaction')
@@ -148,7 +148,7 @@ export class PaymentGatewayController {
       handleZodError(error);
     }
   }
-  
+
   @IsPublic()
   @Get('status')
   @ApiQuery({ name: 'orderCode', required: true, example: '1234567890' })
