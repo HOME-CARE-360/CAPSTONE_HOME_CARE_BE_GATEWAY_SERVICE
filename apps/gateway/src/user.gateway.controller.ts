@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpException,
   Inject,
@@ -10,7 +11,7 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiProperty, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiParam, ApiProperty, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { handlerErrorResponse, handleZodError } from 'libs/common/helpers';
 import { USER_SERVICE } from 'libs/common/src/constants/service-name.constant';
 import { ActiveUser } from 'libs/common/src/decorator/active-user.decorator';
@@ -47,6 +48,15 @@ export const ReportQuerySchema = z.object({
     .default('createdAt'),
   sortOrder: z.enum(['asc', 'desc']).optional().default('desc'),
 });
+
+const GetTransactionsQuerySchema = z.object({
+  page: z.coerce.number().int().positive().default(1),
+  limit: z.coerce.number().int().positive().max(100).default(10),
+  sortBy: z.string().trim().default('createdAt'),
+  sortOrder: z.enum(['asc', 'desc']).default('desc'),
+});
+
+type GetTransactionsQueryDto = z.infer<typeof GetTransactionsQuerySchema>;
 
 export type ReportQueryDTO = z.infer<typeof ReportQuerySchema>;
 class CreateReviewDto {
@@ -394,31 +404,25 @@ export class UserGatewayController {
   @Get('transactions')
   async getTransactions(
     @ActiveUser('userId') userId: number,
-    @Query('page') page = 1,
-    @Query('limit') limit = 10,
-    @Query('sortBy') sortBy = 'createdAt',
-    @Query('sortOrder') sortOrder: 'asc' | 'desc' = 'desc',
+    @Query() rawQuery: Record<string, any>,
   ) {
     try {
+      const query: GetTransactionsQueryDto =
+        GetTransactionsQuerySchema.parse(rawQuery);
+
       const data = await this.userRawTcpClient.send({
         type: 'GET_TRANSACTIONS_BY_USERID',
         userId,
-        page: Number(page),
-        limit: Number(limit),
-        sortBy,
-        sortOrder,
+        ...query,
       });
 
       handlerErrorResponse(data);
 
       return {
-        success: true,
-        message: 'Transactions retrieved successfully',
-        data,
+        data
       };
     } catch (error) {
       if (error instanceof HttpException) throw error;
-
       handleZodError(error);
     }
   }
@@ -495,4 +499,32 @@ async getMyReviews(
     handleZodError(error);
   }
 }
+
+  @Delete('reviews/:reviewId')
+  @ApiOperation({ summary: 'Delete my review' })
+  @ApiParam({ name: 'reviewId', type: Number, required: true, description: 'Review ID' })
+  async deleteMyReview(
+    @ActiveUser('customerId') customerId: number,
+    @Param('reviewId', ParseIntPipe) reviewId: number,
+  ) {
+    try {
+      const payload = {
+        type: 'DELETE_REVIEW',
+        customerId: Number(customerId),
+        reviewId: Number(reviewId),
+      };
+
+      const data = await this.userRawTcpClient.send(payload);
+      handlerErrorResponse(data);
+
+      return {
+        success: true,
+        message: 'Review deleted successfully',
+        data,
+      };
+    } catch (error) {
+      if (error instanceof HttpException) throw error;
+      handleZodError(error);
+    }
+  }
 }
