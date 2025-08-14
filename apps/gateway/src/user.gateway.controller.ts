@@ -76,7 +76,7 @@ export class UserGatewayController {
   constructor(
     @Inject(USER_SERVICE)
     private readonly userRawTcpClient: RawTcpClientService,
-  ) {}
+  ) { }
 
   @Patch('update-customer-information')
   async updateCustomer(
@@ -97,24 +97,7 @@ export class UserGatewayController {
     }
   }
 
-  @Patch('link-bank-account')
-  async linkBankAccount(
-    @Body() body: LinkBankAccountDTO,
-    @ActiveUser('userId') userId: number,
-  ) {
-    try {
-      const data = await this.userRawTcpClient.send({
-        type: 'LINK_BANK_ACCOUNT',
-        userId,
-        ...body,
-      });
-      handlerErrorResponse(data);
-      return data;
-    } catch (error) {
-      if (error instanceof HttpException) throw error;
-      handleZodError(error);
-    }
-  }
+
 
   @Patch('change-bank-account')
   async changeBankAccount(
@@ -456,49 +439,49 @@ export class UserGatewayController {
     return arr.length === 1 ? arr[0] : arr;
   }
 
-@Get('reviews')
-@ApiQuery({ name: 'page', required: false, type: Number })
-@ApiQuery({ name: 'limit', required: false, type: Number })
-@ApiQuery({ name: 'search', required: false, type: String })
-@ApiQuery({ name: 'rating', required: false, type: Number, isArray: true })
-@ApiQuery({ name: 'sortBy', required: false, enum: ['createdAt', 'rating'] })
-@ApiQuery({ name: 'sortOrder', required: false, enum: ['asc', 'desc'] })
-async getMyReviews(
-  @ActiveUser('customerId') customerId: number,
-  @Query('page') page?: number,
-  @Query('limit') limit?: number,
-  @Query('search') search?: string,
-  @Query('rating') rating?: string | string[],
-  @Query('sortBy') sortBy?: 'createdAt' | 'rating',
-  @Query('sortOrder') sortOrder?: 'asc' | 'desc',
-) {
-  try {
-    const parsedRating = this.parseRatingQuery(rating);
+  @Get('reviews')
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  @ApiQuery({ name: 'search', required: false, type: String })
+  @ApiQuery({ name: 'rating', required: false, type: Number, isArray: true })
+  @ApiQuery({ name: 'sortBy', required: false, enum: ['createdAt', 'rating'] })
+  @ApiQuery({ name: 'sortOrder', required: false, enum: ['asc', 'desc'] })
+  async getMyReviews(
+    @ActiveUser('customerId') customerId: number,
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+    @Query('search') search?: string,
+    @Query('rating') rating?: string | string[],
+    @Query('sortBy') sortBy?: 'createdAt' | 'rating',
+    @Query('sortOrder') sortOrder?: 'asc' | 'desc',
+  ) {
+    try {
+      const parsedRating = this.parseRatingQuery(rating);
 
-    const payload = {
-      type: 'GET_REVIEWS_BY_CUSTOMERID',
-      customerId: Number(customerId),
-      page: Number(page ?? 1),
-      limit: Number(limit ?? 10),
-      search,
-      rating: parsedRating,
-      sortBy: sortBy ?? 'createdAt',
-      sortOrder: sortOrder ?? 'desc',
-    };
+      const payload = {
+        type: 'GET_REVIEWS_BY_CUSTOMERID',
+        customerId: Number(customerId),
+        page: Number(page ?? 1),
+        limit: Number(limit ?? 10),
+        search,
+        rating: parsedRating,
+        sortBy: sortBy ?? 'createdAt',
+        sortOrder: sortOrder ?? 'desc',
+      };
 
-    const data = await this.userRawTcpClient.send(payload);
-    handlerErrorResponse(data);
+      const data = await this.userRawTcpClient.send(payload);
+      handlerErrorResponse(data);
 
-    return {
-      success: true,
-      message: 'Customer reviews retrieved successfully',
-      data,
-    };
-  } catch (error) {
-    if (error instanceof HttpException) throw error;
-    handleZodError(error);
+      return {
+        success: true,
+        message: 'Customer reviews retrieved successfully',
+        data,
+      };
+    } catch (error) {
+      if (error instanceof HttpException) throw error;
+      handleZodError(error);
+    }
   }
-}
 
   @Delete('reviews/:reviewId')
   @ApiOperation({ summary: 'Delete my review' })
