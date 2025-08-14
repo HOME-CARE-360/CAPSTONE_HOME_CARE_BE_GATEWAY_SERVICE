@@ -15,14 +15,13 @@ import { ActiveUser } from 'libs/common/src/decorator/active-user.decorator';
 import { IsPublic } from 'libs/common/src/decorator/auth.decorator';
 import { ApiBody, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { PaymentMethod } from '@prisma/client';
-
 @ApiTags('payments') // Add Swagger tag for better organization
 @Controller('payments')
 export class PaymentGatewayController {
   constructor(
     @Inject(PAYMENT_SERVICE)
     private readonly paymentRawTcpClient: RawTcpClientService,
-  ) {}
+  ) { }
 
   @Post('create-topup')
   @ApiBody({

@@ -7,8 +7,10 @@ import { PrismaService } from 'libs/common/src/services/prisma.service';
 async function bootstrap() {
     const app = await NestFactory.create(AppModule);
     await app.listen(0); // chỉ cần khởi để đọc router, port nào cũng được
+    console.log("11");
 
     const prisma = new PrismaService();
+    console.log("9");
 
     // 1) Đọc tất cả route của Nest
     const server = app.getHttpAdapter().getInstance();
@@ -53,13 +55,14 @@ async function bootstrap() {
     ];
 
     const routes: RouteInfo[] = [...httpRoutes, ...socketRoutes];
+    console.log("1");
 
     // 3) Sync lên bảng permission
     const existing = await prisma.permission.findMany({ where: { deletedAt: null } });
     const key = (r: { method: string; path: string }) => `${r.method}-${r.path}`;
     const existMap = new Map(existing.map((p) => [key(p), p]));
     const routeMap = new Map(routes.map((r) => [key(r), r]));
-
+    console.log("18");
     // Xóa những permission không còn route
     const toDelete = existing.filter((p) => !routeMap.has(key(p)));
     if (toDelete.length) {
@@ -91,13 +94,13 @@ async function bootstrap() {
     const CustomerModules = [
         'AUTH', 'SERVICES', 'SERVICEPACKAGES', 'USERS',
         'BOOKINGS', 'CHATMESSAGES', 'REWARDS',
-        'PACKAGERECOMMENDATIONS', 'CUSTOMERPROFILE', 'PUBLICS'
+        'PACKAGERECOMMENDATIONS', 'CUSTOMERPROFILE', 'PUBLICS', "PAYMENTS"
     ];
     const ServiceProviderModules = [
         'PUBLICS',
         'AUTH', 'SERVICES', 'BOOKINGS',
         'SCHEDULE', 'STAFFSCHEDULECATEGORY', 'MANAGE-STAFFS', 'MANAGE-SERVICES', 'MANAGE-BOOKINGS',
-        'CHATMESSAGES', 'REWARDS', 'WORK_SHIFT_TEMPLATE'
+        'CHATMESSAGES', 'REWARDS', 'WORK_SHIFT_TEMPLATE', "PAYMENTS"
     ];
     const StaffModules = [
         'PUBLICS',
