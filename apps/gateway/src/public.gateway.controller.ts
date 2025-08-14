@@ -12,7 +12,6 @@ import { USER_SERVICE } from 'libs/common/src/constants/service-name.constant';
 import { ActiveUser } from 'libs/common/src/decorator/active-user.decorator';
 import { IsPublic } from 'libs/common/src/decorator/auth.decorator';
 import { ChangePasswordDTO } from 'libs/common/src/request-response-type/customer/customer.dto';
-
 import { RawTcpClientService } from 'libs/common/src/tcp/raw-tcp-client.service';
 import { AccessTokenPayload } from 'libs/common/src/types/jwt.type';
 
@@ -22,7 +21,7 @@ export class PublicGatewayController {
     @Inject(USER_SERVICE)
     private readonly userRawTcpClient: RawTcpClientService,
   ) {}
-  @IsPublic()
+
   @Get('get-staff-information/:staffId')
   async getStaffInformation(@Param('staffId') staffId: number) {
     try {
@@ -38,7 +37,6 @@ export class PublicGatewayController {
     }
   }
 
-  @IsPublic()
   @Get('get-customer-information/:customerId')
   async changeStatusProvider(@Param('customerId') customerId: number) {
     try {
@@ -54,7 +52,6 @@ export class PublicGatewayController {
     }
   }
 
-  @IsPublic()
   @Get('get-service-provider-information/:providerId')
   async getServiceProviderInformation(@Param('providerId') providerId: number) {
     try {
@@ -89,7 +86,7 @@ export class PublicGatewayController {
       handleZodError(error);
     }
   }
-  
+
   @Get('get-me')
   async getMe(@ActiveUser() user: AccessTokenPayload) {
     const keyName = ((user.customerId && 'customerId') ||
