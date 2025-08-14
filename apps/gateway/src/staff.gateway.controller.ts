@@ -172,54 +172,6 @@ export class StaffGatewayController {
     }
   }
 
-  @Get('staff-get-reviews')
-  @ApiOperation({ summary: 'Get staff reviews' })
-  @ApiQuery({
-    name: 'page',
-    required: false,
-    type: Number,
-    description: 'Page number',
-  })
-  @ApiQuery({
-    name: 'limit',
-    required: false,
-    type: Number,
-    description: 'Items per page',
-  })
-  @ApiQuery({
-    name: 'rating',
-    required: false,
-    type: Number,
-    description: 'Filter by rating (1-5)',
-  })
-  @ApiQuery({
-    name: 'fromDate',
-    required: false,
-    type: String,
-    description: 'Start date (ISO string)',
-  })
-  @ApiQuery({
-    name: 'toDate',
-    required: false,
-    type: String,
-    description: 'End date (ISO string)',
-  })
-  async staffGetReview(
-    @Query() query: StaffGetReviewQueryDTO,
-    @ActiveUser('staffId') staffId: number,
-  ) {
-    try {
-      const data = await this.staffRawTcpClient.send({
-        type: 'STAFF_GET_REVIEWS',
-        data: { ...query, staffId },
-      });
-      handlerErrorResponse(data);
-      return data;
-    } catch (error) {
-      if (error instanceof HttpException) throw error;
-      handleZodError(error);
-    }
-  }
 
   @Get('staff-get-inspection-detail/:inspectionId')
   @ApiParam({ name: 'inspectionId', type: Number })
@@ -300,35 +252,6 @@ export class StaffGatewayController {
           bookingId,
           imageUrls: body.imageUrls ?? [],
         },
-      });
-      handlerErrorResponse(data);
-      return data;
-    } catch (error) {
-      if (error instanceof HttpException) throw error;
-      handleZodError(error);
-    }
-  }
-  @Get('staff-get-performance')
-  async staffGetPerformance(@ActiveUser('staffId') staffId: number) {
-    try {
-      const data = await this.staffRawTcpClient.send({
-        type: 'STAFF_GET_PERFORMANCE',
-        data: { staffId },
-      });
-      handlerErrorResponse(data);
-      return data;
-    } catch (error) {
-      if (error instanceof HttpException) throw error;
-      handleZodError(error);
-    }
-  }
-
-  @Get('staff-get-review-summary')
-  async staffGetReviewSummary(@ActiveUser('staffId') staffId: number) {
-    try {
-      const data = await this.staffRawTcpClient.send({
-        type: 'STAFF_GET_REVIEW_SUMMARY',
-        data: { staffId },
       });
       handlerErrorResponse(data);
       return data;
