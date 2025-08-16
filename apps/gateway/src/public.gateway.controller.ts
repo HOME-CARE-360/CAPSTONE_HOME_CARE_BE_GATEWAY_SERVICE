@@ -6,20 +6,31 @@ import {
   Inject,
   Param,
   Patch,
+  Post,
+  Query,
 } from '@nestjs/common';
+import { ClientProxy } from '@nestjs/microservices';
+import { ApiQuery } from '@nestjs/swagger';
+import { WithdrawalStatus } from '@prisma/client';
 import { handlerErrorResponse, handleZodError } from 'libs/common/helpers';
-import { USER_SERVICE } from 'libs/common/src/constants/service-name.constant';
+import { OrderBy, SortByWithDraw } from 'libs/common/src/constants/others.constant';
+import { PROVIDER_SERVICE, USER_SERVICE } from 'libs/common/src/constants/service-name.constant';
 import { ActiveUser } from 'libs/common/src/decorator/active-user.decorator';
+import { MessageResDTO } from 'libs/common/src/dtos/response.dto';
 import { ChangePasswordDTO } from 'libs/common/src/request-response-type/customer/customer.dto';
 import { LinkBankAccountDTO } from 'libs/common/src/request-response-type/user/user.dto';
+import { CreateWithdrawBodyDTO, GetListWidthDrawProviderQueryDTO, GetWidthDrawDetailParamsDTO } from 'libs/common/src/request-response-type/with-draw/with-draw.dto';
 import { RawTcpClientService } from 'libs/common/src/tcp/raw-tcp-client.service';
 import { AccessTokenPayload } from 'libs/common/src/types/jwt.type';
+import { ZodSerializerDto } from 'nestjs-zod';
+import { lastValueFrom } from 'rxjs';
 
 @Controller('publics')
 export class PublicGatewayController {
   constructor(
     @Inject(USER_SERVICE)
     private readonly userRawTcpClient: RawTcpClientService,
+    @Inject(PROVIDER_SERVICE) private readonly providerClient: ClientProxy,
   ) { }
 
   @Get('get-staff-information/:staffId')
@@ -120,6 +131,93 @@ export class PublicGatewayController {
       return data;
     } catch (error) {
       if (error instanceof HttpException) throw error;
+      handleZodError(error);
+    }
+  }
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    example: 1,
+    description: 'Page number (default = 1)',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    example: 10,
+    description: 'Items per page (default = 10)',
+  })
+  @ApiQuery({
+    name: 'status',
+    required: false,
+    isArray: true,
+    enum: WithdrawalStatus,
+    description: 'Filter by withdrawal status (multiple allowed)',
+    example: ['PENDING', 'APPROVED'],
+  })
+  @ApiQuery({
+    name: 'orderBy',
+    required: false,
+    enum: OrderBy,
+    description: 'Sort order: asc | desc',
+    example: OrderBy.Desc,
+  })
+  @ApiQuery({
+    name: 'sortBy',
+    required: false,
+    enum: SortByWithDraw,
+    description: 'Field to sort by: createdAt | amount | processedAt',
+    example: SortByWithDraw.CreatedAt,
+  })
+  @Get('get-list-withdraw')
+  @ZodSerializerDto(MessageResDTO)
+  async getListWithDraw(
+    @Query() query: GetListWidthDrawProviderQueryDTO,
+    @ActiveUser('userId') userId: number,
+  ) {
+    try {
+      return await lastValueFrom(
+        this.providerClient.send(
+          { cmd: 'get-list-withdraw' },
+          { query, userId },
+        ),
+      );
+    } catch (error) {
+      handleZodError(error);
+    }
+  }
+  @Get('get-withdraw-detail/:id')
+  @ZodSerializerDto(MessageResDTO)
+  async getWithDrawDetail(
+    @Param() param: GetWidthDrawDetailParamsDTO,
+    @ActiveUser('userId') userId: number,
+  ) {
+    try {
+      return await lastValueFrom(
+        this.providerClient.send(
+          { cmd: 'get-withdraw-detail' },
+          { id: param.id, userId },
+        ),
+      );
+    } catch (error) {
+      handleZodError(error);
+    }
+  }
+  @Post('create-withdraw-request')
+  @ZodSerializerDto(MessageResDTO)
+  async createWidthDrawRequest(
+    @Body() data: CreateWithdrawBodyDTO,
+    @ActiveUser('userId') userId: number,
+  ) {
+    try {
+      return await lastValueFrom(
+        this.providerClient.send(
+          { cmd: 'create-withdraw-request' },
+          { data, userId },
+        ),
+      );
+    } catch (error) {
       handleZodError(error);
     }
   }

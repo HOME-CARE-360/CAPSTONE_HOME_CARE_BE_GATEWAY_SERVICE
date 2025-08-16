@@ -34,7 +34,6 @@ import { ManageBookingsGatewayController } from './provider-gateway-controller/m
 import { StaffGatewayController } from './staff.gateway.controller';
 import { AdminGatewayController } from './admin.gateway.controller';
 import { PaymentGatewayController } from './payment.gateway.controller';
-import { ManageFundingGatewayController } from './provider-gateway-controller/manage-funding-controller';
 import { ChatGateway } from './chat.gateway.controller';
 // import { NotificationGatewayController } from './notification.gateway.controller';
 
@@ -116,7 +115,6 @@ import { ChatGateway } from './chat.gateway.controller';
     StaffGatewayController,
     AdminGatewayController,
     PaymentGatewayController,
-    ManageFundingGatewayController,
     // NotificationGatewayController,
   ],
   providers: [
@@ -167,4 +165,4 @@ import { ChatGateway } from './chat.gateway.controller';
     // },
   ],
 })
-export class AppModule {}
+export class AppModule { }
