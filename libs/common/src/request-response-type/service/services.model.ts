@@ -57,7 +57,7 @@ export const GetServicesQuerySchema = z.object({
       return value;
     }, z.array(z.coerce.number().int().positive()))
     .optional(),
-  categoryId: z
+  categories: z
     .preprocess((value) => {
       if (typeof value === 'string') {
         return [Number(value)];
