@@ -172,7 +172,6 @@ export class StaffGatewayController {
     }
   }
 
-
   @Get('staff-get-inspection-detail/:inspectionId')
   @ApiParam({ name: 'inspectionId', type: Number })
   async staffGetInspectionDetail(

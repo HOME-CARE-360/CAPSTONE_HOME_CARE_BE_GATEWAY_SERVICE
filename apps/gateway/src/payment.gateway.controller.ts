@@ -21,7 +21,7 @@ export class PaymentGatewayController {
   constructor(
     @Inject(PAYMENT_SERVICE)
     private readonly paymentRawTcpClient: RawTcpClientService,
-  ) { }
+  ) {}
 
   @Post('create-topup')
   @ApiBody({
@@ -151,9 +151,7 @@ export class PaymentGatewayController {
   @IsPublic()
   @Get('status')
   @ApiQuery({ name: 'orderCode', required: true, example: '1234567890' })
-  async getPaymentStatus(
-    @Query('orderCode') orderCode: string,
-  ) {
+  async getPaymentStatus(@Query('orderCode') orderCode: string) {
     try {
       const data = await this.paymentRawTcpClient.send({
         type: 'GET_PAYMENT_STATUS',

@@ -13,13 +13,24 @@ import { ClientProxy } from '@nestjs/microservices';
 import { ApiQuery } from '@nestjs/swagger';
 import { WithdrawalStatus } from '@prisma/client';
 import { handlerErrorResponse, handleZodError } from 'libs/common/helpers';
-import { OrderBy, SortByWithDraw } from 'libs/common/src/constants/others.constant';
-import { PROVIDER_SERVICE, USER_SERVICE } from 'libs/common/src/constants/service-name.constant';
+import {
+  OrderBy,
+  SortByWithDraw,
+} from 'libs/common/src/constants/others.constant';
+import {
+  PROVIDER_SERVICE,
+  USER_SERVICE,
+} from 'libs/common/src/constants/service-name.constant';
 import { ActiveUser } from 'libs/common/src/decorator/active-user.decorator';
+import { IsPublic } from 'libs/common/src/decorator/auth.decorator';
 import { MessageResDTO } from 'libs/common/src/dtos/response.dto';
 import { ChangePasswordDTO } from 'libs/common/src/request-response-type/customer/customer.dto';
 import { LinkBankAccountDTO } from 'libs/common/src/request-response-type/user/user.dto';
-import { CreateWithdrawBodyDTO, GetListWidthDrawProviderQueryDTO, GetWidthDrawDetailParamsDTO } from 'libs/common/src/request-response-type/with-draw/with-draw.dto';
+import {
+  CreateWithdrawBodyDTO,
+  GetListWidthDrawProviderQueryDTO,
+  GetWidthDrawDetailParamsDTO,
+} from 'libs/common/src/request-response-type/with-draw/with-draw.dto';
 import { RawTcpClientService } from 'libs/common/src/tcp/raw-tcp-client.service';
 import { AccessTokenPayload } from 'libs/common/src/types/jwt.type';
 import { ZodSerializerDto } from 'nestjs-zod';
@@ -31,7 +42,7 @@ export class PublicGatewayController {
     @Inject(USER_SERVICE)
     private readonly userRawTcpClient: RawTcpClientService,
     @Inject(PROVIDER_SERVICE) private readonly providerClient: ClientProxy,
-  ) { }
+  ) {}
 
   @Get('get-staff-information/:staffId')
   async getStaffInformation(@Param('staffId') staffId: number) {
@@ -218,6 +229,57 @@ export class PublicGatewayController {
         ),
       );
     } catch (error) {
+      handleZodError(error);
+    }
+  }
+  @IsPublic()
+  @Get('top-discounted-services')
+  async getTopDiscountedServices(
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
+    try {
+      const p =
+        Number.isFinite(Number(page)) && Number(page) > 0 ? Number(page) : 1;
+      const lim =
+        Number.isFinite(Number(limit)) && Number(limit) > 0
+          ? Number(limit)
+          : 10;
+
+      const data = await this.userRawTcpClient.send({
+        type: 'GET_TOP_DISCOUNTED_SERVICES',
+        page: p,
+        limit: lim,
+      });
+      handlerErrorResponse(data);
+      return data;
+    } catch (error) {
+      if (error instanceof HttpException) throw error;
+      handleZodError(error);
+    }
+  }
+
+  @IsPublic()
+  @Get('top-providers-all-time')
+  async getTopProvidersAllTime(
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
+    try {
+      const p =
+        Number.isFinite(Number(page)) && Number(page) > 0 ? Number(page) : 1;
+      const lim =
+        Number.isFinite(Number(limit)) && Number(limit) > 0 ? Number(limit) : 5;
+
+      const data = await this.userRawTcpClient.send({
+        type: 'GET_TOP_PROVIDERS_ALL_TIME',
+        page: p,
+        limit: lim,
+      });
+      handlerErrorResponse(data);
+      return data;
+    } catch (error) {
+      if (error instanceof HttpException) throw error;
       handleZodError(error);
     }
   }

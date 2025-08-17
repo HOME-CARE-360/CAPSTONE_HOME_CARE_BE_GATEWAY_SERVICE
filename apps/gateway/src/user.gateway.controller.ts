@@ -11,7 +11,14 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiParam, ApiProperty, ApiQuery, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiParam,
+  ApiProperty,
+  ApiQuery,
+  ApiTags,
+} from '@nestjs/swagger';
 import { handlerErrorResponse, handleZodError } from 'libs/common/helpers';
 import { USER_SERVICE } from 'libs/common/src/constants/service-name.constant';
 import { ActiveUser } from 'libs/common/src/decorator/active-user.decorator';
@@ -76,7 +83,7 @@ export class UserGatewayController {
   constructor(
     @Inject(USER_SERVICE)
     private readonly userRawTcpClient: RawTcpClientService,
-  ) { }
+  ) {}
 
   @Patch('update-customer-information')
   async updateCustomer(
@@ -96,8 +103,6 @@ export class UserGatewayController {
       handleZodError(error);
     }
   }
-
-
 
   @Patch('change-bank-account')
   async changeBankAccount(
@@ -402,7 +407,7 @@ export class UserGatewayController {
       handlerErrorResponse(data);
 
       return {
-        data
+        data,
       };
     } catch (error) {
       if (error instanceof HttpException) throw error;
@@ -485,7 +490,12 @@ export class UserGatewayController {
 
   @Delete('reviews/:reviewId')
   @ApiOperation({ summary: 'Delete my review' })
-  @ApiParam({ name: 'reviewId', type: Number, required: true, description: 'Review ID' })
+  @ApiParam({
+    name: 'reviewId',
+    type: Number,
+    required: true,
+    description: 'Review ID',
+  })
   async deleteMyReview(
     @ActiveUser('customerId') customerId: number,
     @Param('reviewId', ParseIntPipe) reviewId: number,
