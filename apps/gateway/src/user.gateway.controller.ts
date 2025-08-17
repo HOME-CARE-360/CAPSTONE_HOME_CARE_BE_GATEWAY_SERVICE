@@ -76,6 +76,139 @@ class CreateReviewDto {
   })
   comment?: string;
 }
+
+export const MaintenanceSuggestionOptionsSchema = z.object({
+  type: z.string().optional().default('byAssetType'),
+  limit: z.coerce.number().int().positive().max(50).optional(),
+  priorityFilter: z.enum(['HIGH', 'MEDIUM', 'LOW']).optional(),
+  dueSoon: z.coerce.boolean().optional(),
+  categoryId: z.coerce.number().int().positive().optional(),
+});
+
+// Updated schema to match your Prisma model (nickname, serial, not name/serialNumber)
+export const CreateAssetSchema = z.object({
+  categoryId: z.coerce.number().int().positive(), // REQUIRED - must exist in DB
+  brand: z.string().min(1).max(100).optional(),
+  model: z.string().min(1).max(100).optional(),
+  serial: z.string().max(255).optional(), // NOT serialNumber
+  nickname: z.string().min(1).max(255).optional(), // NOT name
+  description: z.string().max(1000).optional(),
+  purchaseDate: z.string().datetime().optional(),
+  lastMaintenanceDate: z.string().datetime().optional(),
+  totalMaintenanceCount: z.coerce.number().int().min(0).optional(),
+});
+
+export const UpdateAssetSchema = CreateAssetSchema.partial().omit({ categoryId: true }).extend({
+  categoryId: z.coerce.number().int().positive().optional(), // Make categoryId optional for updates
+});
+
+export const UpdateMaintenanceStatsSchema = z.object({
+  lastDate: z.string().datetime(),
+  totalCount: z.coerce.number().int().min(0),
+});
+
+export const AssetIdsSchema = z.object({
+  assetIds: z.array(z.coerce.number().int().positive()).min(1),
+});
+
+export type MaintenanceSuggestionOptionsDTO = z.infer<typeof MaintenanceSuggestionOptionsSchema>;
+export type CreateAssetDTO = z.infer<typeof CreateAssetSchema>;
+export type UpdateAssetDTO = z.infer<typeof UpdateAssetSchema>;
+export type UpdateMaintenanceStatsDTO = z.infer<typeof UpdateMaintenanceStatsSchema>;
+export type AssetIdsDTO = z.infer<typeof AssetIdsSchema>;
+
+// DTO classes for Swagger documentation - Updated field names
+class MaintenanceSuggestionOptionsSwaggerDTO {
+  @ApiProperty({ required: false, default: 'byAssetType' })
+  type?: string;
+
+  @ApiProperty({ required: false, minimum: 1, maximum: 50 })
+  limit?: number;
+
+  @ApiProperty({ required: false, enum: ['HIGH', 'MEDIUM', 'LOW'] })
+  priorityFilter?: 'HIGH' | 'MEDIUM' | 'LOW';
+
+  @ApiProperty({ required: false })
+  dueSoon?: boolean;
+
+  @ApiProperty({ required: false, minimum: 1 })
+  categoryId?: number;
+}
+
+class CreateAssetSwaggerDTO {
+  @ApiProperty({ description: 'Category ID (REQUIRED - must exist in database)', minimum: 1 })
+  categoryId: number;
+
+  @ApiProperty({ required: false, description: 'Asset brand', maxLength: 100 })
+  brand?: string;
+
+  @ApiProperty({ required: false, description: 'Asset model', maxLength: 100 })
+  model?: string;
+
+  @ApiProperty({ required: false, description: 'Serial number', maxLength: 255 })
+  serial?: string;
+
+  @ApiProperty({ required: false, description: 'Asset nickname/display name', maxLength: 255 })
+  nickname?: string;
+
+  @ApiProperty({ required: false, description: 'Asset description', maxLength: 1000 })
+  description?: string;
+
+  @ApiProperty({ required: false, description: 'Purchase date (ISO string)' })
+  purchaseDate?: string;
+
+  @ApiProperty({ required: false, description: 'Last maintenance date (ISO string)' })
+  lastMaintenanceDate?: string;
+
+  @ApiProperty({ required: false, description: 'Total maintenance count', minimum: 0 })
+  totalMaintenanceCount?: number;
+}
+
+class UpdateAssetSwaggerDTO {
+  @ApiProperty({ required: false, description: 'Category ID', minimum: 1 })
+  categoryId?: number;
+
+  @ApiProperty({ required: false, description: 'Asset brand', maxLength: 100 })
+  brand?: string;
+
+  @ApiProperty({ required: false, description: 'Asset model', maxLength: 100 })
+  model?: string;
+
+  @ApiProperty({ required: false, description: 'Serial number', maxLength: 255 })
+  serial?: string;
+
+  @ApiProperty({ required: false, description: 'Asset nickname/display name', maxLength: 255 })
+  nickname?: string;
+
+  @ApiProperty({ required: false, description: 'Asset description', maxLength: 1000 })
+  description?: string;
+
+  @ApiProperty({ required: false, description: 'Purchase date (ISO string)' })
+  purchaseDate?: string;
+
+  @ApiProperty({ required: false, description: 'Last maintenance date (ISO string)' })
+  lastMaintenanceDate?: string;
+
+  @ApiProperty({ required: false, description: 'Total maintenance count', minimum: 0 })
+  totalMaintenanceCount?: number;
+}
+
+class UpdateMaintenanceStatsSwaggerDTO {
+  @ApiProperty({ description: 'Last maintenance date (ISO string)' })
+  lastDate: string;
+
+  @ApiProperty({ description: 'Total maintenance count', minimum: 0 })
+  totalCount: number;
+}
+
+class AssetIdsSwaggerDTO {
+  @ApiProperty({ 
+    description: 'Array of asset IDs', 
+    type: [Number], 
+    minItems: 1 
+  })
+  assetIds: number[];
+}
 @ApiTags('Users')
 @ApiBearerAuth()
 @Controller('users')
@@ -515,6 +648,211 @@ export class UserGatewayController {
         message: 'Review deleted successfully',
         data,
       };
+    } catch (error) {
+      if (error instanceof HttpException) throw error;
+      handleZodError(error);
+    }
+  }
+
+
+  @Get('suggestions')
+  @ApiOperation({ summary: 'Get maintenance suggestions for customer' })
+  @ApiQuery({ name: 'type', required: false, type: String })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  @ApiQuery({ name: 'priorityFilter', required: false, enum: ['HIGH', 'MEDIUM', 'LOW'] })
+  @ApiQuery({ name: 'dueSoon', required: false, type: Boolean })
+  @ApiQuery({ name: 'categoryId', required: false, type: Number })
+  async getMaintenanceSuggestions(
+    @ActiveUser('customerId') customerId: number,
+    @Query() rawQuery: any,
+  ) {
+    try {
+      const options = MaintenanceSuggestionOptionsSchema.parse(rawQuery);
+      
+      const data = await this.userRawTcpClient.send({
+        type: 'SUGGEST_FOR_CUSTOMER',
+        customerId,
+        options,
+      });
+
+      handlerErrorResponse(data);
+      return data;
+    } catch (error) {
+      if (error instanceof HttpException) throw error;
+      handleZodError(error);
+    }
+  }
+
+  @Post('sync-stats')
+  @ApiOperation({ summary: 'Sync maintenance stats for customer assets' })
+  @ApiQuery({ name: 'assetId', required: false, type: Number, description: 'Optional specific asset ID to sync' })
+  async syncMaintenanceStats(
+    @ActiveUser('customerId') customerId: number,
+    @Query('assetId') assetId?: number,
+  ) {
+    try {
+      const data = await this.userRawTcpClient.send({
+        type: 'SYNC_ASSET_MAINTENANCE_STATS',
+        customerId,
+        ...(assetId ? { assetId: Number(assetId) } : {}),
+      });
+
+      handlerErrorResponse(data);
+      return data;
+    } catch (error) {
+      if (error instanceof HttpException) throw error;
+      handleZodError(error);
+    }
+  }
+
+  @Post('assets')
+  @ApiOperation({ summary: 'Create a new customer asset' })
+  async createAsset(
+    @ActiveUser('customerId') customerId: number,
+    @Body() body: CreateAssetSwaggerDTO,
+  ) {
+    try {
+      const validatedData = CreateAssetSchema.parse(body);
+            const processedData = {
+        ...validatedData,
+        purchaseDate: validatedData.purchaseDate 
+          ? new Date(validatedData.purchaseDate).toISOString() 
+          : undefined,
+        lastMaintenanceDate: validatedData.lastMaintenanceDate 
+          ? new Date(validatedData.lastMaintenanceDate).toISOString() 
+          : undefined,
+      };
+      
+      const data = await this.userRawTcpClient.send({
+        type: 'CREATE_CUSTOMER_ASSET',
+        customerId,
+        data: processedData,
+      });
+
+      handlerErrorResponse(data);
+      return data;
+    } catch (error) {
+      if (error instanceof HttpException) throw error;
+      handleZodError(error);
+    }
+  }
+
+  @Patch('assets/:assetId')
+  @ApiOperation({ summary: 'Update customer asset' })
+  @ApiParam({ name: 'assetId', type: Number, required: true })
+  async updateAsset(
+    @ActiveUser('customerId') customerId: number,
+    @Param('assetId', ParseIntPipe) assetId: number,
+    @Body() body: UpdateAssetSwaggerDTO,
+  ) {
+    try {
+      const validatedData = UpdateAssetSchema.parse(body);
+      const processedData = {
+        ...validatedData,
+        purchaseDate: validatedData.purchaseDate 
+          ? new Date(validatedData.purchaseDate).toISOString() 
+          : undefined,
+        lastMaintenanceDate: validatedData.lastMaintenanceDate 
+          ? new Date(validatedData.lastMaintenanceDate).toISOString() 
+          : undefined,
+      };
+      
+      const data = await this.userRawTcpClient.send({
+        type: 'UPDATE_CUSTOMER_ASSET',
+        customerId,
+        assetId,
+        data: processedData,
+      });
+
+      handlerErrorResponse(data);
+      return data;
+    } catch (error) {
+      if (error instanceof HttpException) throw error;
+      handleZodError(error);
+    }
+  }
+
+  @Delete('assets/:assetId')
+  @ApiOperation({ summary: 'Remove customer asset' })
+  @ApiParam({ name: 'assetId', type: Number, required: true })
+  async removeAsset(
+    @ActiveUser('customerId') customerId: number,
+    @Param('assetId', ParseIntPipe) assetId: number,
+  ) {
+    try {
+      const data = await this.userRawTcpClient.send({
+        type: 'REMOVE_CUSTOMER_ASSET',
+        customerId,
+        assetId,
+      });
+
+      handlerErrorResponse(data);
+      return data;
+    } catch (error) {
+      if (error instanceof HttpException) throw error;
+      handleZodError(error);
+    }
+  }
+
+  @Get('assets')
+  @ApiOperation({ summary: 'Get all customer assets' })
+  async getAssets(@ActiveUser('customerId') customerId: number) {
+    try {
+      const data = await this.userRawTcpClient.send({
+        type: 'GET_CUSTOMER_ASSETS',
+        customerId,
+      });
+
+      handlerErrorResponse(data);
+      return data;
+    } catch (error) {
+      if (error instanceof HttpException) throw error;
+      handleZodError(error);
+    }
+  }
+
+  @Get('assets/by-ids')
+  @ApiOperation({ summary: 'Get customer assets by IDs' })
+  async getAssetsByIds(
+    @ActiveUser('customerId') customerId: number,
+    @Body() body: AssetIdsSwaggerDTO,
+  ) {
+    try {
+      const validatedData = AssetIdsSchema.parse(body);
+      
+      const data = await this.userRawTcpClient.send({
+        type: 'GET_CUSTOMER_ASSETS_BY_IDS',
+        customerId,
+        assetIds: validatedData.assetIds,
+      });
+
+      handlerErrorResponse(data);
+      return data;
+    } catch (error) {
+      if (error instanceof HttpException) throw error;
+      handleZodError(error);
+    }
+  }
+
+  @Patch('assets/:assetId/stats')
+  @ApiOperation({ summary: 'Update asset maintenance statistics' })
+  @ApiParam({ name: 'assetId', type: Number, required: true })
+  async updateAssetMaintenanceStats(
+    @Param('assetId', ParseIntPipe) assetId: number,
+    @Body() body: UpdateMaintenanceStatsSwaggerDTO,
+  ) {
+    try {
+      const validatedData = UpdateMaintenanceStatsSchema.parse(body);
+      
+      const data = await this.userRawTcpClient.send({
+        type: 'UPDATE_ASSET_MAINTENANCE_STATS',
+        assetId,
+        lastDate: new Date(validatedData.lastDate).toISOString(),
+        totalCount: validatedData.totalCount,
+      });
+
+      handlerErrorResponse(data);
+      return data;
     } catch (error) {
       if (error instanceof HttpException) throw error;
       handleZodError(error);
