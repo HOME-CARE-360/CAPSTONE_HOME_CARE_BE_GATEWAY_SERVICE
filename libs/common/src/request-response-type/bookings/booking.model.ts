@@ -44,6 +44,7 @@ export const CreateServiceRequestBodySchema = ServiceRequestSchema.omit({
     paymentMethod: z.enum([
       PaymentMethod.BANK_TRANSFER,
       PaymentMethod.CREDIT_CARD,
+      PaymentMethod.WALLET,
     ]),
   })
   .strict();
