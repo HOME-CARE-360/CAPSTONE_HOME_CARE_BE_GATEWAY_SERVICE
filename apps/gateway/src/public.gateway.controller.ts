@@ -1,10 +1,12 @@
 import {
   Body,
   Controller,
+  DefaultValuePipe,
   Get,
   HttpException,
   Inject,
   Param,
+  ParseIntPipe,
   Patch,
   Post,
   Query,
@@ -233,54 +235,106 @@ export class PublicGatewayController {
     }
   }
   @IsPublic()
-  @Get('top-discounted-services')
-  async getTopDiscountedServices(
-    @Query('page') page?: string,
-    @Query('limit') limit?: string,
-  ) {
-    try {
-      const p =
-        Number.isFinite(Number(page)) && Number(page) > 0 ? Number(page) : 1;
-      const lim =
-        Number.isFinite(Number(limit)) && Number(limit) > 0
-          ? Number(limit)
-          : 10;
-
-      const data = await this.userRawTcpClient.send({
-        type: 'GET_TOP_DISCOUNTED_SERVICES',
-        page: p,
-        limit: lim,
-      });
-      handlerErrorResponse(data);
-      return data;
-    } catch (error) {
-      if (error instanceof HttpException) throw error;
-      handleZodError(error);
-    }
+@Get('top-discounted-services')
+@ApiQuery({ name: 'page', required: false, type: Number, description: 'Page number (default: 1)' })
+@ApiQuery({ name: 'limit', required: false, type: Number, description: 'Items per page (default: 10)' })
+async getTopDiscountedServices(
+  @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+  @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
+) {
+  try {
+    const p = page > 0 ? page : 1;
+    const lim = limit > 0 ? limit : 10;
+    const data = await this.userRawTcpClient.send({
+      type: 'GET_TOP_DISCOUNTED_SERVICES',
+      page: p,
+      limit: lim,
+    });
+    handlerErrorResponse(data);
+    return data;
+  } catch (error) {
+    if (error instanceof HttpException) throw error;
+    handleZodError(error);
   }
+}
 
-  @IsPublic()
-  @Get('top-providers-all-time')
-  async getTopProvidersAllTime(
-    @Query('page') page?: string,
-    @Query('limit') limit?: string,
-  ) {
-    try {
-      const p =
-        Number.isFinite(Number(page)) && Number(page) > 0 ? Number(page) : 1;
-      const lim =
-        Number.isFinite(Number(limit)) && Number(limit) > 0 ? Number(limit) : 5;
-
-      const data = await this.userRawTcpClient.send({
-        type: 'GET_TOP_PROVIDERS_ALL_TIME',
-        page: p,
-        limit: lim,
-      });
-      handlerErrorResponse(data);
-      return data;
-    } catch (error) {
-      if (error instanceof HttpException) throw error;
-      handleZodError(error);
-    }
+@IsPublic()
+@Get('top-providers-all-time')
+@ApiQuery({ name: 'page', required: false, type: Number, description: 'Page number (default: 1)' })
+@ApiQuery({ name: 'limit', required: false, type: Number, description: 'Items per page (default: 10)' })
+async getTopProvidersAllTime(
+  @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+  @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
+) {
+  try {
+    const p = page > 0 ? page : 1;
+    const lim = limit > 0 ? limit : 10;
+    const data = await this.userRawTcpClient.send({
+      type: 'GET_TOP_PROVIDERS_ALL_TIME',
+      page: p,
+      limit: lim,
+    });
+    handlerErrorResponse(data);
+    return data;
+  } catch (error) {
+    if (error instanceof HttpException) throw error;
+    handleZodError(error);
   }
+}
+
+@IsPublic()
+@Get('reviews/:providerId')
+@ApiQuery({ name: 'page', required: false, type: Number, description: 'Page number (default: 1)' })
+@ApiQuery({ name: 'limit', required: false, type: Number, description: 'Items per page (default: 10)' })
+@ApiQuery({ name: 'search', required: false, type: String, description: 'Search term for reviews' })
+@ApiQuery({ name: 'rating', required: false, type: String, description: 'Filter by rating: single value ("5") or comma-separated ("4,5")' })
+@ApiQuery({ name: 'sortBy', required: false, enum: ['createdAt', 'rating'], description: 'Sort field (default: createdAt)' })
+@ApiQuery({ name: 'sortOrder', required: false, enum: ['asc', 'desc'], description: 'Sort order (default: desc)' })
+async getProviderReviews(
+  @Param('providerId', ParseIntPipe) providerId: number,
+  @Query('page') page?: string,
+  @Query('limit') limit?: string,
+  @Query('search') search?: string,
+  @Query('rating') rating?: string,
+  @Query('sortBy') sortBy?: 'createdAt' | 'rating',
+  @Query('sortOrder') sortOrder?: 'asc' | 'desc',
+) {
+  try {
+    // Parse and validate page
+    const pg = page && Number.isFinite(Number(page)) && Number(page) > 0 ? Number(page) : 1;
+    
+    // Parse and validate limit
+    const lim = limit && Number.isFinite(Number(limit)) && Number(limit) > 0 ? Number(limit) : 10;
+    
+    // Parse rating parameter
+    let ratingParam: number | number[] | undefined;
+    if (rating && rating.length > 0) {
+      if (rating.includes(',')) {
+        const arr = rating
+          .split(',')
+          .map((x) => Number(x.trim()))
+          .filter((n) => Number.isFinite(n));
+        ratingParam = arr.length ? arr : undefined;
+      } else if (Number.isFinite(Number(rating))) {
+        ratingParam = Number(rating);
+      }
+    }
+
+    const data = await this.userRawTcpClient.send({
+      type: 'GET_REVIEWS_BY_PROVIDER_ID',
+      providerId,
+      page: pg,
+      limit: lim,
+      ...(search && search.trim() ? { search: search.trim() } : {}),
+      ...(ratingParam !== undefined ? { rating: ratingParam } : {}),
+      sortBy: sortBy ?? 'createdAt',
+      sortOrder: sortOrder ?? 'desc',
+    });
+    handlerErrorResponse(data);
+    return data;
+  } catch (error) {
+    if (error instanceof HttpException) throw error;
+    handleZodError(error);
+  }
+}
 }
