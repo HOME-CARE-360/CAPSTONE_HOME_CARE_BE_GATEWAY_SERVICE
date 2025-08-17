@@ -337,4 +337,30 @@ async getProviderReviews(
     handleZodError(error);
   }
 }
+
+@IsPublic()
+@Get('top-favorite-services')
+@ApiQuery({ name: 'page', required: false, type: Number, description: 'default 1' })
+@ApiQuery({ name: 'limit', required: false, type: Number, description: 'default 10' })
+@ApiQuery({ name: 'from', required: false, type: String, description: 'ISO date filter start' })
+@ApiQuery({ name: 'to', required: false, type: String, description: 'ISO date filter end' })
+async topFavoriteServices(
+  @Query('page') page?: string,
+  @Query('limit') limit?: string,
+  @Query('from') from?: string,
+  @Query('to') to?: string,
+) {
+  const p = Number.isFinite(Number(page)) && Number(page) > 0 ? Number(page) : 1;
+  const lim = Number.isFinite(Number(limit)) && Number(limit) > 0 ? Number(limit) : 10;
+
+  const data = await this.userRawTcpClient.send({
+    type: 'GET_TOP_FAVORITE_SERVICES',
+    page: p,
+    limit: lim,
+    ...(from ? { from } : {}),
+    ...(to ? { to } : {}),
+  });
+  handlerErrorResponse(data);
+  return data;
+}
 }
