@@ -13,12 +13,15 @@ import {
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
+  ApiBody,
   ApiOperation,
   ApiParam,
   ApiProperty,
   ApiQuery,
+  ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { darcula } from '@react-email/components';
 import { handlerErrorResponse, handleZodError } from 'libs/common/helpers';
 import { USER_SERVICE } from 'libs/common/src/constants/service-name.constant';
 import { ActiveUser } from 'libs/common/src/decorator/active-user.decorator';
@@ -84,23 +87,46 @@ export const MaintenanceSuggestionOptionsSchema = z.object({
   dueSoon: z.coerce.boolean().optional(),
   categoryId: z.coerce.number().int().positive().optional(),
 });
-
-// Updated schema to match your Prisma model (nickname, serial, not name/serialNumber)
-export const CreateAssetSchema = z.object({
-  categoryId: z.coerce.number().int().positive(), // REQUIRED - must exist in DB
+const CreateAssetBase = z.object({
+  categoryId: z.coerce.number().int().positive(),
   brand: z.string().min(1).max(100).optional(),
   model: z.string().min(1).max(100).optional(),
-  serial: z.string().max(255).optional(), // NOT serialNumber
-  nickname: z.string().min(1).max(255).optional(), // NOT name
-  description: z.string().max(1000).optional(),
-  purchaseDate: z.string().datetime().optional(),
-  lastMaintenanceDate: z.string().datetime().optional(),
+  serial: z.string().max(255).optional(),
+  nickname: z.string().min(1).max(255).optional(),
+  purchaseDate: z.coerce.date().optional(),
+  lastMaintenanceDate: z.coerce.date().optional(),
   totalMaintenanceCount: z.coerce.number().int().min(0).optional(),
 });
 
-export const UpdateAssetSchema = CreateAssetSchema.partial().omit({ categoryId: true }).extend({
-  categoryId: z.coerce.number().int().positive().optional(), // Make categoryId optional for updates
-});
+/** Optional: shared refinement to keep dates consistent */
+const datesNotBefore = <T extends { purchaseDate?: Date; lastMaintenanceDate?: Date }>(
+  schema: z.ZodType<T>
+) =>
+  schema.refine(
+    (v) =>
+      !v.purchaseDate ||
+      !v.lastMaintenanceDate ||
+      v.lastMaintenanceDate >= v.purchaseDate,
+    { path: ["lastMaintenanceDate"], message: "lastMaintenanceDate must be on/after purchaseDate" }
+  );
+
+/** 2) Create schema (if you want the refinement on create) */
+export const CreateAssetSchema = datesNotBefore(CreateAssetBase);
+
+/** 3) Update schema: make everything optional, ensure categoryId rule, reapply refinement */
+export const UpdateAssetSchema = datesNotBefore(
+  CreateAssetBase.partial().merge(
+    z.object({
+      categoryId: z.coerce.number().int().positive().optional(),
+    })
+  )
+);
+
+/** (Optional) Guard: require at least one field for update */
+export const NonEmptyUpdateAssetSchema = UpdateAssetSchema.refine(
+  (v) => Object.keys(v).length > 0,
+  { message: "At least one field must be provided for update" }
+);
 
 export const UpdateMaintenanceStatsSchema = z.object({
   lastDate: z.string().datetime(),
@@ -705,28 +731,23 @@ export class UserGatewayController {
     }
   }
 
-  @Post('assets')
+ @Post('assets')
   @ApiOperation({ summary: 'Create a new customer asset' })
+  @ApiBody({ type: CreateAssetSwaggerDTO })
+  @ApiResponse({ status: 201, description: 'Customer asset created successfully' })
+  @ApiResponse({ status: 400, description: 'Bad request - Invalid input data' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
   async createAsset(
     @ActiveUser('customerId') customerId: number,
-    @Body() body: CreateAssetSwaggerDTO,
+    @Body() body: unknown,
   ) {
     try {
-      const validatedData = CreateAssetSchema.parse(body);
-            const processedData = {
-        ...validatedData,
-        purchaseDate: validatedData.purchaseDate 
-          ? new Date(validatedData.purchaseDate).toISOString() 
-          : undefined,
-        lastMaintenanceDate: validatedData.lastMaintenanceDate 
-          ? new Date(validatedData.lastMaintenanceDate).toISOString() 
-          : undefined,
-      };
-      
+      const validated: CreateAssetDTO = CreateAssetSchema.parse(body);
+
       const data = await this.userRawTcpClient.send({
         type: 'CREATE_CUSTOMER_ASSET',
         customerId,
-        data: processedData,
+        data: validated,
       });
 
       handlerErrorResponse(data);
