@@ -134,7 +134,6 @@ export class StaffGatewayController {
       handleZodError(error);
     }
   }
-
   @Post('create-inspection-report')
   async createInspectionReport(
     @Body() body: CreateInspectionReportDTO,

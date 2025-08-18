@@ -48,10 +48,10 @@ export type UpdateUserAndStaffProfileType = z.infer<
 
 export const GetBookingBelongToStaffQuerySchema = z.object({
   status: z.string().optional(),
-  page: z.number().int().min(1).optional().default(1),
-  limit: z.number().int().min(1).optional().default(10),
-  fromDate: z.string().optional(),
-  toDate: z.string().optional(),
+  page: z.coerce.number().int().min(1).optional().default(1),
+  limit: z.coerce.number().int().min(1).optional().default(10),
+  fromDate: z.string().datetime().optional(),
+  toDate: z.string().datetime().optional(),
   keyword: z.string().optional(),
 });
 export const GetBookingDetailSchema = z.object({
