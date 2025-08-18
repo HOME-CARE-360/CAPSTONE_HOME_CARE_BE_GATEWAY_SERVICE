@@ -51,7 +51,7 @@ export const GetServicesQuerySchema = z.object({
   name: z.string().optional(),
   providerIds: z
     .preprocess((value) => {
-      if (typeof value === 'string') {
+      if (typeof value === 'string' || typeof value === 'number') {
         return [Number(value)];
       }
       return value;
@@ -59,7 +59,7 @@ export const GetServicesQuerySchema = z.object({
     .optional(),
   categories: z
     .preprocess((value) => {
-      if (typeof value === 'string') {
+      if (typeof value === 'string' || typeof value === 'number') {
         return [Number(value)];
       }
       return value;

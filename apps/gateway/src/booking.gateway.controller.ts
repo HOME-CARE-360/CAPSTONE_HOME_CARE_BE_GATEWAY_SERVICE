@@ -18,16 +18,13 @@ import { ApiQuery } from '@nestjs/swagger';
 export class BookingsGatewayController {
   constructor(
     @Inject(BOOKING_SERVICE) private readonly bookingClient: ClientProxy,
-  ) {}
+  ) { }
   @Post('create-service-request')
   @ZodSerializerDto(GetListCategoryResDTO)
   async getListService(
     @Body() body: CreateServiceRequestBodySchemaDTO,
     @ActiveUser() user: AccessTokenPayload,
   ) {
-    console.log(user);
-    console.log('ja');
-
     try {
       return await lastValueFrom(
         this.bookingClient.send(
