@@ -517,7 +517,20 @@ export class UserGatewayController {
       handleZodError(error);
     }
   }
-  @Post('create-review/:bookingId')
+ @Post('create-review/:bookingId')
+  @ApiOperation({ summary: 'Create a new review for a booking' })
+  @ApiParam({
+    name: 'bookingId',
+    type: Number,
+    description: 'ID of the booking to review',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Review created successfully.',
+  })
+  @ApiResponse({ status: 400, description: 'Invalid input or rating.' })
+  @ApiResponse({ status: 401, description: 'Unauthorized if customerId is missing.' })
+  @ApiResponse({ status: 500, description: 'Internal server error.' })
   async createReview(
     @Param('bookingId', ParseIntPipe) bookingId: number,
     @ActiveUser('customerId') customerId: number,
@@ -526,28 +539,23 @@ export class UserGatewayController {
     try {
       const { rating, comment } = body;
 
-      if (rating < 1 || rating > 5) {
-        throw new HttpException('Rating must be between 1 and 5', 400);
-      }
-
       const data = await this.userRawTcpClient.send({
         type: 'CREATE_REVIEW',
-        payload: {
-          customerId,
-          bookingId,
-          rating,
-          comment,
-        },
+        customerId,
+        bookingId,
+        rating,
+        comment,
       });
 
       handlerErrorResponse(data);
       return data;
     } catch (error) {
-      if (error instanceof HttpException) throw error;
+      if (error instanceof HttpException) {
+        throw error;
+      }
       handleZodError(error);
     }
   }
-
   @Get('transactions')
   async getTransactions(
     @ActiveUser('userId') userId: number,
