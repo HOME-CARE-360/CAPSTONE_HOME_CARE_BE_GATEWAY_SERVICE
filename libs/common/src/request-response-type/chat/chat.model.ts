@@ -38,7 +38,7 @@ export const CreateMessageBodySchema = z.object({
 
 // Query: Get message list
 export const GetListMessageQuerySchema = z.object({
-  conversationId: z.number().int(),
+  conversationId: z.coerce.number().int().positive(),
   page: z.coerce.number().int().default(1),
   limit: z.coerce.number().int().default(20),
 });
