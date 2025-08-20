@@ -54,7 +54,6 @@ export class ProviderGatewayController {
       handleZodError(error);
     }
   }
-
   @Get('reviews')
   async getReviewsByProviderId(@ActiveUser('providerId') providerId: number) {
     try {
