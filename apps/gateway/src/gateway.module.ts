@@ -113,6 +113,7 @@ import { ChatGateway } from './chat.gateway.controller';
     PublicGatewayController,
     ManageBookingsGatewayController,
     StaffGatewayController,
+    UserGatewayController,
     AdminGatewayController,
     PaymentGatewayController,
     // NotificationGatewayController,
