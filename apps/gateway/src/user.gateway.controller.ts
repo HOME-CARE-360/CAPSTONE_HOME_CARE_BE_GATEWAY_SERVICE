@@ -21,7 +21,6 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { darcula } from '@react-email/components';
 import { handlerErrorResponse, handleZodError } from 'libs/common/helpers';
 import { USER_SERVICE } from 'libs/common/src/constants/service-name.constant';
 import { ActiveUser } from 'libs/common/src/decorator/active-user.decorator';
@@ -281,7 +280,7 @@ class AssetIdsSwaggerDTO {
   @ApiProperty({
     description: 'Array of asset IDs',
     type: [Number],
-    minItems: 1,
+    minItems: 1
   })
   assetIds: number[];
 }
@@ -292,7 +291,7 @@ export class UserGatewayController {
   constructor(
     @Inject(USER_SERVICE)
     private readonly userRawTcpClient: RawTcpClientService,
-  ) {}
+  ) { }
 
   @Patch('update-customer-information')
   async updateCustomer(
@@ -568,6 +567,7 @@ export class UserGatewayController {
     }
   }
   @Post('create-review/:bookingId')
+  @Post('create-review/:bookingId')
   @ApiOperation({ summary: 'Create a new review for a booking' })
   @ApiParam({
     name: 'bookingId',
@@ -759,6 +759,7 @@ export class UserGatewayController {
     try {
       const options = MaintenanceSuggestionOptionsSchema.parse(rawQuery);
 
+
       const data = await this.userRawTcpClient.send({
         type: 'SUGGEST_FOR_CUSTOMER',
         customerId,
@@ -800,6 +801,7 @@ export class UserGatewayController {
     }
   }
 
+  @Post('assets')
   @Post('assets')
   @ApiOperation({ summary: 'Create a new customer asset' })
   @ApiBody({ type: CreateAssetSwaggerDTO })
@@ -844,11 +846,16 @@ export class UserGatewayController {
         ...validatedData,
         purchaseDate: validatedData.purchaseDate
           ? new Date(validatedData.purchaseDate).toISOString()
+        purchaseDate: validatedData.purchaseDate
+          ? new Date(validatedData.purchaseDate).toISOString()
           : undefined,
+        lastMaintenanceDate: validatedData.lastMaintenanceDate
+          ? new Date(validatedData.lastMaintenanceDate).toISOString()
         lastMaintenanceDate: validatedData.lastMaintenanceDate
           ? new Date(validatedData.lastMaintenanceDate).toISOString()
           : undefined,
       };
+
 
       const data = await this.userRawTcpClient.send({
         type: 'UPDATE_CUSTOMER_ASSET',
@@ -913,6 +920,7 @@ export class UserGatewayController {
     try {
       const validatedData = AssetIdsSchema.parse(body);
 
+
       const data = await this.userRawTcpClient.send({
         type: 'GET_CUSTOMER_ASSETS_BY_IDS',
         customerId,
@@ -936,6 +944,7 @@ export class UserGatewayController {
   ) {
     try {
       const validatedData = UpdateMaintenanceStatsSchema.parse(body);
+
 
       const data = await this.userRawTcpClient.send({
         type: 'UPDATE_ASSET_MAINTENANCE_STATS',
