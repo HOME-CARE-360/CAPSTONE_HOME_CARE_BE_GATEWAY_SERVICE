@@ -25,6 +25,7 @@ async function main() {
 
     // Cấp 2: Dọn dẹp
     await Promise.all([
+
         ensureCategory('Dọn dẹp nhà', cleaning.id),
         ensureCategory('Tổng vệ sinh', cleaning.id),
         ensureCategory('Vệ sinh sofa', cleaning.id),

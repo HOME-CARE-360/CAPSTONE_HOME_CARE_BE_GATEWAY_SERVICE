@@ -62,7 +62,7 @@ export class BookingsGatewayController {
     try {
       return await lastValueFrom(
         this.bookingClient.send(
-          { cmd: 'get-user-conversation' },
+          { cmd: 'get-messages' },
           { user, query },
         ),
       );
