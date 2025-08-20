@@ -33,7 +33,6 @@ import {
 import { RawTcpClientService } from 'libs/common/src/tcp/raw-tcp-client.service';
 import {
   UpdateUserAndStaffForProviderDTO,
-  UpdateUserAndStaffProfileDTO,
 } from 'libs/common/src/request-response-type/staff/staff.dto';
 @Controller('manage-staffs')
 @UseGuards(VerifiedProviderGuard)
@@ -42,7 +41,7 @@ export class ManageStaffGatewayController {
     @Inject(PROVIDER_SERVICE) private readonly providerClient: ClientProxy,
     @Inject(USER_SERVICE)
     private readonly userRawTcpClient: RawTcpClientService,
-  ) {}
+  ) { }
   @Post('create-staff')
   @ZodSerializerDto(MessageResDTO)
   async createService(
