@@ -256,4 +256,88 @@ export class PaymentGatewayController {
       handleZodError(error);
     }
   }
+@Post('pay-existing-service-request')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        serviceRequestId: { 
+          type: 'number', 
+          example: 123,
+          description: 'ID of the service request to pay for'
+        },
+        amount: { 
+          type: 'number', 
+          example: 250000,
+          description: 'Amount to pay in VND'
+        },
+        paymentMethod: {
+          type: 'string',
+          enum: Object.values(PaymentMethod),
+          example: PaymentMethod.WALLET,
+          description: 'Payment method (WALLET or BANK_TRANSFER)',
+        },
+      },
+      required: ['serviceRequestId', 'amount'],
+    },
+  })
+  async payExistingServiceRequest(
+    @Body() body: { 
+      serviceRequestId: number; 
+      amount: number;
+      paymentMethod?: PaymentMethod;
+    },
+    @ActiveUser('userId') userId: number,
+  ) {
+    try {
+      console.log('Paying existing service request with body:', {
+        ...body,
+        userId,
+        timestamp: new Date().toISOString(),
+      });
+
+    
+      if (!body.amount || typeof body.amount !== 'number' || body.amount <= 0) {
+        throw new HttpException(
+          {
+            success: false,
+            message: 'amount is required and must be a positive number',
+            error: 'Validation Error',
+          },
+          400,
+        );
+      }
+
+      const data = await this.paymentRawTcpClient.send({
+        type: 'PAY_EXISTING_SERVICE_REQUEST',
+        data: {
+          serviceRequestId: body.serviceRequestId,
+          userId,
+          amount: body.amount,
+          paymentMethod: body.paymentMethod || PaymentMethod.BANK_TRANSFER,
+        },
+      });
+
+      console.log('Service request payment processed successfully:', {
+        serviceRequestId: body.serviceRequestId,
+        userId,
+        success: data?.success,
+        timestamp: new Date().toISOString(),
+      });
+
+      handlerErrorResponse(data);
+      return data;
+    } catch (error) {
+      console.error('Error paying existing service request:', {
+        serviceRequestId: body?.serviceRequestId,
+        userId,
+        error: error?.message,
+        timestamp: new Date().toISOString(),
+      });
+
+      if (error instanceof HttpException) throw error;
+      handleZodError(error);
+    }
+  }
 }
+
