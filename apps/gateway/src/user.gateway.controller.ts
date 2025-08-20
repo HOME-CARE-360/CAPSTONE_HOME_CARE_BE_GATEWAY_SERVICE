@@ -152,22 +152,22 @@ export type UpdateMaintenanceStatsDTO = z.infer<
 export type AssetIdsDTO = z.infer<typeof AssetIdsSchema>;
 
 // DTO classes for Swagger documentation - Updated field names
-class MaintenanceSuggestionOptionsSwaggerDTO {
-  @ApiProperty({ required: false, default: 'byAssetType' })
-  type?: string;
+// class MaintenanceSuggestionOptionsSwaggerDTO {
+//   @ApiProperty({ required: false, default: 'byAssetType' })
+//   type?: string;
 
-  @ApiProperty({ required: false, minimum: 1, maximum: 50 })
-  limit?: number;
+//   @ApiProperty({ required: false, minimum: 1, maximum: 50 })
+//   limit?: number;
 
-  @ApiProperty({ required: false, enum: ['HIGH', 'MEDIUM', 'LOW'] })
-  priorityFilter?: 'HIGH' | 'MEDIUM' | 'LOW';
+//   @ApiProperty({ required: false, enum: ['HIGH', 'MEDIUM', 'LOW'] })
+//   priorityFilter?: 'HIGH' | 'MEDIUM' | 'LOW';
 
-  @ApiProperty({ required: false })
-  dueSoon?: boolean;
+//   @ApiProperty({ required: false })
+//   dueSoon?: boolean;
 
-  @ApiProperty({ required: false, minimum: 1 })
-  categoryId?: number;
-}
+//   @ApiProperty({ required: false, minimum: 1 })
+//   categoryId?: number;
+// }
 
 class CreateAssetSwaggerDTO {
   @ApiProperty({
@@ -802,7 +802,6 @@ export class UserGatewayController {
   }
 
   @Post('assets')
-  @Post('assets')
   @ApiOperation({ summary: 'Create a new customer asset' })
   @ApiBody({ type: CreateAssetSwaggerDTO })
   @ApiResponse({
@@ -846,16 +845,11 @@ export class UserGatewayController {
         ...validatedData,
         purchaseDate: validatedData.purchaseDate
           ? new Date(validatedData.purchaseDate).toISOString()
-        purchaseDate: validatedData.purchaseDate
-          ? new Date(validatedData.purchaseDate).toISOString()
           : undefined,
-        lastMaintenanceDate: validatedData.lastMaintenanceDate
-          ? new Date(validatedData.lastMaintenanceDate).toISOString()
         lastMaintenanceDate: validatedData.lastMaintenanceDate
           ? new Date(validatedData.lastMaintenanceDate).toISOString()
           : undefined,
       };
-
 
       const data = await this.userRawTcpClient.send({
         type: 'UPDATE_CUSTOMER_ASSET',
@@ -920,7 +914,6 @@ export class UserGatewayController {
     try {
       const validatedData = AssetIdsSchema.parse(body);
 
-
       const data = await this.userRawTcpClient.send({
         type: 'GET_CUSTOMER_ASSETS_BY_IDS',
         customerId,
@@ -944,7 +937,6 @@ export class UserGatewayController {
   ) {
     try {
       const validatedData = UpdateMaintenanceStatsSchema.parse(body);
-
 
       const data = await this.userRawTcpClient.send({
         type: 'UPDATE_ASSET_MAINTENANCE_STATS',
