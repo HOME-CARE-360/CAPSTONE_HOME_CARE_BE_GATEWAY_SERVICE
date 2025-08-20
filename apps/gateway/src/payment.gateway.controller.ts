@@ -256,20 +256,20 @@ export class PaymentGatewayController {
       handleZodError(error);
     }
   }
-@Post('pay-existing-service-request')
+  @Post('pay-existing-service-request')
   @ApiBody({
     schema: {
       type: 'object',
       properties: {
-        serviceRequestId: { 
-          type: 'number', 
+        serviceRequestId: {
+          type: 'number',
           example: 123,
-          description: 'ID of the service request to pay for'
+          description: 'ID of the service request to pay for',
         },
-        amount: { 
-          type: 'number', 
+        amount: {
+          type: 'number',
           example: 250000,
-          description: 'Amount to pay in VND'
+          description: 'Amount to pay in VND',
         },
         paymentMethod: {
           type: 'string',
@@ -282,8 +282,9 @@ export class PaymentGatewayController {
     },
   })
   async payExistingServiceRequest(
-    @Body() body: { 
-      serviceRequestId: number; 
+    @Body()
+    body: {
+      serviceRequestId: number;
       amount: number;
       paymentMethod?: PaymentMethod;
     },
@@ -296,7 +297,6 @@ export class PaymentGatewayController {
         timestamp: new Date().toISOString(),
       });
 
-    
       if (!body.amount || typeof body.amount !== 'number' || body.amount <= 0) {
         throw new HttpException(
           {
@@ -340,4 +340,3 @@ export class PaymentGatewayController {
     }
   }
 }
-

@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Inject, Post, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpException,
+  Inject,
+  Post,
+  Query,
+} from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { handleZodError } from 'libs/common/helpers';
 import { BOOKING_SERVICE } from 'libs/common/src/constants/service-name.constant';
@@ -18,7 +26,7 @@ import { ApiQuery } from '@nestjs/swagger';
 export class BookingsGatewayController {
   constructor(
     @Inject(BOOKING_SERVICE) private readonly bookingClient: ClientProxy,
-  ) { }
+  ) {}
   @Post('create-service-request')
   @ZodSerializerDto(GetListCategoryResDTO)
   async getListService(
@@ -26,12 +34,23 @@ export class BookingsGatewayController {
     @ActiveUser() user: AccessTokenPayload,
   ) {
     try {
-      return await lastValueFrom(
+      const data = await lastValueFrom(
         this.bookingClient.send(
           { cmd: 'create-service-request' },
           { body, userId: user.userId, customerID: user.customerId },
         ),
       );
+      console.log(data);
+      if (data?.statusCode && data.statusCode >= 400) {
+        throw new HttpException(
+          {
+            error: data.error ?? 'Internal Server Error',
+            message: data.message ?? 'Unknown error',
+          },
+          data.statusCode,
+        );
+      }
+      return data;
     } catch (error) {
       console.log(error);
 
@@ -61,10 +80,7 @@ export class BookingsGatewayController {
   ) {
     try {
       return await lastValueFrom(
-        this.bookingClient.send(
-          { cmd: 'get-messages' },
-          { user, query },
-        ),
+        this.bookingClient.send({ cmd: 'get-messages' }, { user, query }),
       );
     } catch (error) {
       console.log(error);

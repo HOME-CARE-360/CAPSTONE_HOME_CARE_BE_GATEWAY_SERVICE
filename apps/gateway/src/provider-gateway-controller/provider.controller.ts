@@ -11,7 +11,10 @@ import {
 import { ClientProxy } from '@nestjs/microservices';
 import { ApiQuery } from '@nestjs/swagger';
 import { handlerErrorResponse, handleZodError } from 'libs/common/helpers';
-import { PROVIDER_SERVICE, USER_SERVICE } from 'libs/common/src/constants/service-name.constant';
+import {
+  PROVIDER_SERVICE,
+  USER_SERVICE,
+} from 'libs/common/src/constants/service-name.constant';
 import { ActiveUser } from 'libs/common/src/decorator/active-user.decorator';
 import { VerifiedProviderGuard } from 'libs/common/src/guards/verified-provider.guard';
 import { GetProviderStatsQueryType } from 'libs/common/src/request-response-type/dashboard/dashboard.model';
@@ -30,7 +33,7 @@ export class UserGatewayController {
     @Inject(USER_SERVICE)
     private readonly userRawTcpClient: RawTcpClientService,
     @Inject(PROVIDER_SERVICE) private readonly providerClient: ClientProxy,
-  ) { }
+  ) {}
 
   @Patch('update-service-provider-information')
   async updateServiceProviderInformation(
@@ -90,8 +93,11 @@ export class UserGatewayController {
     example: GranularitySwaggerEnum.day,
     description: 'Mặc định: day',
   })
-  @Get("dashboard")
-  async getStatsMsg(@Query() params: GetProviderStatsQueryType, @ActiveUser("providerId") providerId: number) {
+  @Get('dashboard')
+  async getStatsMsg(
+    @Query() params: GetProviderStatsQueryType,
+    @ActiveUser('providerId') providerId: number,
+  ) {
     {
       try {
         return await lastValueFrom(
@@ -99,7 +105,7 @@ export class UserGatewayController {
             { cmd: 'dashboard' },
             {
               providerId,
-              params
+              params,
             },
           ),
         );

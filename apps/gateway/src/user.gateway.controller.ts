@@ -99,15 +99,20 @@ const CreateAssetBase = z.object({
 });
 
 /** Optional: shared refinement to keep dates consistent */
-const datesNotBefore = <T extends { purchaseDate?: Date; lastMaintenanceDate?: Date }>(
-  schema: z.ZodType<T>
+const datesNotBefore = <
+  T extends { purchaseDate?: Date; lastMaintenanceDate?: Date },
+>(
+  schema: z.ZodType<T>,
 ) =>
   schema.refine(
     (v) =>
       !v.purchaseDate ||
       !v.lastMaintenanceDate ||
       v.lastMaintenanceDate >= v.purchaseDate,
-    { path: ["lastMaintenanceDate"], message: "lastMaintenanceDate must be on/after purchaseDate" }
+    {
+      path: ['lastMaintenanceDate'],
+      message: 'lastMaintenanceDate must be on/after purchaseDate',
+    },
   );
 
 /** 2) Create schema (if you want the refinement on create) */
@@ -118,14 +123,14 @@ export const UpdateAssetSchema = datesNotBefore(
   CreateAssetBase.partial().merge(
     z.object({
       categoryId: z.coerce.number().int().positive().optional(),
-    })
-  )
+    }),
+  ),
 );
 
 /** (Optional) Guard: require at least one field for update */
 export const NonEmptyUpdateAssetSchema = UpdateAssetSchema.refine(
   (v) => Object.keys(v).length > 0,
-  { message: "At least one field must be provided for update" }
+  { message: 'At least one field must be provided for update' },
 );
 
 export const UpdateMaintenanceStatsSchema = z.object({
@@ -137,10 +142,14 @@ export const AssetIdsSchema = z.object({
   assetIds: z.array(z.coerce.number().int().positive()).min(1),
 });
 
-export type MaintenanceSuggestionOptionsDTO = z.infer<typeof MaintenanceSuggestionOptionsSchema>;
+export type MaintenanceSuggestionOptionsDTO = z.infer<
+  typeof MaintenanceSuggestionOptionsSchema
+>;
 export type CreateAssetDTO = z.infer<typeof CreateAssetSchema>;
 export type UpdateAssetDTO = z.infer<typeof UpdateAssetSchema>;
-export type UpdateMaintenanceStatsDTO = z.infer<typeof UpdateMaintenanceStatsSchema>;
+export type UpdateMaintenanceStatsDTO = z.infer<
+  typeof UpdateMaintenanceStatsSchema
+>;
 export type AssetIdsDTO = z.infer<typeof AssetIdsSchema>;
 
 // DTO classes for Swagger documentation - Updated field names
@@ -162,7 +171,10 @@ class MaintenanceSuggestionOptionsSwaggerDTO {
 }
 
 class CreateAssetSwaggerDTO {
-  @ApiProperty({ description: 'Category ID (REQUIRED - must exist in database)', minimum: 1 })
+  @ApiProperty({
+    description: 'Category ID (REQUIRED - must exist in database)',
+    minimum: 1,
+  })
   categoryId: number;
 
   @ApiProperty({ required: false, description: 'Asset brand', maxLength: 100 })
@@ -171,22 +183,41 @@ class CreateAssetSwaggerDTO {
   @ApiProperty({ required: false, description: 'Asset model', maxLength: 100 })
   model?: string;
 
-  @ApiProperty({ required: false, description: 'Serial number', maxLength: 255 })
+  @ApiProperty({
+    required: false,
+    description: 'Serial number',
+    maxLength: 255,
+  })
   serial?: string;
 
-  @ApiProperty({ required: false, description: 'Asset nickname/display name', maxLength: 255 })
+  @ApiProperty({
+    required: false,
+    description: 'Asset nickname/display name',
+    maxLength: 255,
+  })
   nickname?: string;
 
-  @ApiProperty({ required: false, description: 'Asset description', maxLength: 1000 })
+  @ApiProperty({
+    required: false,
+    description: 'Asset description',
+    maxLength: 1000,
+  })
   description?: string;
 
   @ApiProperty({ required: false, description: 'Purchase date (ISO string)' })
   purchaseDate?: string;
 
-  @ApiProperty({ required: false, description: 'Last maintenance date (ISO string)' })
+  @ApiProperty({
+    required: false,
+    description: 'Last maintenance date (ISO string)',
+  })
   lastMaintenanceDate?: string;
 
-  @ApiProperty({ required: false, description: 'Total maintenance count', minimum: 0 })
+  @ApiProperty({
+    required: false,
+    description: 'Total maintenance count',
+    minimum: 0,
+  })
   totalMaintenanceCount?: number;
 }
 
@@ -200,22 +231,41 @@ class UpdateAssetSwaggerDTO {
   @ApiProperty({ required: false, description: 'Asset model', maxLength: 100 })
   model?: string;
 
-  @ApiProperty({ required: false, description: 'Serial number', maxLength: 255 })
+  @ApiProperty({
+    required: false,
+    description: 'Serial number',
+    maxLength: 255,
+  })
   serial?: string;
 
-  @ApiProperty({ required: false, description: 'Asset nickname/display name', maxLength: 255 })
+  @ApiProperty({
+    required: false,
+    description: 'Asset nickname/display name',
+    maxLength: 255,
+  })
   nickname?: string;
 
-  @ApiProperty({ required: false, description: 'Asset description', maxLength: 1000 })
+  @ApiProperty({
+    required: false,
+    description: 'Asset description',
+    maxLength: 1000,
+  })
   description?: string;
 
   @ApiProperty({ required: false, description: 'Purchase date (ISO string)' })
   purchaseDate?: string;
 
-  @ApiProperty({ required: false, description: 'Last maintenance date (ISO string)' })
+  @ApiProperty({
+    required: false,
+    description: 'Last maintenance date (ISO string)',
+  })
   lastMaintenanceDate?: string;
 
-  @ApiProperty({ required: false, description: 'Total maintenance count', minimum: 0 })
+  @ApiProperty({
+    required: false,
+    description: 'Total maintenance count',
+    minimum: 0,
+  })
   totalMaintenanceCount?: number;
 }
 
@@ -228,10 +278,10 @@ class UpdateMaintenanceStatsSwaggerDTO {
 }
 
 class AssetIdsSwaggerDTO {
-  @ApiProperty({ 
-    description: 'Array of asset IDs', 
-    type: [Number], 
-    minItems: 1 
+  @ApiProperty({
+    description: 'Array of asset IDs',
+    type: [Number],
+    minItems: 1,
   })
   assetIds: number[];
 }
@@ -517,7 +567,7 @@ export class UserGatewayController {
       handleZodError(error);
     }
   }
- @Post('create-review/:bookingId')
+  @Post('create-review/:bookingId')
   @ApiOperation({ summary: 'Create a new review for a booking' })
   @ApiParam({
     name: 'bookingId',
@@ -529,7 +579,10 @@ export class UserGatewayController {
     description: 'Review created successfully.',
   })
   @ApiResponse({ status: 400, description: 'Invalid input or rating.' })
-  @ApiResponse({ status: 401, description: 'Unauthorized if customerId is missing.' })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized if customerId is missing.',
+  })
   @ApiResponse({ status: 500, description: 'Internal server error.' })
   async createReview(
     @Param('bookingId', ParseIntPipe) bookingId: number,
@@ -688,12 +741,15 @@ export class UserGatewayController {
     }
   }
 
-
   @Get('suggestions')
   @ApiOperation({ summary: 'Get maintenance suggestions for customer' })
   @ApiQuery({ name: 'type', required: false, type: String })
   @ApiQuery({ name: 'limit', required: false, type: Number })
-  @ApiQuery({ name: 'priorityFilter', required: false, enum: ['HIGH', 'MEDIUM', 'LOW'] })
+  @ApiQuery({
+    name: 'priorityFilter',
+    required: false,
+    enum: ['HIGH', 'MEDIUM', 'LOW'],
+  })
   @ApiQuery({ name: 'dueSoon', required: false, type: Boolean })
   @ApiQuery({ name: 'categoryId', required: false, type: Number })
   async getMaintenanceSuggestions(
@@ -702,7 +758,7 @@ export class UserGatewayController {
   ) {
     try {
       const options = MaintenanceSuggestionOptionsSchema.parse(rawQuery);
-      
+
       const data = await this.userRawTcpClient.send({
         type: 'SUGGEST_FOR_CUSTOMER',
         customerId,
@@ -719,7 +775,12 @@ export class UserGatewayController {
 
   @Post('sync-stats')
   @ApiOperation({ summary: 'Sync maintenance stats for customer assets' })
-  @ApiQuery({ name: 'assetId', required: false, type: Number, description: 'Optional specific asset ID to sync' })
+  @ApiQuery({
+    name: 'assetId',
+    required: false,
+    type: Number,
+    description: 'Optional specific asset ID to sync',
+  })
   async syncMaintenanceStats(
     @ActiveUser('customerId') customerId: number,
     @Query('assetId') assetId?: number,
@@ -739,10 +800,13 @@ export class UserGatewayController {
     }
   }
 
- @Post('assets')
+  @Post('assets')
   @ApiOperation({ summary: 'Create a new customer asset' })
   @ApiBody({ type: CreateAssetSwaggerDTO })
-  @ApiResponse({ status: 201, description: 'Customer asset created successfully' })
+  @ApiResponse({
+    status: 201,
+    description: 'Customer asset created successfully',
+  })
   @ApiResponse({ status: 400, description: 'Bad request - Invalid input data' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   async createAsset(
@@ -778,14 +842,14 @@ export class UserGatewayController {
       const validatedData = UpdateAssetSchema.parse(body);
       const processedData = {
         ...validatedData,
-        purchaseDate: validatedData.purchaseDate 
-          ? new Date(validatedData.purchaseDate).toISOString() 
+        purchaseDate: validatedData.purchaseDate
+          ? new Date(validatedData.purchaseDate).toISOString()
           : undefined,
-        lastMaintenanceDate: validatedData.lastMaintenanceDate 
-          ? new Date(validatedData.lastMaintenanceDate).toISOString() 
+        lastMaintenanceDate: validatedData.lastMaintenanceDate
+          ? new Date(validatedData.lastMaintenanceDate).toISOString()
           : undefined,
       };
-      
+
       const data = await this.userRawTcpClient.send({
         type: 'UPDATE_CUSTOMER_ASSET',
         customerId,
@@ -848,7 +912,7 @@ export class UserGatewayController {
   ) {
     try {
       const validatedData = AssetIdsSchema.parse(body);
-      
+
       const data = await this.userRawTcpClient.send({
         type: 'GET_CUSTOMER_ASSETS_BY_IDS',
         customerId,
@@ -872,7 +936,7 @@ export class UserGatewayController {
   ) {
     try {
       const validatedData = UpdateMaintenanceStatsSchema.parse(body);
-      
+
       const data = await this.userRawTcpClient.send({
         type: 'UPDATE_ASSET_MAINTENANCE_STATS',
         assetId,

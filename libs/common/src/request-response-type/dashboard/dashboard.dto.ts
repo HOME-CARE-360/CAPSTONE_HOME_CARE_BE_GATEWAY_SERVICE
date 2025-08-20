@@ -1,4 +1,6 @@
-import { createZodDto } from "nestjs-zod";
-import { GetProviderStatsQuerySchema } from "./dashboard.model";
+import { createZodDto } from 'nestjs-zod';
+import { GetProviderStatsQuerySchema } from './dashboard.model';
 
-export class GetProviderStatsQueryDTO extends createZodDto(GetProviderStatsQuerySchema) { }
+export class GetProviderStatsQueryDTO extends createZodDto(
+  GetProviderStatsQuerySchema,
+) {}
