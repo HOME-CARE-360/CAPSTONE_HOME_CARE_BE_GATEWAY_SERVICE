@@ -86,7 +86,9 @@ export const MaintenanceSuggestionOptionsSchema = z.object({
   dueSoon: z.coerce.boolean().optional(),
   categoryId: z.coerce.number().int().positive().optional(),
 });
+
 const CreateAssetBase = z.object({
+  customerId: z.coerce.number().int().positive(),   
   categoryId: z.coerce.number().int().positive(),
   brand: z.string().min(1).max(100).optional(),
   model: z.string().min(1).max(100).optional(),
@@ -96,6 +98,7 @@ const CreateAssetBase = z.object({
   lastMaintenanceDate: z.coerce.date().optional(),
   totalMaintenanceCount: z.coerce.number().int().min(0).optional(),
 });
+
 
 /** Optional: shared refinement to keep dates consistent */
 const datesNotBefore = <
@@ -801,35 +804,30 @@ export class UserGatewayController {
     }
   }
 
-  @Post('assets')
-  @ApiOperation({ summary: 'Create a new customer asset' })
-  @ApiBody({ type: CreateAssetSwaggerDTO })
-  @ApiResponse({
-    status: 201,
-    description: 'Customer asset created successfully',
-  })
-  @ApiResponse({ status: 400, description: 'Bad request - Invalid input data' })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async createAsset(
-    @ActiveUser('customerId') customerId: number,
-    @Body() body: unknown,
-  ) {
-    try {
-      const validated: CreateAssetDTO = CreateAssetSchema.parse(body);
+ @Post('assets')
+@ApiOperation({ summary: 'Create a new customer asset' })
+@ApiBody({ type: CreateAssetSwaggerDTO })
+@ApiResponse({ status: 201, description: 'Customer asset created successfully' })
+@ApiResponse({ status: 400, description: 'Bad request - Invalid input data' })
+@ApiResponse({ status: 401, description: 'Unauthorized' })
+async createAsset(@Body() body: unknown) {
+  try {
+    const validated: CreateAssetDTO = CreateAssetSchema.parse(body);
 
-      const data = await this.userRawTcpClient.send({
-        type: 'CREATE_CUSTOMER_ASSET',
-        customerId,
-        data: validated,
-      });
+    // lấy luôn customerId trong validated
+    const data = await this.userRawTcpClient.send({
+      type: 'CREATE_CUSTOMER_ASSET',
+      data: validated,
+    });
 
-      handlerErrorResponse(data);
-      return data;
-    } catch (error) {
-      if (error instanceof HttpException) throw error;
-      handleZodError(error);
-    }
+    handlerErrorResponse(data);
+    return data;
+  } catch (error) {
+    if (error instanceof HttpException) throw error;
+    handleZodError(error);
   }
+}
+
 
   @Patch('assets/:assetId')
   @ApiOperation({ summary: 'Update customer asset' })
@@ -888,9 +886,15 @@ export class UserGatewayController {
     }
   }
 
-  @Get('assets')
-  @ApiOperation({ summary: 'Get all customer assets' })
-  async getAssets(@ActiveUser('customerId') customerId: number) {
+  @Get(':customerId/assets')
+  @ApiOperation({ summary: 'Get all assets of a customer' })
+  @ApiParam({ name: 'customerId', type: Number, required: true, description: 'Customer ID' })
+  @ApiResponse({ status: 200, description: 'Assets retrieved successfully' })
+  @ApiResponse({ status: 400, description: 'Bad request' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 404, description: 'Customer not found' })
+  @ApiResponse({ status: 500, description: 'Internal server error' })
+  async getAssets(@Param('customerId', ParseIntPipe) customerId: number) {
     try {
       const data = await this.userRawTcpClient.send({
         type: 'GET_CUSTOMER_ASSETS',
@@ -898,35 +902,40 @@ export class UserGatewayController {
       });
 
       handlerErrorResponse(data);
-      return data;
+
+      return {
+        success: true,
+        message: 'Assets retrieved successfully',
+        data,
+      };
     } catch (error) {
       if (error instanceof HttpException) throw error;
       handleZodError(error);
     }
   }
 
-  @Get('assets/by-ids')
-  @ApiOperation({ summary: 'Get customer assets by IDs' })
-  async getAssetsByIds(
-    @ActiveUser('customerId') customerId: number,
-    @Body() body: AssetIdsSwaggerDTO,
-  ) {
-    try {
-      const validatedData = AssetIdsSchema.parse(body);
+  // @Get('assets/by-ids')
+  // @ApiOperation({ summary: 'Get customer assets by IDs' })
+  // async getAssetsByIds(
+  //   @Param('customerId', ParseIntPipe) customerId: number,
+  //   @Body() body: AssetIdsSwaggerDTO,
+  // ) {
+  //   try {
+  //     const validatedData = AssetIdsSchema.parse(body);
 
-      const data = await this.userRawTcpClient.send({
-        type: 'GET_CUSTOMER_ASSETS_BY_IDS',
-        customerId,
-        assetIds: validatedData.assetIds,
-      });
+  //     const data = await this.userRawTcpClient.send({
+  //       type: 'GET_CUSTOMER_ASSETS_BY_IDS',
+  //       customerId,
+  //       assetIds: validatedData.assetIds,
+  //     });
 
-      handlerErrorResponse(data);
-      return data;
-    } catch (error) {
-      if (error instanceof HttpException) throw error;
-      handleZodError(error);
-    }
-  }
+  //     handlerErrorResponse(data);
+  //     return data;
+  //   } catch (error) {
+  //     if (error instanceof HttpException) throw error;
+  //     handleZodError(error);
+  //   }
+  // }
 
   @Patch('assets/:assetId/stats')
   @ApiOperation({ summary: 'Update asset maintenance statistics' })
