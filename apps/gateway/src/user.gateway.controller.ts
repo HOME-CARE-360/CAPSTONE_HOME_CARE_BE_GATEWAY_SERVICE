@@ -857,14 +857,8 @@ async createAsset(
         type: 'GET_CUSTOMER_ASSETS',
         customerId,
       });
-
       handlerErrorResponse(data);
-
-      return {
-        success: true,
-        message: 'Assets retrieved successfully',
-        data,
-      };
+      return data;
     } catch (error) {
       if (error instanceof HttpException) throw error;
       handleZodError(error);

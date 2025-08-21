@@ -125,12 +125,17 @@ export class PaymentGatewayController {
       required: ['bookingId'],
     },
   })
+
   async createProposalTransaction(
     @Body() body: { bookingId: number; method?: PaymentMethod },
     @ActiveUser('userId') userId: number,
   ) {
     try {
-      console.log('Creating proposal transaction with body:', body);
+      console.log('Creating proposal transaction with body:', {
+        ...body,
+        userId,
+        timestamp: new Date().toISOString(),
+      });
       const data = await this.paymentRawTcpClient.send({
         type: 'CREATE_PROPOSAL_TRANSACTION',
         data: {
