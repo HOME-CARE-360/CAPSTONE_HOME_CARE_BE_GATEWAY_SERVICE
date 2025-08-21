@@ -72,16 +72,14 @@ export const CreateInspectionReportSchema = z.object({
     .number()
     .int()
     .min(1, { message: 'estimatedTime must be at least 1 minute' })
-    .max(600, { message: 'estimatedTime must not exceed 600 minutes' })
-    .optional(),
+    .max(600, { message: 'estimatedTime must not exceed 600 minutes' }),
   note: z
     .string()
-    .max(1000, { message: 'note must not exceed 1000 characters' })
-    .optional(),
+    .max(1000, { message: 'note must not exceed 1000 characters' }),
   images: z
     .array(z.string().url({ message: 'each image must be a valid URL' }))
     .default([]),
-  assetIds: z.array(z.number().int().positive()).optional().default([]),
+  assetIds: z.array(z.number().int().positive()).default([]),
 });
 
 export const StaffGetReviewQuerySchema = z.object({
