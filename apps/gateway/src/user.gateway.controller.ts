@@ -21,7 +21,6 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { darcula } from '@react-email/components';
 import { handlerErrorResponse, handleZodError } from 'libs/common/helpers';
 import { USER_SERVICE } from 'libs/common/src/constants/service-name.constant';
 import { ActiveUser } from 'libs/common/src/decorator/active-user.decorator';
@@ -153,22 +152,22 @@ export type UpdateMaintenanceStatsDTO = z.infer<
 export type AssetIdsDTO = z.infer<typeof AssetIdsSchema>;
 
 // DTO classes for Swagger documentation - Updated field names
-class MaintenanceSuggestionOptionsSwaggerDTO {
-  @ApiProperty({ required: false, default: 'byAssetType' })
-  type?: string;
+// class MaintenanceSuggestionOptionsSwaggerDTO {
+//   @ApiProperty({ required: false, default: 'byAssetType' })
+//   type?: string;
 
-  @ApiProperty({ required: false, minimum: 1, maximum: 50 })
-  limit?: number;
+//   @ApiProperty({ required: false, minimum: 1, maximum: 50 })
+//   limit?: number;
 
-  @ApiProperty({ required: false, enum: ['HIGH', 'MEDIUM', 'LOW'] })
-  priorityFilter?: 'HIGH' | 'MEDIUM' | 'LOW';
+//   @ApiProperty({ required: false, enum: ['HIGH', 'MEDIUM', 'LOW'] })
+//   priorityFilter?: 'HIGH' | 'MEDIUM' | 'LOW';
 
-  @ApiProperty({ required: false })
-  dueSoon?: boolean;
+//   @ApiProperty({ required: false })
+//   dueSoon?: boolean;
 
-  @ApiProperty({ required: false, minimum: 1 })
-  categoryId?: number;
-}
+//   @ApiProperty({ required: false, minimum: 1 })
+//   categoryId?: number;
+// }
 
 class CreateAssetSwaggerDTO {
   @ApiProperty({
@@ -281,7 +280,7 @@ class AssetIdsSwaggerDTO {
   @ApiProperty({
     description: 'Array of asset IDs',
     type: [Number],
-    minItems: 1,
+    minItems: 1
   })
   assetIds: number[];
 }
@@ -292,7 +291,7 @@ export class UserGatewayController {
   constructor(
     @Inject(USER_SERVICE)
     private readonly userRawTcpClient: RawTcpClientService,
-  ) {}
+  ) { }
 
   @Patch('update-customer-information')
   async updateCustomer(
@@ -568,6 +567,7 @@ export class UserGatewayController {
     }
   }
   @Post('create-review/:bookingId')
+  @Post('create-review/:bookingId')
   @ApiOperation({ summary: 'Create a new review for a booking' })
   @ApiParam({
     name: 'bookingId',
@@ -758,6 +758,7 @@ export class UserGatewayController {
   ) {
     try {
       const options = MaintenanceSuggestionOptionsSchema.parse(rawQuery);
+
 
       const data = await this.userRawTcpClient.send({
         type: 'SUGGEST_FOR_CUSTOMER',

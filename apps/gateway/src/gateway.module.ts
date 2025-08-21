@@ -35,6 +35,7 @@ import { StaffGatewayController } from './staff.gateway.controller';
 import { AdminGatewayController } from './admin.gateway.controller';
 import { PaymentGatewayController } from './payment.gateway.controller';
 import { ChatGateway } from './chat.gateway.controller';
+import { ProviderGatewayController } from './provider-gateway-controller/provider.controller';
 // import { NotificationGatewayController } from './notification.gateway.controller';
 
 @Module({
@@ -113,6 +114,7 @@ import { ChatGateway } from './chat.gateway.controller';
     PublicGatewayController,
     ManageBookingsGatewayController,
     StaffGatewayController,
+    ProviderGatewayController,
     AdminGatewayController,
     PaymentGatewayController,
     // NotificationGatewayController,

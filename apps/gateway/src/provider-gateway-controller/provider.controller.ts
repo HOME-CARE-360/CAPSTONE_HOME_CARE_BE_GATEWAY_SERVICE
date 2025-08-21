@@ -28,7 +28,7 @@ export enum GranularitySwaggerEnum {
 }
 @Controller('providers')
 @UseGuards(VerifiedProviderGuard)
-export class UserGatewayController {
+export class ProviderGatewayController {
   constructor(
     @Inject(USER_SERVICE)
     private readonly userRawTcpClient: RawTcpClientService,
@@ -54,7 +54,6 @@ export class UserGatewayController {
       handleZodError(error);
     }
   }
-
   @Get('reviews')
   async getReviewsByProviderId(@ActiveUser('providerId') providerId: number) {
     try {
