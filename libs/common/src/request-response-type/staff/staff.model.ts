@@ -68,9 +68,6 @@ export const CreateInspectionReportSchema = z.object({
   bookingId: z.number().int().positive({
     message: 'bookingId must be a positive integer',
   }),
-  staffId: z.number().int().positive({
-    message: 'staffId must be a positive integer',
-  }),
   estimatedTime: z
     .number()
     .int()
