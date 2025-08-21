@@ -88,15 +88,12 @@ export const MaintenanceSuggestionOptionsSchema = z.object({
 });
 
 const CreateAssetBase = z.object({
-  customerId: z.coerce.number().int().positive(),   
   categoryId: z.coerce.number().int().positive(),
   brand: z.string().min(1).max(100).optional(),
   model: z.string().min(1).max(100).optional(),
   serial: z.string().max(255).optional(),
   nickname: z.string().min(1).max(255).optional(),
   purchaseDate: z.coerce.date().optional(),
-  lastMaintenanceDate: z.coerce.date().optional(),
-  totalMaintenanceCount: z.coerce.number().int().min(0).optional(),
 });
 
 
@@ -172,7 +169,7 @@ export type AssetIdsDTO = z.infer<typeof AssetIdsSchema>;
 //   categoryId?: number;
 // }
 
-class CreateAssetSwaggerDTO {
+export class CreateAssetSwaggerDTO {
   @ApiProperty({
     description: 'Category ID (REQUIRED - must exist in database)',
     minimum: 1,
@@ -199,28 +196,12 @@ class CreateAssetSwaggerDTO {
   })
   nickname?: string;
 
-  @ApiProperty({
+   @ApiProperty({
     required: false,
-    description: 'Asset description',
-    maxLength: 1000,
+    description: 'Purchase date (ISO string)',
+    example: '2025-08-21T00:00:00.000Z',
   })
-  description?: string;
-
-  @ApiProperty({ required: false, description: 'Purchase date (ISO string)' })
   purchaseDate?: string;
-
-  @ApiProperty({
-    required: false,
-    description: 'Last maintenance date (ISO string)',
-  })
-  lastMaintenanceDate?: string;
-
-  @ApiProperty({
-    required: false,
-    description: 'Total maintenance count',
-    minimum: 0,
-  })
-  totalMaintenanceCount?: number;
 }
 
 class UpdateAssetSwaggerDTO {
@@ -804,20 +785,32 @@ export class UserGatewayController {
     }
   }
 
- @Post('assets')
+@Post(':customerId/assets') // route có param customerId
 @ApiOperation({ summary: 'Create a new customer asset' })
+@ApiParam({
+  name: 'customerId',
+  type: Number,
+  required: true,
+  description: 'Customer ID (must exist in database)',
+})
 @ApiBody({ type: CreateAssetSwaggerDTO })
 @ApiResponse({ status: 201, description: 'Customer asset created successfully' })
 @ApiResponse({ status: 400, description: 'Bad request - Invalid input data' })
 @ApiResponse({ status: 401, description: 'Unauthorized' })
-async createAsset(@Body() body: unknown) {
+async createAsset(
+  @Param('customerId', ParseIntPipe) customerId: number,
+  @Body() body: unknown,
+) {
   try {
     const validated: CreateAssetDTO = CreateAssetSchema.parse(body);
-
-    // lấy luôn customerId trong validated
+    console.log('Validated asset data:', validated);
+    console.log('Customer ID:', customerId);
     const data = await this.userRawTcpClient.send({
       type: 'CREATE_CUSTOMER_ASSET',
-      data: validated,
+      data: {
+        customerId,
+        ...validated,
+      },
     });
 
     handlerErrorResponse(data);
@@ -827,43 +820,7 @@ async createAsset(@Body() body: unknown) {
     handleZodError(error);
   }
 }
-
-
-  @Patch('assets/:assetId')
-  @ApiOperation({ summary: 'Update customer asset' })
-  @ApiParam({ name: 'assetId', type: Number, required: true })
-  async updateAsset(
-    @ActiveUser('customerId') customerId: number,
-    @Param('assetId', ParseIntPipe) assetId: number,
-    @Body() body: UpdateAssetSwaggerDTO,
-  ) {
-    try {
-      const validatedData = UpdateAssetSchema.parse(body);
-      const processedData = {
-        ...validatedData,
-        purchaseDate: validatedData.purchaseDate
-          ? new Date(validatedData.purchaseDate).toISOString()
-          : undefined,
-        lastMaintenanceDate: validatedData.lastMaintenanceDate
-          ? new Date(validatedData.lastMaintenanceDate).toISOString()
-          : undefined,
-      };
-
-      const data = await this.userRawTcpClient.send({
-        type: 'UPDATE_CUSTOMER_ASSET',
-        customerId,
-        assetId,
-        data: processedData,
-      });
-
-      handlerErrorResponse(data);
-      return data;
-    } catch (error) {
-      if (error instanceof HttpException) throw error;
-      handleZodError(error);
-    }
-  }
-
+  
   @Delete('assets/:assetId')
   @ApiOperation({ summary: 'Remove customer asset' })
   @ApiParam({ name: 'assetId', type: Number, required: true })
@@ -913,30 +870,6 @@ async createAsset(@Body() body: unknown) {
       handleZodError(error);
     }
   }
-
-  // @Get('assets/by-ids')
-  // @ApiOperation({ summary: 'Get customer assets by IDs' })
-  // async getAssetsByIds(
-  //   @Param('customerId', ParseIntPipe) customerId: number,
-  //   @Body() body: AssetIdsSwaggerDTO,
-  // ) {
-  //   try {
-  //     const validatedData = AssetIdsSchema.parse(body);
-
-  //     const data = await this.userRawTcpClient.send({
-  //       type: 'GET_CUSTOMER_ASSETS_BY_IDS',
-  //       customerId,
-  //       assetIds: validatedData.assetIds,
-  //     });
-
-  //     handlerErrorResponse(data);
-  //     return data;
-  //   } catch (error) {
-  //     if (error instanceof HttpException) throw error;
-  //     handleZodError(error);
-  //   }
-  // }
-
   @Patch('assets/:assetId/stats')
   @ApiOperation({ summary: 'Update asset maintenance statistics' })
   @ApiParam({ name: 'assetId', type: Number, required: true })
