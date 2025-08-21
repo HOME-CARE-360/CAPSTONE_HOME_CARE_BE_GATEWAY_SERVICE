@@ -98,7 +98,7 @@ async function bootstrap() {
     ];
     const ServiceProviderModules = [
         'PUBLICS',
-        'AUTH', 'SERVICES', 'BOOKINGS',
+        'AUTH', 'SERVICES', 'BOOKINGS', "PROVIDERS",
         'SCHEDULE', 'STAFFSCHEDULECATEGORY', 'MANAGE-STAFFS', 'MANAGE-SERVICES', 'MANAGE-BOOKINGS',
         'CHATMESSAGES', 'REWARDS', 'WORK_SHIFT_TEMPLATE', "PAYMENTS"
     ];

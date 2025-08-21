@@ -33,7 +33,7 @@ export class ProviderGatewayController {
     @Inject(USER_SERVICE)
     private readonly userRawTcpClient: RawTcpClientService,
     @Inject(PROVIDER_SERVICE) private readonly providerClient: ClientProxy,
-  ) {}
+  ) { }
 
   @Patch('update-service-provider-information')
   async updateServiceProviderInformation(
@@ -98,6 +98,8 @@ export class ProviderGatewayController {
     @ActiveUser('providerId') providerId: number,
   ) {
     {
+      console.log(params);
+
       try {
         return await lastValueFrom(
           this.providerClient.send(
