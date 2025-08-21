@@ -103,7 +103,7 @@ export class ProviderGatewayController {
       try {
         return await lastValueFrom(
           this.providerClient.send(
-            { cmd: 'dashboard' },
+            { cmd: 'provider.stats' },
             {
               providerId,
               params,
