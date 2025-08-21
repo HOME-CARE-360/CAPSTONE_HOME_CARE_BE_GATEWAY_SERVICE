@@ -79,7 +79,7 @@ export const CreateInspectionReportSchema = z.object({
   images: z
     .array(z.string().url({ message: 'each image must be a valid URL' }))
     .default([]),
-  assetIds: z.array(z.number().int().positive()).default([]),
+  assetIds: z.array(z.number().int().positive()).default([]).optional(),
 });
 
 export const StaffGetReviewQuerySchema = z.object({
