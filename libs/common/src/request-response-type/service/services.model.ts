@@ -15,9 +15,9 @@ export const ServiceBodyPrototype = ServiceSchema.pick({
   categoryId: z.number(),
 });
 export const CreateServiceBodySchema = ServiceBodyPrototype.strict().refine(
-  (data) => data.virtualPrice < data.basePrice,
+  (data) => data.virtualPrice <= data.basePrice,
   {
-    message: 'Virtual price must be less than base price',
+    message: 'Virtual price must be less than or equal base price',
     path: ['virtualPrice'],
   },
 );
@@ -142,9 +142,9 @@ export const UpdateServiceBodySchema = ServiceBodyPrototype.partial()
     (data) =>
       data.virtualPrice === undefined ||
       data.basePrice === undefined ||
-      data.virtualPrice < data.basePrice,
+      data.virtualPrice <= data.basePrice,
     {
-      message: 'Virtual price must be less than base price',
+      message: 'Virtual price must be less than or equal base price',
       path: ['virtualPrice'],
     },
   );
