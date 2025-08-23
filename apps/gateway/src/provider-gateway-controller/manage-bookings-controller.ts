@@ -127,7 +127,7 @@ export class ManageBookingsGatewayController {
     try {
       return await lastValueFrom(
         this.providerClient.send(
-          { cmd: 'assign-staff-to-booking' },
+          { cmd: 'cancel-booking' },
           { body, userId },
         ),
       );
@@ -140,12 +140,13 @@ export class ManageBookingsGatewayController {
   @Post('update-cancel-booking')
   async updateCancelBooking(
     @Body() body: UpdateBookingReportBodyDTO,
+    @ActiveUser('userId') userId: number,
   ) {
     try {
       return await lastValueFrom(
         this.providerClient.send(
           { cmd: 'update-cancel-booking' },
-          { body },
+          { body, userId },
         ),
       );
     } catch (error) {
