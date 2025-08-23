@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { OrderBy, SortByWithDraw } from '../../constants/others.constant';
+import { OrderBy, SortByStaff, SortByWithDraw } from '../../constants/others.constant';
 import { ReportStatus } from '@prisma/client';
 
 export const UpdateProviderReportSchema = z.object({
@@ -30,6 +30,13 @@ export const GetListReportQuerySchema = z.object({
   orderBy: z.enum([OrderBy.Asc, OrderBy.Desc]).default(OrderBy.Desc),
   sortBy: z.enum([SortByWithDraw.CreatedAt]).default(SortByWithDraw.CreatedAt),
 });
+export const GetBookingReportsQuerySchema = z.object({
+  page: z.coerce.number().int().positive().default(1),
+  limit: z.coerce.number().int().positive().default(10),
+  status: z.nativeEnum(ReportStatus).optional(),
+  orderBy: z.enum([OrderBy.Asc, OrderBy.Desc]).default(OrderBy.Desc),
+  sortBy: z.enum([SortByStaff.CreatedAt]).default(SortByStaff.CreatedAt),
+})
 
 export type GetListReportQueryType = z.infer<typeof GetListReportQuerySchema>;
 export type UpdateProviderReportType = z.infer<

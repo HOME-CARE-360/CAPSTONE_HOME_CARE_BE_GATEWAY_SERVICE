@@ -1,7 +1,7 @@
 import { ApiQuery } from '@nestjs/swagger';
 import { VerifiedProviderGuard } from 'libs/common/src/guards/verified-provider.guard';
 import { ActiveUser } from 'libs/common/src/decorator/active-user.decorator';
-import { OrderBy, SortBy } from 'libs/common/src/constants/others.constant';
+import { OrderBy, SortBy, SortByStaff } from 'libs/common/src/constants/others.constant';
 import { PROVIDER_SERVICE } from 'libs/common/src/constants/service-name.constant';
 import { ClientProxy } from '@nestjs/microservices';
 import { lastValueFrom } from 'rxjs';
@@ -26,13 +26,15 @@ import {
   CancelServiceRequestBodyDTO,
   GetServicesRequestQueryDTO,
 } from 'libs/common/src/request-response-type/bookings/booking.dto';
+import { CreateBookingReportBodyDTO, GetBookingReportsQueryDTO, UpdateBookingReportBodyDTO } from 'libs/common/src/request-response-type/provider/provider/provider.dto';
+import { ReportStatus } from '@prisma/client';
 
 @Controller('manage-bookings')
 @UseGuards(VerifiedProviderGuard)
 export class ManageBookingsGatewayController {
   constructor(
     @Inject(PROVIDER_SERVICE) private readonly providerClient: ClientProxy,
-  ) {}
+  ) { }
   @Get('/list-service-request')
   @ApiQuery({
     name: 'page',
@@ -109,6 +111,94 @@ export class ManageBookingsGatewayController {
         this.providerClient.send(
           { cmd: 'get-request-service-detail' },
           { data, providerID },
+        ),
+      );
+    } catch (error) {
+      console.log(error);
+
+      handleZodError(error);
+    }
+  }
+
+  @Post('report-booking')
+  async cancelBooking(
+    @Body() body: CreateBookingReportBodyDTO,
+    @ActiveUser('userId') userId: number,
+  ) {
+    try {
+      return await lastValueFrom(
+        this.providerClient.send(
+          { cmd: 'report-booking' },
+          { body, userId },
+        ),
+      );
+    } catch (error) {
+      console.log(error);
+
+      handleZodError(error);
+    }
+  }
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    example: 1,
+    description: 'Page number',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    example: 10,
+    description: 'Items per page',
+  })
+  @ApiQuery({
+    name: 'status',
+    required: false,
+    enum: ReportStatus,
+    description: 'Filter by status (partial match)',
+  })
+
+  @ApiQuery({
+    name: 'orderBy',
+    required: false,
+    enum: OrderBy,
+    description: 'Sort order: Asc or Desc',
+    example: OrderBy.Desc,
+  })
+  @ApiQuery({
+    name: 'sortBy',
+    required: false,
+    enum: SortByStaff,
+    description: 'Sort field: CreatedAt',
+    example: SortByStaff.CreatedAt,
+  })
+  @Get("get-list-report")
+  async getListReport(@Body() query: GetBookingReportsQueryDTO, @ActiveUser('userId') userId: number) {
+    try {
+      return await lastValueFrom(
+        this.providerClient.send(
+          { cmd: 'get-list-report' },
+          { query, userId },
+        ),
+      );
+    } catch (error) {
+      console.log(error);
+
+      handleZodError(error);
+    }
+  }
+
+  @Post('update-report-booking')
+  async updateCancelBooking(
+    @Body() body: UpdateBookingReportBodyDTO,
+    @ActiveUser('userId') userId: number,
+  ) {
+    try {
+      return await lastValueFrom(
+        this.providerClient.send(
+          { cmd: 'update-report-booking' },
+          { body, userId },
         ),
       );
     } catch (error) {

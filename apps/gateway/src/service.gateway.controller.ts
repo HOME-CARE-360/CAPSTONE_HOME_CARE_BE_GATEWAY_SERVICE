@@ -13,12 +13,13 @@ import {
   GetServicesQueryDTO,
   GetServicesResDTO,
 } from 'libs/common/src/request-response-type/service/services.dto';
+import { ActiveUser } from 'libs/common/src/decorator/active-user.decorator';
 
 @Controller('services')
 export class ServiceGatewayController {
   constructor(
     @Inject(SERVICE_SERVICE) private readonly serviceClient: ClientProxy,
-  ) {}
+  ) { }
   @ApiQuery({
     name: 'page',
     required: false,
@@ -116,4 +117,18 @@ export class ServiceGatewayController {
       handleZodError(error);
     }
   }
+  @Get('get-suggestion')
+  async getSuggestionDevice(@ActiveUser("customerId") customerId: number) {
+    try {
+      return await lastValueFrom(
+        this.serviceClient.send(
+          { cmd: 'get-suggestion' },
+          { customerId },
+        ),
+      );
+    } catch (error) {
+      handleZodError(error);
+    }
+  }
+
 }
