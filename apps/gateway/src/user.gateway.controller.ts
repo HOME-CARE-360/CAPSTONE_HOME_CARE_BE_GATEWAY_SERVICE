@@ -24,6 +24,7 @@ import {
 import { handlerErrorResponse, handleZodError } from 'libs/common/helpers';
 import { USER_SERVICE } from 'libs/common/src/constants/service-name.constant';
 import { ActiveUser } from 'libs/common/src/decorator/active-user.decorator';
+import { IsPublic } from 'libs/common/src/decorator/auth.decorator';
 import { UpdateUserAndCustomerProfileDTO } from 'libs/common/src/request-response-type/customer/customer.dto';
 import {
   createCustomerReportDTO,
@@ -879,6 +880,54 @@ async createAsset(
         assetId,
         lastDate: new Date(validatedData.lastDate).toISOString(),
         totalCount: validatedData.totalCount,
+      });
+
+      handlerErrorResponse(data);
+      return data;
+    } catch (error) {
+      if (error instanceof HttpException) throw error;
+      handleZodError(error);
+    }
+  }
+
+  @IsPublic()
+  @Get('services/:serviceId/reviews')
+  @ApiOperation({ summary: 'Get reviews of a service' })
+  @ApiParam({ name: 'serviceId', type: Number, required: true })
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  @ApiQuery({ name: 'search', required: false, type: String })
+  @ApiQuery({
+    name: 'rating',
+    required: false,
+    type: Number,
+    isArray: true,
+    description: 'rating=4 or rating=4,5 or rating=4&rating=5',
+  })
+  @ApiQuery({ name: 'sortBy', required: false, enum: ['createdAt', 'rating'] })
+  @ApiQuery({ name: 'sortOrder', required: false, enum: ['asc', 'desc'] })
+  @ApiResponse({ status: 200, description: 'Service reviews fetched successfully' })
+  async getServiceReviews(
+    @Param('serviceId', ParseIntPipe) serviceId: number,
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+    @Query('search') search?: string,
+    @Query('rating') rating?: string | string[],
+    @Query('sortBy') sortBy?: 'createdAt' | 'rating',
+    @Query('sortOrder') sortOrder?: 'asc' | 'desc',
+  ) {
+    try {
+      const parsedRating = this.parseRatingQuery(rating);
+
+      const data = await this.userRawTcpClient.send({
+        type: 'GET_REVIEWS_BY_SERVICE_ID',
+        serviceId,
+        page: Number(page ?? 1),
+        limit: Number(limit ?? 10),
+        search,
+        rating: parsedRating,
+        sortBy: sortBy ?? 'createdAt',
+        sortOrder: sortOrder ?? 'desc',
       });
 
       handlerErrorResponse(data);
