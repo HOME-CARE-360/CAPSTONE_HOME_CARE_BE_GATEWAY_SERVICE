@@ -26,13 +26,14 @@ import {
   CancelServiceRequestBodyDTO,
   GetServicesRequestQueryDTO,
 } from 'libs/common/src/request-response-type/bookings/booking.dto';
+import { CreateBookingReportBodyDTO } from 'libs/common/src/request-response-type/provider/provider/provider.dto';
 
 @Controller('manage-bookings')
 @UseGuards(VerifiedProviderGuard)
 export class ManageBookingsGatewayController {
   constructor(
     @Inject(PROVIDER_SERVICE) private readonly providerClient: ClientProxy,
-  ) {}
+  ) { }
   @Get('/list-service-request')
   @ApiQuery({
     name: 'page',
@@ -109,6 +110,25 @@ export class ManageBookingsGatewayController {
         this.providerClient.send(
           { cmd: 'get-request-service-detail' },
           { data, providerID },
+        ),
+      );
+    } catch (error) {
+      console.log(error);
+
+      handleZodError(error);
+    }
+  }
+
+  @Post('cancel-booking')
+  async cancelBooking(
+    @Body() body: CreateBookingReportBodyDTO,
+    @ActiveUser('userId') userId: number,
+  ) {
+    try {
+      return await lastValueFrom(
+        this.providerClient.send(
+          { cmd: 'assign-staff-to-booking' },
+          { body, userId },
         ),
       );
     } catch (error) {

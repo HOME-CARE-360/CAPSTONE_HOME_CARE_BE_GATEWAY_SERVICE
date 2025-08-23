@@ -4,6 +4,7 @@ import {
   CompanyTypeEnum,
   VerificationStatusEnum,
 } from 'libs/common/src/constants/common.constants';
+import { BookingReportSchema } from 'libs/common/src/models/shared-report.model';
 
 export const zodDate = () =>
   z.preprocess(
@@ -19,7 +20,17 @@ export const zodDate = () =>
       invalid_type_error: 'INVALID_DATE',
     }),
   );
+export const CreateBookingReportBodySchema = BookingReportSchema.pick({
+  description: true,
+  imageUrls: true,
+  note: true,
+  reporterType: true,
+  reason: true,
+  reportedCustomerId: true,
+  reportedProviderId: true,
+  bookingId: true,
 
+})
 export const updateServiceProviderSchema = z.object({
   description: z.string().nullable().optional(),
   address: z.string().max(255, 'MAX_LENGTH').optional(),
