@@ -26,7 +26,7 @@ import {
   CancelServiceRequestBodyDTO,
   GetServicesRequestQueryDTO,
 } from 'libs/common/src/request-response-type/bookings/booking.dto';
-import { CreateBookingReportBodyDTO } from 'libs/common/src/request-response-type/provider/provider/provider.dto';
+import { CreateBookingReportBodyDTO, UpdateBookingReportBodyDTO } from 'libs/common/src/request-response-type/provider/provider/provider.dto';
 
 @Controller('manage-bookings')
 @UseGuards(VerifiedProviderGuard)
@@ -129,6 +129,23 @@ export class ManageBookingsGatewayController {
         this.providerClient.send(
           { cmd: 'assign-staff-to-booking' },
           { body, userId },
+        ),
+      );
+    } catch (error) {
+      console.log(error);
+
+      handleZodError(error);
+    }
+  }
+  @Post('update-cancel-booking')
+  async updateCancelBooking(
+    @Body() body: UpdateBookingReportBodyDTO,
+  ) {
+    try {
+      return await lastValueFrom(
+        this.providerClient.send(
+          { cmd: 'update-cancel-booking' },
+          { body },
         ),
       );
     } catch (error) {
