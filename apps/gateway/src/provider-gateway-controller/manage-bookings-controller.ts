@@ -191,6 +191,7 @@ export class ManageBookingsGatewayController {
     }
   }
 
+
   @Post('update-report-booking')
   async updateCancelBooking(
     @Body() body: UpdateBookingReportBodyDTO,

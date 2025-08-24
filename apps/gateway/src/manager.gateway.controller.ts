@@ -48,12 +48,13 @@ import {
 } from 'libs/common/src/request-response-type/report/report.dto';
 import { AccessTokenPayload } from 'libs/common/src/types/jwt.type';
 import { GetServicesForManagerQueryDTO } from 'libs/common/src/request-response-type/service/services.dto';
+import { GetBookingReportQueryDTO } from 'libs/common/src/request-response-type/provider/provider/provider.dto';
 
 @Controller('managers')
 export class ManagerGatewayController {
   constructor(
     @Inject(MANAGER_SERVICE) private readonly managerClient: ClientProxy,
-  ) {}
+  ) { }
   @Patch('change-status-provider')
   @ZodSerializerDto(MessageResDTO)
   async changeStatusProvider(
@@ -214,6 +215,17 @@ export class ManagerGatewayController {
     try {
       return await lastValueFrom(
         this.managerClient.send({ cmd: 'update-withdraw' }, { body, userId }),
+      );
+    } catch (error) {
+      handleZodError(error);
+    }
+  }
+  @Get('get-report-detail/:id')
+  @ZodSerializerDto(MessageResDTO)
+  async getReportDetail(@Param() params: GetBookingReportQueryDTO) {
+    try {
+      return await lastValueFrom(
+        this.managerClient.send({ cmd: 'get-report-detail' }, { reportId: params.id }),
       );
     } catch (error) {
       handleZodError(error);

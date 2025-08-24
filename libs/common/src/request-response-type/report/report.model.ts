@@ -38,6 +38,7 @@ export const GetBookingReportsQuerySchema = z.object({
   sortBy: z.enum([SortByStaff.CreatedAt]).default(SortByStaff.CreatedAt),
 })
 
+
 export type GetListReportQueryType = z.infer<typeof GetListReportQuerySchema>;
 export type UpdateProviderReportType = z.infer<
   typeof UpdateProviderReportSchema
