@@ -152,24 +152,6 @@ export type UpdateMaintenanceStatsDTO = z.infer<
 >;
 export type AssetIdsDTO = z.infer<typeof AssetIdsSchema>;
 
-// DTO classes for Swagger documentation - Updated field names
-// class MaintenanceSuggestionOptionsSwaggerDTO {
-//   @ApiProperty({ required: false, default: 'byAssetType' })
-//   type?: string;
-
-//   @ApiProperty({ required: false, minimum: 1, maximum: 50 })
-//   limit?: number;
-
-//   @ApiProperty({ required: false, enum: ['HIGH', 'MEDIUM', 'LOW'] })
-//   priorityFilter?: 'HIGH' | 'MEDIUM' | 'LOW';
-
-//   @ApiProperty({ required: false })
-//   dueSoon?: boolean;
-
-//   @ApiProperty({ required: false, minimum: 1 })
-//   categoryId?: number;
-// }
-
 export class CreateAssetSwaggerDTO {
   @ApiProperty({
     description: 'Category ID (REQUIRED - must exist in database)',
@@ -205,53 +187,6 @@ export class CreateAssetSwaggerDTO {
   purchaseDate?: string;
 }
 
-class UpdateAssetSwaggerDTO {
-  @ApiProperty({ required: false, description: 'Category ID', minimum: 1 })
-  categoryId?: number;
-
-  @ApiProperty({ required: false, description: 'Asset brand', maxLength: 100 })
-  brand?: string;
-
-  @ApiProperty({ required: false, description: 'Asset model', maxLength: 100 })
-  model?: string;
-
-  @ApiProperty({
-    required: false,
-    description: 'Serial number',
-    maxLength: 255,
-  })
-  serial?: string;
-
-  @ApiProperty({
-    required: false,
-    description: 'Asset nickname/display name',
-    maxLength: 255,
-  })
-  nickname?: string;
-
-  @ApiProperty({
-    required: false,
-    description: 'Asset description',
-    maxLength: 1000,
-  })
-  description?: string;
-
-  @ApiProperty({ required: false, description: 'Purchase date (ISO string)' })
-  purchaseDate?: string;
-
-  @ApiProperty({
-    required: false,
-    description: 'Last maintenance date (ISO string)',
-  })
-  lastMaintenanceDate?: string;
-
-  @ApiProperty({
-    required: false,
-    description: 'Total maintenance count',
-    minimum: 0,
-  })
-  totalMaintenanceCount?: number;
-}
 
 class UpdateMaintenanceStatsSwaggerDTO {
   @ApiProperty({ description: 'Last maintenance date (ISO string)' })
@@ -786,7 +721,7 @@ export class UserGatewayController {
     }
   }
 
-@Post(':customerId/assets') // route có param customerId
+@Post(':customerId/assets')
 @ApiOperation({ summary: 'Create a new customer asset' })
 @ApiParam({
   name: 'customerId',
@@ -844,6 +779,7 @@ async createAsset(
     }
   }
 
+  @IsPublic()
   @Get(':customerId/assets')
   @ApiOperation({ summary: 'Get all assets of a customer' })
   @ApiParam({ name: 'customerId', type: Number, required: true, description: 'Customer ID' })
