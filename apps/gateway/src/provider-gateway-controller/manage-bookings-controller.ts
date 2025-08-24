@@ -174,7 +174,9 @@ export class ManageBookingsGatewayController {
     example: SortByStaff.CreatedAt,
   })
   @Get("get-list-report")
-  async getListReport(@Body() query: GetBookingReportsQueryDTO, @ActiveUser('userId') userId: number) {
+  async getListReport(@Query() query: GetBookingReportsQueryDTO, @ActiveUser('userId') userId: number) {
+    console.log(query);
+
     try {
       return await lastValueFrom(
         this.providerClient.send(
