@@ -236,7 +236,7 @@ export class ManagerGatewayController {
   async getListReport(@Query() query: GetListReportQueryDTO) {
     try {
       return await lastValueFrom(
-        this.managerClient.send({ cmd: 'get-list-report' }, { ...query }),
+        this.managerClient.send({ cmd: 'get-list-report' }, { query }),
       );
     } catch (error) {
       handleZodError(error);
