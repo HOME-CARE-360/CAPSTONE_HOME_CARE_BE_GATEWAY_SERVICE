@@ -10,6 +10,7 @@ import {
   Patch,
   Post,
   Query,
+  ValidationPipe,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -29,6 +30,7 @@ import { UpdateUserAndCustomerProfileDTO } from 'libs/common/src/request-respons
 import {
   createCustomerReportDTO,
   CustomerCompleteBookingDTO,
+  GetMyTxQueryDto,
   LinkBankAccountDTO,
 } from 'libs/common/src/request-response-type/user/user.dto';
 import { RawTcpClientService } from 'libs/common/src/tcp/raw-tcp-client.service';
@@ -866,6 +868,34 @@ async createAsset(
         sortOrder: sortOrder ?? 'desc',
       });
 
+      handlerErrorResponse(data);
+      return data;
+    } catch (error) {
+      if (error instanceof HttpException) throw error;
+      handleZodError(error);
+    }
+  }
+
+  @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })
+  @ApiQuery({ name: 'limit', required: false, type: Number, example: 10 })
+  @ApiQuery({ name: 'status', required: false, type: String })
+  @ApiQuery({ name: 'method', required: false, type: String })
+  @ApiQuery({ name: 'dateFrom', required: false, type: String })
+  @ApiQuery({ name: 'dateTo', required: false, type: String })
+  @ApiQuery({ name: 'sortBy', required: false, type: String })
+  @ApiQuery({ name: 'sortOrder', required: false, type: String })
+  @ApiQuery({ name: 'q', required: false, type: String })
+  @Get('provider-transactions')
+  async getMyPaymentTransactions(
+    @ActiveUser('userId') userId: number,
+    @Query() query: GetMyTxQueryDto,
+  ) {
+    try {
+      const params = { userId, ...query };
+      const data = await this.userRawTcpClient.send({
+        type: 'GET_PAYMENT_TRANSACTIONS_BY_USERID',
+        payload: params,
+      });
       handlerErrorResponse(data);
       return data;
     } catch (error) {

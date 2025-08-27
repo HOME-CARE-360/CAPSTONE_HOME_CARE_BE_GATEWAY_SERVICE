@@ -3,6 +3,7 @@ import {
   createCustomerReportSchema,
   CustomerCompleteBookingSchema,
   GetCustomerInformationParamsSchema,
+  getMyTxQuerySchema,
   LinkBankAccountSchema,
 } from './user.model';
 
@@ -16,3 +17,5 @@ export class CustomerCompleteBookingDTO extends createZodDto(
 export class createCustomerReportDTO extends createZodDto(
   createCustomerReportSchema,
 ) {}
+
+export class GetMyTxQueryDto extends createZodDto(getMyTxQuerySchema) {}
