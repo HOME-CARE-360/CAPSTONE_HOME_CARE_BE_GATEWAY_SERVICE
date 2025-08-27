@@ -12,7 +12,6 @@ export const UpdateProviderReportSchema = z.object({
       ReportStatus.UNDER_REVIEW,
     ])
     .optional(),
-  reviewedAt: z.date().optional(),
   reviewedById: z.number().int().optional(),
   note: z.string().max(1000).optional(),
 });
