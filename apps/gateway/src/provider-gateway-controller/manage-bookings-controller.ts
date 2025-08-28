@@ -26,7 +26,7 @@ import {
   CancelServiceRequestBodyDTO,
   GetServicesRequestQueryDTO,
 } from 'libs/common/src/request-response-type/bookings/booking.dto';
-import { CreateBookingReportBodyDTO, GetBookingReportsQueryDTO, UpdateBookingReportBodyDTO } from 'libs/common/src/request-response-type/provider/provider/provider.dto';
+import { CreateBookingReportBodyDTO, GetBookingReportQueryDTO, GetBookingReportsQueryDTO, UpdateBookingReportBodyDTO } from 'libs/common/src/request-response-type/provider/provider/provider.dto';
 import { ReportStatus } from '@prisma/client';
 
 @Controller('manage-bookings')
@@ -207,6 +207,16 @@ export class ManageBookingsGatewayController {
     } catch (error) {
       console.log(error);
 
+      handleZodError(error);
+    }
+  }
+  @Get('get-report-detail/:id')
+  async getReportDetail(@Param() params: GetBookingReportQueryDTO, @ActiveUser("userId") userId: number) {
+    try {
+      return await lastValueFrom(
+        this.providerClient.send({ cmd: 'get-report-detail' }, { reportId: params.id, userId }),
+      );
+    } catch (error) {
       handleZodError(error);
     }
   }

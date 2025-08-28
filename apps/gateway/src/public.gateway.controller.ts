@@ -44,7 +44,7 @@ export class PublicGatewayController {
     @Inject(USER_SERVICE)
     private readonly userRawTcpClient: RawTcpClientService,
     @Inject(PROVIDER_SERVICE) private readonly providerClient: ClientProxy,
-  ) {}
+  ) { }
 
   @Get('get-staff-information/:staffId')
   async getStaffInformation(@Param('staffId') staffId: number) {
@@ -75,7 +75,7 @@ export class PublicGatewayController {
       handleZodError(error);
     }
   }
-
+  @IsPublic()
   @Get('get-service-provider-information/:providerId')
   async getServiceProviderInformation(@Param('providerId') providerId: number) {
     try {
