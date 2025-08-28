@@ -4,7 +4,7 @@ import { RpcException } from '@nestjs/microservices';
 export const ServiceNotFoundException = new RpcException(
   new UnprocessableEntityException([
     {
-      message: 'Error.ServiceNotFound',
+      message: 'Service not found',
       path: 'serviceId',
     },
   ]),

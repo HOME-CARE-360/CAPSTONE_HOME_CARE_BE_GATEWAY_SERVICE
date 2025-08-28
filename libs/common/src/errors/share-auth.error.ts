@@ -1,13 +1,17 @@
 import { UnauthorizedException, ForbiddenException } from '@nestjs/common';
 
 export const UnauthorizedAccessException = new UnauthorizedException(
-  'Error.UnauthorizedAccess',
+  'Unauthorized access',
 );
+
 export const InvalidAccessTokenException = new UnauthorizedException(
-  'Error.InvalidAccessToken',
+  'Invalid access token',
 );
 
 export const MissingAccessTokenException = new UnauthorizedException(
-  'Error.MissingAccessToken',
+  'Access token is missing',
 );
-export const ForbiddenExceptionRpc = new ForbiddenException();
+
+export const ForbiddenExceptionRpc = new ForbiddenException(
+  'Access to this resource is forbidden',
+);

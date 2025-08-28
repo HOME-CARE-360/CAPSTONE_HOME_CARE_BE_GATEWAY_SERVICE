@@ -1,19 +1,17 @@
 import {
+  BadRequestException,
   ForbiddenException,
   NotFoundException,
-  UnauthorizedException,
 } from '@nestjs/common';
 
 export const ServiceProviderNotFoundException = new NotFoundException([
-  { message: 'Error.ServiceProviderNotFound', path: ['id'] },
+  { message: 'Service provider not found', path: ['id'] },
 ]);
 
-export const MissingProviderIdException = new UnauthorizedException({
-  message: 'Error.MissingProviderId',
-  path: ['providerId'],
-});
+export const MissingProviderIdException = new BadRequestException([
+  { message: 'Provider ID is missing', path: ['providerId'] },
+]);
 
-export const ProviderNotVerifiedException = new ForbiddenException({
-  message: 'Error.ProviderNotVerified',
-  path: ['providerId'],
-});
+export const ProviderNotVerifiedException = new ForbiddenException([
+  { message: 'Service provider has not been verified', path: ['providerId'] },
+]);
