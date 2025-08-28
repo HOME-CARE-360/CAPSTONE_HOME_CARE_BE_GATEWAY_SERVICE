@@ -460,7 +460,7 @@ export class PublicGatewayController {
     return data;
   }
 
-  @IsPublic()
+  
   @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })
   @ApiQuery({ name: 'limit', required: false, type: Number, example: 10 })
   @ApiQuery({ name: 'status', required: false, type: String })
@@ -488,8 +488,6 @@ export class PublicGatewayController {
       handleZodError(error);
     }
   }
-
-  @IsPublic()
   @Get('transactions')
   async getTransactions(
     @ActiveUser('userId') userId: number,
