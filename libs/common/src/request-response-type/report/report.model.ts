@@ -14,6 +14,8 @@ export const UpdateProviderReportSchema = z.object({
     .optional(),
   reviewedById: z.number().int().optional(),
   note: z.string().max(1000).optional(),
+  amount: z.number().optional(),
+  reporterId: z.number().optional(),
 });
 export const GetListReportQuerySchema = z.object({
   status: z
