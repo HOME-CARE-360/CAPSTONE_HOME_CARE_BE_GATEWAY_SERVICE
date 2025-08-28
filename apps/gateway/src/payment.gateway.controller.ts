@@ -125,7 +125,6 @@ export class PaymentGatewayController {
       required: ['bookingId'],
     },
   })
-
   async createProposalTransaction(
     @Body() body: { bookingId: number; method?: PaymentMethod },
     @ActiveUser('userId') userId: number,

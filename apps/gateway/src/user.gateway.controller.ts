@@ -61,15 +61,6 @@ export const ReportQuerySchema = z.object({
   sortOrder: z.enum(['asc', 'desc']).optional().default('desc'),
 });
 
-const GetTransactionsQuerySchema = z.object({
-  page: z.coerce.number().int().positive().default(1),
-  limit: z.coerce.number().int().positive().max(100).default(10),
-  sortBy: z.string().trim().default('createdAt'),
-  sortOrder: z.enum(['asc', 'desc']).default('desc'),
-});
-
-type GetTransactionsQueryDto = z.infer<typeof GetTransactionsQuerySchema>;
-
 export type ReportQueryDTO = z.infer<typeof ReportQuerySchema>;
 class CreateReviewDto {
   @ApiProperty({ description: 'Rating from 1 to 5', minimum: 1, maximum: 5 })
@@ -98,7 +89,6 @@ const CreateAssetBase = z.object({
   nickname: z.string().min(1).max(255).optional(),
   purchaseDate: z.coerce.date().optional(),
 });
-
 
 /** Optional: shared refinement to keep dates consistent */
 const datesNotBefore = <
@@ -181,14 +171,13 @@ export class CreateAssetSwaggerDTO {
   })
   nickname?: string;
 
-   @ApiProperty({
+  @ApiProperty({
     required: false,
     description: 'Purchase date (ISO string)',
     example: '2025-08-21T00:00:00.000Z',
   })
   purchaseDate?: string;
 }
-
 
 class UpdateMaintenanceStatsSwaggerDTO {
   @ApiProperty({ description: 'Last maintenance date (ISO string)' })
@@ -202,7 +191,7 @@ class AssetIdsSwaggerDTO {
   @ApiProperty({
     description: 'Array of asset IDs',
     type: [Number],
-    minItems: 1
+    minItems: 1,
   })
   assetIds: number[];
 }
@@ -213,7 +202,7 @@ export class UserGatewayController {
   constructor(
     @Inject(USER_SERVICE)
     private readonly userRawTcpClient: RawTcpClientService,
-  ) { }
+  ) {}
 
   @Patch('update-customer-information')
   async updateCustomer(
@@ -531,31 +520,6 @@ export class UserGatewayController {
       handleZodError(error);
     }
   }
-  @Get('transactions')
-  async getTransactions(
-    @ActiveUser('userId') userId: number,
-    @Query() rawQuery: Record<string, any>,
-  ) {
-    try {
-      const query: GetTransactionsQueryDto =
-        GetTransactionsQuerySchema.parse(rawQuery);
-
-      const data = await this.userRawTcpClient.send({
-        type: 'GET_TRANSACTIONS_BY_USERID',
-        userId,
-        ...query,
-      });
-
-      handlerErrorResponse(data);
-
-      return {
-        data,
-      };
-    } catch (error) {
-      if (error instanceof HttpException) throw error;
-      handleZodError(error);
-    }
-  }
 
   private parseRatingQuery(
     rating: string | string[] | undefined,
@@ -681,7 +645,6 @@ export class UserGatewayController {
     try {
       const options = MaintenanceSuggestionOptionsSchema.parse(rawQuery);
 
-
       const data = await this.userRawTcpClient.send({
         type: 'SUGGEST_FOR_CUSTOMER',
         customerId,
@@ -723,42 +686,45 @@ export class UserGatewayController {
     }
   }
 
-@Post(':customerId/assets')
-@ApiOperation({ summary: 'Create a new customer asset' })
-@ApiParam({
-  name: 'customerId',
-  type: Number,
-  required: true,
-  description: 'Customer ID (must exist in database)',
-})
-@ApiBody({ type: CreateAssetSwaggerDTO })
-@ApiResponse({ status: 201, description: 'Customer asset created successfully' })
-@ApiResponse({ status: 400, description: 'Bad request - Invalid input data' })
-@ApiResponse({ status: 401, description: 'Unauthorized' })
-async createAsset(
-  @Param('customerId', ParseIntPipe) customerId: number,
-  @Body() body: unknown,
-) {
-  try {
-    const validated: CreateAssetDTO = CreateAssetSchema.parse(body);
-    console.log('Validated asset data:', validated);
-    console.log('Customer ID:', customerId);
-    const data = await this.userRawTcpClient.send({
-      type: 'CREATE_CUSTOMER_ASSET',
-      data: {
-        customerId,
-        ...validated,
-      },
-    });
+  @Post(':customerId/assets')
+  @ApiOperation({ summary: 'Create a new customer asset' })
+  @ApiParam({
+    name: 'customerId',
+    type: Number,
+    required: true,
+    description: 'Customer ID (must exist in database)',
+  })
+  @ApiBody({ type: CreateAssetSwaggerDTO })
+  @ApiResponse({
+    status: 201,
+    description: 'Customer asset created successfully',
+  })
+  @ApiResponse({ status: 400, description: 'Bad request - Invalid input data' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  async createAsset(
+    @Param('customerId', ParseIntPipe) customerId: number,
+    @Body() body: unknown,
+  ) {
+    try {
+      const validated: CreateAssetDTO = CreateAssetSchema.parse(body);
+      console.log('Validated asset data:', validated);
+      console.log('Customer ID:', customerId);
+      const data = await this.userRawTcpClient.send({
+        type: 'CREATE_CUSTOMER_ASSET',
+        data: {
+          customerId,
+          ...validated,
+        },
+      });
 
-    handlerErrorResponse(data);
-    return data;
-  } catch (error) {
-    if (error instanceof HttpException) throw error;
-    handleZodError(error);
+      handlerErrorResponse(data);
+      return data;
+    } catch (error) {
+      if (error instanceof HttpException) throw error;
+      handleZodError(error);
+    }
   }
-}
-  
+
   @Delete('assets/:assetId')
   @ApiOperation({ summary: 'Remove customer asset' })
   @ApiParam({ name: 'assetId', type: Number, required: true })
@@ -784,7 +750,12 @@ async createAsset(
   @IsPublic()
   @Get(':customerId/assets')
   @ApiOperation({ summary: 'Get all assets of a customer' })
-  @ApiParam({ name: 'customerId', type: Number, required: true, description: 'Customer ID' })
+  @ApiParam({
+    name: 'customerId',
+    type: Number,
+    required: true,
+    description: 'Customer ID',
+  })
   @ApiResponse({ status: 200, description: 'Assets retrieved successfully' })
   @ApiResponse({ status: 400, description: 'Bad request' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
@@ -844,7 +815,10 @@ async createAsset(
   })
   @ApiQuery({ name: 'sortBy', required: false, enum: ['createdAt', 'rating'] })
   @ApiQuery({ name: 'sortOrder', required: false, enum: ['asc', 'desc'] })
-  @ApiResponse({ status: 200, description: 'Service reviews fetched successfully' })
+  @ApiResponse({
+    status: 200,
+    description: 'Service reviews fetched successfully',
+  })
   async getServiceReviews(
     @Param('serviceId', ParseIntPipe) serviceId: number,
     @Query('page') page?: number,
@@ -876,26 +850,112 @@ async createAsset(
     }
   }
 
+  @Get('noti/unread')
+  @ApiOperation({ summary: 'Get unread in-app notifications' })
   @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })
   @ApiQuery({ name: 'limit', required: false, type: Number, example: 10 })
-  @ApiQuery({ name: 'status', required: false, type: String })
-  @ApiQuery({ name: 'method', required: false, type: String })
-  @ApiQuery({ name: 'dateFrom', required: false, type: String })
-  @ApiQuery({ name: 'dateTo', required: false, type: String })
-  @ApiQuery({ name: 'sortBy', required: false, type: String })
-  @ApiQuery({ name: 'sortOrder', required: false, type: String })
-  @ApiQuery({ name: 'q', required: false, type: String })
-  @Get('provider-transactions')
-  async getMyPaymentTransactions(
+  @ApiResponse({ status: 200, description: 'Unread notifications fetched' })
+  async listUnread(
     @ActiveUser('userId') userId: number,
-    @Query() query: GetMyTxQueryDto,
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
   ) {
     try {
-      const params = { userId, ...query };
-      const data = await this.userRawTcpClient.send({
-        type: 'GET_PAYMENT_TRANSACTIONS_BY_USERID',
-        payload: params,
-      });
+      const payload = {
+        type: 'GET_UNREAD_IN_APP_NOTIFICATIONS',
+        userId: Number(userId),
+        page: Number(page ?? 1),
+        limit: Number(limit ?? 10),
+      };
+      const data = await this.userRawTcpClient.send(payload);
+      handlerErrorResponse(data);
+      return data;
+    } catch (error) {
+      if (error instanceof HttpException) throw error;
+      handleZodError(error);
+    }
+  }
+
+  // -------- GET all --------
+  @Get('noti/all')
+  @ApiOperation({ summary: 'Get all in-app notifications' })
+  @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })
+  @ApiQuery({ name: 'limit', required: false, type: Number, example: 10 })
+  @ApiResponse({ status: 200, description: 'All notifications fetched' })
+  async listAll(
+    @ActiveUser('userId') userId: number,
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+  ) {
+    try {
+      const payload = {
+        type: 'GET_ALL_IN_APP_NOTIFICATIONS',
+        userId: Number(userId),
+        page: Number(page ?? 1),
+        limit: Number(limit ?? 10),
+      };
+      const data = await this.userRawTcpClient.send(payload);
+      handlerErrorResponse(data);
+      return data;
+    } catch (error) {
+      if (error instanceof HttpException) throw error;
+      handleZodError(error);
+    }
+  }
+
+  @Patch('noti/:id/read')
+  @ApiOperation({ summary: 'Mark one notification as read' })
+  @ApiParam({ name: 'id', type: Number })
+  async markOneRead(
+    @Param('id', ParseIntPipe) id: number,
+    @ActiveUser('userId') _userId: number,
+  ) {
+    try {
+      const payload = {
+        type: 'MARK_IN_APP_NOTIFICATION_AS_READ',
+        notificationId: Number(id),
+      };
+      const data = await this.userRawTcpClient.send(payload);
+      handlerErrorResponse(data);
+      return data;
+    } catch (error) {
+      if (error instanceof HttpException) throw error;
+      handleZodError(error);
+    }
+  }
+
+  // -------- PATCH mark all read --------
+  @Patch('noti/read-all')
+  @ApiOperation({ summary: 'Mark all notifications as read for current user' })
+  async markAllRead(@ActiveUser('userId') userId: number) {
+    try {
+      const payload = {
+        type: 'MARK_ALL_IN_APP_NOTIFICATIONS_AS_READ_FOR_USER',
+        userId: Number(userId),
+      };
+      const data = await this.userRawTcpClient.send(payload);
+      handlerErrorResponse(data);
+      return data;
+    } catch (error) {
+      if (error instanceof HttpException) throw error;
+      handleZodError(error);
+    }
+  }
+
+  // -------- DELETE one --------
+  @Delete('noti/:id')
+  @ApiOperation({ summary: 'Delete one notification' })
+  @ApiParam({ name: 'id', type: Number })
+  async deleteOne(
+    @Param('id', ParseIntPipe) id: number,
+    @ActiveUser('userId') _userId: number,
+  ) {
+    try {
+      const payload = {
+        type: 'DELETE_IN_APP_NOTIFICATION',
+        notificationId: Number(id),
+      };
+      const data = await this.userRawTcpClient.send(payload);
       handlerErrorResponse(data);
       return data;
     } catch (error) {

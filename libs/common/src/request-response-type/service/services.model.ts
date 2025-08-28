@@ -57,8 +57,8 @@ export const GetServicesQuerySchema = z.object({
       return value;
     }, z.array(z.coerce.number().int().positive()))
     .optional(),
-  categories: z.preprocess(
-    (value) => {
+  categories: z
+    .preprocess((value) => {
       if (typeof value === 'string' || typeof value === 'number') {
         return [Number(value)];
       }
@@ -66,9 +66,8 @@ export const GetServicesQuerySchema = z.object({
         return value.map((v) => Number(v));
       }
       return value;
-    },
-    z.array(z.coerce.number().int().positive())
-  ).optional(),
+    }, z.array(z.coerce.number().int().positive()))
+    .optional(),
 
   minPrice: z.coerce.number().positive().optional(),
   maxPrice: z.coerce.number().positive().optional(),

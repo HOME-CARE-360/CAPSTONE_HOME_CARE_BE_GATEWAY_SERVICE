@@ -1,152 +1,282 @@
-// import {
-//   WebSocketGateway,
-//   WebSocketServer,
-//   SubscribeMessage,
-//   ConnectedSocket,
-//   MessageBody,
-// } from '@nestjs/websockets';
-// import { Inject, UseGuards } from '@nestjs/common';
-// import { Server, Socket } from 'socket.io';
-// import { WsAccessTokenGuard } from 'libs/common/src/guards/access-token-socket.guard';
-// import { WsUser } from 'libs/common/src/decorator/active-user.decorator';
-// import { AccessTokenPayload } from 'libs/common/src/types/jwt.type';
-// import { RawTcpClientService } from 'libs/common/src/tcp/raw-tcp-client.service';
-// import { NOTIFICATION_SERVICE } from 'libs/common/src/constants/service-name.constant';
-// import { handlerErrorResponse } from 'libs/common/helpers';
+import {
+  WebSocketGateway,
+  WebSocketServer,
+  SubscribeMessage,
+  ConnectedSocket,
+  MessageBody,
+  OnGatewayConnection,
+  OnGatewayDisconnect,
+  OnGatewayInit,
+} from '@nestjs/websockets';
+import { Inject, Logger, UseGuards } from '@nestjs/common';
+import { Server, Socket } from 'socket.io';
+import { WsAccessTokenGuard } from 'libs/common/src/guards/access-token-socket.guard';
+import { WsUser } from 'libs/common/src/decorator/active-user.decorator';
+import { AccessTokenPayload } from 'libs/common/src/types/jwt.type';
+import { RawTcpClientService } from 'libs/common/src/tcp/raw-tcp-client.service';
+import { USER_SERVICE } from 'libs/common/src/constants/service-name.constant';
+import { handlerErrorResponse } from 'libs/common/helpers';
 
-// const roomOfUser = (id: number) => `user:${id}`;
+const roomOfUser = (id: number) => `user:${id}`;
 
-// @UseGuards(WsAccessTokenGuard)
-// @WebSocketGateway({
-//   cors: true,
-//   namespace: '/notifications',
-// })
-// export class NotificationsGateway {
-//   @WebSocketServer()
-//   server: Server;
-//   constructor(
-//     @Inject(NOTIFICATION_SERVICE)
-//     private readonly notificationRawTcpClient: RawTcpClientService,
-//   ) {}
+@UseGuards(WsAccessTokenGuard)
+@WebSocketGateway({
+  cors: true,
+  namespace: '/notifications',
+})
+export class NotificationsGateway
+  implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
+{
+  private readonly logger = new Logger(NotificationsGateway.name);
 
-//   @SubscribeMessage('notifications:subscribe')
-//   handleSubscribe(
-//     @ConnectedSocket() socket: Socket,
-//     @WsUser() user: AccessTokenPayload,
-//   ) {
-//     const userId = Number(user.userId);
-//     if (!userId) {
-//       console.warn('Unauthorized WebSocket subscription attempt.');
-//       return { success: false, message: 'Unauthorized' };
-//     }
+  @WebSocketServer()
+  server: Server;
 
-//     socket.join(roomOfUser(userId));
-//     socket.emit('system:hello', { userId, ts: Date.now() });
-//     console.log(`User ${userId} subscribed to notifications and joined room.`);
-//     return { success: true };
-//   }
-//   pushNewNotification(userId: number, payload: any) {
-//     this.server.to(roomOfUser(userId)).emit('notification:new', payload);
-//     console.log(`New notification pushed to user ${userId}:`, payload);
-//   }
+  constructor(
+    @Inject(USER_SERVICE)
+    private readonly notiClient: RawTcpClientService,
+  ) {}
 
-//   @SubscribeMessage('notifications:listUnread')
-//   async listUnread(
-//     @MessageBody() query: { page?: number; limit?: number },
-//     @WsUser() user: AccessTokenPayload,
-//   ) {
-//     try {
-//       const response = await this.notificationRawTcpClient.send({
-//         type: 'GET_UNREAD_IN_APP_NOTIFICATIONS',
-//         userId: Number(user.userId),
-//         page: query?.page ?? 1,
-//         limit: query?.limit ?? 10,
-//       });
+  afterInit(server: Server) {
+    this.logger.log('🚀 NotificationsGateway initialized successfully');
+    this.logger.log(
+      `📡 WebSocket server listening on namespace: /notifications`,
+    );
+  }
 
-//       handlerErrorResponse(response);
-//       console.log(`Unread notifications retrieved for user ${user.userId}.`);
-//       return { success: true, ...response };
-//     } catch (err: any) {
-//       console.error(`Error listing unread notifications for user ${user.userId}:`, err.message);
-//       return { success: false, message: err.message || 'Failed to retrieve unread notifications' };
-//     }
-//   }
+  handleConnection(socket: Socket) {
+    this.logger.log(`🔗 New socket connection: ${socket.id}`);
 
-//   @SubscribeMessage('notifications:listAll')
-//   async listAll(
-//     @MessageBody() query: { page?: number; limit?: number },
-//     @WsUser() user: AccessTokenPayload,
-//   ) {
-//     try {
-//       const response = await this.notificationRawTcpClient.send({
-//         type: 'GET_ALL_IN_APP_NOTIFICATIONS',
-//         userId: Number(user.userId),
-//         page: query?.page ?? 1,
-//         limit: query?.limit ?? 10,
-//       });
+    // Log client info
+    const clientInfo = {
+      socketId: socket.id,
+      remoteAddress: socket.handshake.address,
+      userAgent: socket.handshake.headers['user-agent'],
+      timestamp: new Date().toISOString(),
+    };
+    this.logger.debug(`Client info: ${JSON.stringify(clientInfo)}`);
+  }
 
-//       handlerErrorResponse(response);
-//       console.log(`All notifications retrieved for user ${user.userId}.`);
-//       return { success: true, ...response };
-//     } catch (err: any) {
-//       console.error(`Error listing all notifications for user ${user.userId}:`, err.message);
-//       return { success: false, message: err.message || 'Failed to retrieve all notifications' };
-//     }
-//   }
+  handleDisconnect(socket: Socket) {
+    this.logger.log(`❌ Socket disconnected: ${socket.id}`);
+  }
 
-//   @SubscribeMessage('notifications:markRead')
-//   async markRead(
-//     @MessageBody() payload: { notificationId: number },
-//     @WsUser() user: AccessTokenPayload,
-//   ) {
-//     try {
-//       const response = await this.notificationRawTcpClient.send({
-//         type: 'MARK_IN_APP_NOTIFICATION_AS_READ',
-//         notificationId: payload.notificationId,
-//       });
-//       handlerErrorResponse(response);
-//       console.log(`Notification ${payload.notificationId} marked as read for user ${user.userId}.`);
-//       return { success: true, ...response };
-//     } catch (err: any) {
-//       console.error(`Error marking notification ${payload.notificationId} as read for user ${user.userId}:`, err.message);
-//       return { success: false, message: err.message || 'Failed to mark notification as read' };
-//     }
-//   }
+  @SubscribeMessage('notifications:subscribe')
+  handleSubscribe(
+    @ConnectedSocket() socket: Socket,
+    @WsUser() user: AccessTokenPayload,
+  ) {
+    const userId = Number(user.userId);
+    if (!userId) {
+      this.logger.warn(
+        `⚠️ Unauthorized WebSocket subscription attempt from socket: ${socket.id}`,
+      );
+      return { success: false, message: 'Unauthorized' };
+    }
 
-//   @SubscribeMessage('notifications:markAllRead')
-//   async markAllRead(
-//     @WsUser() user: AccessTokenPayload,
-//   ) {
-//     try {
-//       const response = await this.notificationRawTcpClient.send({
-//         type: 'MARK_ALL_IN_APP_NOTIFICATIONS_AS_READ_FOR_USER',
-//         userId: Number(user.userId),
-//       });
-//       handlerErrorResponse(response);
-//       console.log(`All notifications marked as read for user ${user.userId}.`);
-//       return { success: true, ...response };
-//     } catch (err: any) {
-//       console.error(`Error marking all notifications as read for user ${user.userId}:`, err.message);
-//       return { success: false, message: err.message || 'Failed to mark all notifications as read' };
-//     }
-//   }
+    const userRoom = roomOfUser(userId);
+    socket.join(userRoom);
 
-//   @SubscribeMessage('notifications:delete')
-//   async deleteNotification(
-//     @MessageBody() payload: { notificationId: number },
-//     @WsUser() user: AccessTokenPayload,
-//   ) {
-//     try {
-//       const response = await this.notificationRawTcpClient.send({
-//         type: 'DELETE_IN_APP_NOTIFICATION',
-//         notificationId: payload.notificationId,
-//       });
-//       handlerErrorResponse(response);
-//       console.log(`Notification ${payload.notificationId} deleted for user ${user.userId}.`);
-//       return { success: true, ...response };
-//     } catch (err: any) {
-//       console.error(`Error deleting notification ${payload.notificationId} for user ${user.userId}:`, err.message);
-//       return { success: false, message: err.message || 'Failed to delete notification' };
-//     }
-//   }
-// }
+    // Enhanced logging
+    this.logger.log(`✅ User ${userId} subscribed successfully`);
+    this.logger.log(`🏠 Socket ${socket.id} joined room: ${userRoom}`);
+    this.logger.debug(
+      `👥 Room ${userRoom} now has ${this.server.sockets.adapter.rooms.get(userRoom)?.size || 0} members`,
+    );
+
+    // Send hello message
+    socket.emit('system:hello', {
+      userId,
+      ts: Date.now(),
+      socketId: socket.id,
+      room: userRoom,
+    });
+
+    return { success: true, socketId: socket.id, room: userRoom };
+  }
+
+  // Method to push notifications (for external calls)
+  pushNewNotification(userId: number, payload: any) {
+    const userRoom = roomOfUser(userId);
+    const roomSize = this.server.sockets.adapter.rooms.get(userRoom)?.size || 0;
+
+    if (roomSize > 0) {
+      this.server.to(userRoom).emit('notification:new', payload);
+      this.logger.log(
+        `📨 Pushed notification to ${roomSize} client(s) in room: ${userRoom}`,
+      );
+      this.logger.debug(`📄 Notification payload: ${JSON.stringify(payload)}`);
+    } else {
+      this.logger.warn(
+        `⚠️ No clients in room ${userRoom} to receive notification`,
+      );
+    }
+  }
+
+  @SubscribeMessage('notifications:listUnread')
+  async listUnread(
+    @MessageBody() query: { page?: number; limit?: number },
+    @WsUser() user: AccessTokenPayload,
+  ) {
+    const startTime = Date.now();
+    try {
+      this.logger.debug(
+        `📖 Fetching unread notifications for user ${user.userId}`,
+      );
+
+      const response = await this.notiClient.send({
+        type: 'GET_UNREAD_IN_APP_NOTIFICATIONS',
+        userId: Number(user.userId),
+        page: Number(query?.page) > 0 ? Number(query.page) : 1,
+        limit: Number(query?.limit) > 0 ? Number(query.limit) : 10,
+      });
+
+      handlerErrorResponse(response);
+      const duration = Date.now() - startTime;
+      this.logger.log(
+        `✅ Unread notifications fetched for user ${user.userId} in ${duration}ms`,
+      );
+
+      return { success: true, ...response };
+    } catch (err: any) {
+      const duration = Date.now() - startTime;
+      this.logger.error(
+        `❌ listUnread error for user ${user.userId} after ${duration}ms: ${err?.message || err}`,
+      );
+      return {
+        success: false,
+        message: err?.message || 'Failed to retrieve unread notifications',
+      };
+    }
+  }
+
+  @SubscribeMessage('notifications:listAll')
+  async listAll(
+    @MessageBody() query: { page?: number; limit?: number },
+    @WsUser() user: AccessTokenPayload,
+  ) {
+    const startTime = Date.now();
+    try {
+      this.logger.debug(
+        `📋 Fetching all notifications for user ${user.userId}`,
+      );
+
+      const response = await this.notiClient.send({
+        type: 'GET_ALL_IN_APP_NOTIFICATIONS',
+        userId: Number(user.userId),
+        page: Number(query?.page) > 0 ? Number(query.page) : 1,
+        limit: Number(query?.limit) > 0 ? Number(query.limit) : 10,
+      });
+
+      handlerErrorResponse(response);
+      const duration = Date.now() - startTime;
+      this.logger.log(
+        `✅ All notifications fetched for user ${user.userId} in ${duration}ms`,
+      );
+
+      return { success: true, ...response };
+    } catch (err: any) {
+      const duration = Date.now() - startTime;
+      this.logger.error(
+        `❌ listAll error for user ${user.userId} after ${duration}ms: ${err?.message || err}`,
+      );
+      return {
+        success: false,
+        message: err?.message || 'Failed to retrieve all notifications',
+      };
+    }
+  }
+
+  @SubscribeMessage('notifications:markRead')
+  async markRead(
+    @MessageBody() payload: { notificationId: number },
+    @WsUser() user: AccessTokenPayload,
+  ) {
+    try {
+      this.logger.debug(
+        `📝 Marking notification ${payload.notificationId} as read by user ${user.userId}`,
+      );
+
+      const response = await this.notiClient.send({
+        type: 'MARK_IN_APP_NOTIFICATION_AS_READ',
+        notificationId: Number(payload.notificationId),
+      });
+
+      handlerErrorResponse(response);
+      this.logger.log(
+        `✅ Marked notification ${payload.notificationId} as read by user ${user.userId}`,
+      );
+
+      return { success: true, ...response };
+    } catch (err: any) {
+      this.logger.error(
+        `❌ markRead error for notification ${payload.notificationId} by user ${user.userId}: ${err?.message || err}`,
+      );
+      return {
+        success: false,
+        message: err?.message || 'Failed to mark notification as read',
+      };
+    }
+  }
+
+  @SubscribeMessage('notifications:markAllRead')
+  async markAllRead(@WsUser() user: AccessTokenPayload) {
+    try {
+      this.logger.debug(
+        `📝 Marking all notifications as read for user ${user.userId}`,
+      );
+
+      const response = await this.notiClient.send({
+        type: 'MARK_ALL_IN_APP_NOTIFICATIONS_AS_READ_FOR_USER',
+        userId: Number(user.userId),
+      });
+
+      handlerErrorResponse(response);
+      this.logger.log(
+        `✅ Marked all notifications as read for user ${user.userId}`,
+      );
+
+      return { success: true, ...response };
+    } catch (err: any) {
+      this.logger.error(
+        `❌ markAllRead error for user ${user.userId}: ${err?.message || err}`,
+      );
+      return {
+        success: false,
+        message: err?.message || 'Failed to mark all notifications as read',
+      };
+    }
+  }
+
+  @SubscribeMessage('notifications:delete')
+  async deleteNotification(
+    @MessageBody() payload: { notificationId: number },
+    @WsUser() user: AccessTokenPayload,
+  ) {
+    try {
+      this.logger.debug(
+        `🗑️ Deleting notification ${payload.notificationId} by user ${user.userId}`,
+      );
+
+      const response = await this.notiClient.send({
+        type: 'DELETE_IN_APP_NOTIFICATION',
+        notificationId: Number(payload.notificationId),
+      });
+
+      handlerErrorResponse(response);
+      this.logger.log(
+        `✅ Deleted notification ${payload.notificationId} by user ${user.userId}`,
+      );
+
+      return { success: true, ...response };
+    } catch (err: any) {
+      this.logger.error(
+        `❌ deleteNotification error for notification ${payload.notificationId} by user ${user.userId}: ${err?.message || err}`,
+      );
+      return {
+        success: false,
+        message: err?.message || 'Failed to delete notification',
+      };
+    }
+  }
+}

@@ -27,7 +27,10 @@ import { ActiveUser } from 'libs/common/src/decorator/active-user.decorator';
 import { IsPublic } from 'libs/common/src/decorator/auth.decorator';
 import { MessageResDTO } from 'libs/common/src/dtos/response.dto';
 import { ChangePasswordDTO } from 'libs/common/src/request-response-type/customer/customer.dto';
-import { LinkBankAccountDTO } from 'libs/common/src/request-response-type/user/user.dto';
+import {
+  GetMyTxQueryDto,
+  LinkBankAccountDTO,
+} from 'libs/common/src/request-response-type/user/user.dto';
 import {
   CreateWithdrawBodyDTO,
   GetListWidthDrawProviderQueryDTO,
@@ -37,6 +40,16 @@ import { RawTcpClientService } from 'libs/common/src/tcp/raw-tcp-client.service'
 import { AccessTokenPayload } from 'libs/common/src/types/jwt.type';
 import { ZodSerializerDto } from 'nestjs-zod';
 import { lastValueFrom } from 'rxjs';
+import { z } from 'zod';
+
+const GetTransactionsQuerySchema = z.object({
+  page: z.coerce.number().int().positive().default(1),
+  limit: z.coerce.number().int().positive().max(100).default(10),
+  sortBy: z.string().trim().default('createdAt'),
+  sortOrder: z.enum(['asc', 'desc']).default('desc'),
+});
+
+type GetTransactionsQueryDto = z.infer<typeof GetTransactionsQuerySchema>;
 
 @Controller('publics')
 export class PublicGatewayController {
@@ -44,7 +57,7 @@ export class PublicGatewayController {
     @Inject(USER_SERVICE)
     private readonly userRawTcpClient: RawTcpClientService,
     @Inject(PROVIDER_SERVICE) private readonly providerClient: ClientProxy,
-  ) { }
+  ) {}
 
   @Get('get-staff-information/:staffId')
   async getStaffInformation(@Param('staffId') staffId: number) {
@@ -445,5 +458,59 @@ export class PublicGatewayController {
     });
     handlerErrorResponse(data);
     return data;
+  }
+
+  @IsPublic()
+  @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })
+  @ApiQuery({ name: 'limit', required: false, type: Number, example: 10 })
+  @ApiQuery({ name: 'status', required: false, type: String })
+  @ApiQuery({ name: 'method', required: false, type: String })
+  @ApiQuery({ name: 'dateFrom', required: false, type: String })
+  @ApiQuery({ name: 'dateTo', required: false, type: String })
+  @ApiQuery({ name: 'sortBy', required: false, type: String })
+  @ApiQuery({ name: 'sortOrder', required: false, type: String })
+  @ApiQuery({ name: 'q', required: false, type: String })
+  @Get('provider-transactions')
+  async getMyPaymentTransactions(
+    @ActiveUser('userId') userId: number,
+    @Query() query: GetMyTxQueryDto,
+  ) {
+    try {
+      const params = { userId, ...query };
+      const data = await this.userRawTcpClient.send({
+        type: 'GET_PAYMENT_TRANSACTIONS_BY_USERID',
+        payload: params,
+      });
+      handlerErrorResponse(data);
+      return data;
+    } catch (error) {
+      if (error instanceof HttpException) throw error;
+      handleZodError(error);
+    }
+  }
+
+  @IsPublic()
+  @Get('transactions')
+  async getTransactions(
+    @ActiveUser('userId') userId: number,
+    @Query() rawQuery: Record<string, any>,
+  ) {
+    try {
+      const query: GetTransactionsQueryDto =
+        GetTransactionsQuerySchema.parse(rawQuery);
+
+      const data = await this.userRawTcpClient.send({
+        type: 'GET_TRANSACTIONS_BY_USERID',
+        userId,
+        ...query,
+      });
+      handlerErrorResponse(data);
+      return {
+        data,
+      };
+    } catch (error) {
+      if (error instanceof HttpException) throw error;
+      handleZodError(error);
+    }
   }
 }

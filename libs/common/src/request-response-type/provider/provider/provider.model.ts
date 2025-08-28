@@ -29,8 +29,7 @@ export const CreateBookingReportBodySchema = BookingReportSchema.pick({
   reportedCustomerId: true,
   reportedProviderId: true,
   bookingId: true,
-
-})
+});
 export const UpdateBookingReportBodySchema = BookingReportSchema.pick({
   id: true,
   description: true,
@@ -38,11 +37,10 @@ export const UpdateBookingReportBodySchema = BookingReportSchema.pick({
   note: true,
   reporterType: true,
   reason: true,
-
-})
+});
 export const GetBookingReportBodySchema = BookingReportSchema.pick({
   id: true,
-})
+});
 export const updateServiceProviderSchema = z.object({
   description: z.string().nullable().optional(),
   address: z.string().max(255, 'MAX_LENGTH').optional(),

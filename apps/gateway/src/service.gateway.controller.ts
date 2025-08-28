@@ -19,7 +19,7 @@ import { ActiveUser } from 'libs/common/src/decorator/active-user.decorator';
 export class ServiceGatewayController {
   constructor(
     @Inject(SERVICE_SERVICE) private readonly serviceClient: ClientProxy,
-  ) { }
+  ) {}
   @ApiQuery({
     name: 'page',
     required: false,
@@ -118,17 +118,13 @@ export class ServiceGatewayController {
     }
   }
   @Get('get-suggestion')
-  async getSuggestionDevice(@ActiveUser("customerId") customerId: number) {
+  async getSuggestionDevice(@ActiveUser('customerId') customerId: number) {
     try {
       return await lastValueFrom(
-        this.serviceClient.send(
-          { cmd: 'get-suggestion' },
-          { customerId },
-        ),
+        this.serviceClient.send({ cmd: 'get-suggestion' }, { customerId }),
       );
     } catch (error) {
       handleZodError(error);
     }
   }
-
 }

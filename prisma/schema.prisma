@@ -1,6 +1,5 @@
 generator client {
   provider      = "prisma-client-js"
-// output        = "../node_modules/.prisma/client"
   binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
 }
 
@@ -354,6 +353,8 @@ model PaymentTransaction {
   status              PaymentTransactionStatus
   userId              Int?
   withdrawalRequestId Int?                     @unique
+  bookingReportId     Int?                     @unique
+  BookingReport       BookingReport?           @relation(fields: [bookingReportId], references: [id])
   ServiceRequest      ServiceRequest?          @relation(fields: [serviceRequestId], references: [id])
   WithdrawalRequest   WithdrawalRequest?       @relation(fields: [withdrawalRequestId], references: [id])
 }
@@ -584,26 +585,27 @@ model AssetSuggestion {
 }
 
 model BookingReport {
-  id                                    Int              @id @default(autoincrement())
+  id                                    Int                 @id @default(autoincrement())
   bookingId                             Int
   reporterId                            Int
   reporterType                          ReporterType
   reportedCustomerId                    Int?
   reportedProviderId                    Int?
-  reason                                String           @db.VarChar(255)
-  description                           String?          @db.VarChar(2000)
+  reason                                String              @db.VarChar(255)
+  description                           String?             @db.VarChar(2000)
   imageUrls                             String[]
-  status                                ReportStatus     @default(PENDING)
-  createdAt                             DateTime         @default(now())
+  status                                ReportStatus        @default(PENDING)
+  createdAt                             DateTime            @default(now())
   reviewedAt                            DateTime?
   reviewedById                          Int?
-  note                                  String?          @db.VarChar(1000)
-  reviewResponse                        String?          @db.VarChar(2000)
-  Booking                               Booking          @relation(fields: [bookingId], references: [id], onDelete: Cascade)
-  CustomerProfile                       CustomerProfile? @relation(fields: [reportedCustomerId], references: [id], onDelete: Cascade)
-  ServiceProvider                       ServiceProvider? @relation(fields: [reportedProviderId], references: [id], onDelete: Cascade)
-  User_BookingReport_reporterIdToUser   User             @relation("BookingReport_reporterIdToUser", fields: [reporterId], references: [id], onDelete: Cascade)
-  User_BookingReport_reviewedByIdToUser User?            @relation("BookingReport_reviewedByIdToUser", fields: [reviewedById], references: [id])
+  note                                  String?             @db.VarChar(1000)
+  reviewResponse                        String?             @db.VarChar(2000)
+  Booking                               Booking             @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  CustomerProfile                       CustomerProfile?    @relation(fields: [reportedCustomerId], references: [id], onDelete: Cascade)
+  ServiceProvider                       ServiceProvider?    @relation(fields: [reportedProviderId], references: [id], onDelete: Cascade)
+  User_BookingReport_reporterIdToUser   User                @relation("BookingReport_reporterIdToUser", fields: [reporterId], references: [id], onDelete: Cascade)
+  User_BookingReport_reviewedByIdToUser User?               @relation("BookingReport_reviewedByIdToUser", fields: [reviewedById], references: [id])
+  PaymentTransaction                    PaymentTransaction?
 
   @@index([reportedCustomerId])
   @@index([reportedProviderId])
@@ -669,6 +671,28 @@ model n8nchathistory {
   id         Int    @id @default(autoincrement())
   session_id String @db.VarChar(255)
   message    Json
+}
+
+model SystemConfig {
+  id        Int      @id @default(autoincrement())
+  key       String   @unique
+  value     String?
+  type      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime
+}
+
+model n8n_chat_histories {
+  id         Int    @id @default(autoincrement())
+  session_id String @db.VarChar(255)
+  message    Json
+}
+
+model n8n_data {
+  id        Int                    @id @default(autoincrement())
+  text      String?
+  metadata  Json?
+  embedding Unsupported("vector")?
 }
 
 enum UserStatus {

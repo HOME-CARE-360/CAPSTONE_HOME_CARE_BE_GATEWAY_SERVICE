@@ -36,8 +36,7 @@ import { AdminGatewayController } from './admin.gateway.controller';
 import { PaymentGatewayController } from './payment.gateway.controller';
 import { ChatGateway } from './chat.gateway.controller';
 import { ProviderGatewayController } from './provider-gateway-controller/provider.controller';
-// import { NotificationGatewayController } from './notification.gateway.controller';
-
+import { NotificationsGateway } from './notification.gateway.controller';
 @Module({
   imports: [
     CommonModule,
@@ -117,10 +116,10 @@ import { ProviderGatewayController } from './provider-gateway-controller/provide
     ProviderGatewayController,
     AdminGatewayController,
     PaymentGatewayController,
-    // NotificationGatewayController,
   ],
   providers: [
     ChatGateway,
+    NotificationsGateway,
     {
       provide: APP_PIPE,
       useClass: CustomZodValidationPipe,
@@ -157,14 +156,6 @@ import { ProviderGatewayController } from './provider-gateway-controller/provide
         return new RawTcpClientService(host, port);
       },
     },
-    // {
-    //   provide: NOTIFICATION_SERVICE,
-    //   useFactory: () => {
-    //     const host = process.env.NOTIFICATION_HOST || 'localhost';
-    //     const port = parseInt(process.env.NOTIFICATION_TCP_PORT || '4004');
-    //     return new RawTcpClientService(host, port);
-    //   },
-    // },
   ],
 })
 export class AppModule { }

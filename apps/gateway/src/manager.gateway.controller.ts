@@ -54,7 +54,7 @@ import { GetBookingReportQueryDTO } from 'libs/common/src/request-response-type/
 export class ManagerGatewayController {
   constructor(
     @Inject(MANAGER_SERVICE) private readonly managerClient: ClientProxy,
-  ) { }
+  ) {}
   @Patch('change-status-provider')
   @ZodSerializerDto(MessageResDTO)
   async changeStatusProvider(
@@ -225,7 +225,10 @@ export class ManagerGatewayController {
   async getReportDetail(@Param() params: GetBookingReportQueryDTO) {
     try {
       return await lastValueFrom(
-        this.managerClient.send({ cmd: 'get-report-detail' }, { reportId: params.id }),
+        this.managerClient.send(
+          { cmd: 'get-report-detail' },
+          { reportId: params.id },
+        ),
       );
     } catch (error) {
       handleZodError(error);

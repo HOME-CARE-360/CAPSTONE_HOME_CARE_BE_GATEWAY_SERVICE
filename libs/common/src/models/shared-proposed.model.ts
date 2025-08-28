@@ -7,7 +7,7 @@ export const CreateProposalSchema = z.object({
     z.object({
       serviceId: z.number(),
       quantity: z.number(),
-      price: z.number()
+      price: z.number(),
     }),
   ),
 });
