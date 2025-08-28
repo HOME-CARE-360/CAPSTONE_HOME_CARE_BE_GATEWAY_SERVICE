@@ -3,7 +3,7 @@ import { ReporterType, ReportStatus } from "@prisma/client"
 import { z } from "zod"
 
 export const BookingReportSchema = z.object({
-    id: z.number(),
+    id: z.coerce.number().int(),
     bookingId: z.number(),
     reporterId: z.number(),
     reporterType: z.enum([ReporterType.CUSTOMER, ReporterType.PROVIDER]),
