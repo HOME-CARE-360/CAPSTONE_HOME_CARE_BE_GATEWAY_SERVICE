@@ -1,9 +1,9 @@
-import { Controller, Get, Inject, Param, Query } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Inject, Param, Post, Query } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { handleZodError } from 'libs/common/helpers';
 import { SERVICE_SERVICE } from 'libs/common/src/constants/service-name.constant';
 import { ZodSerializerDto } from 'nestjs-zod';
-import { lastValueFrom } from 'rxjs';
+import { firstValueFrom, lastValueFrom } from 'rxjs';
 import { ApiQuery } from '@nestjs/swagger';
 import { OrderBy, SortBy } from 'libs/common/src/constants/others.constant';
 import { IsPublic } from 'libs/common/src/decorator/auth.decorator';
@@ -14,12 +14,13 @@ import {
   GetServicesResDTO,
 } from 'libs/common/src/request-response-type/service/services.dto';
 import { ActiveUser } from 'libs/common/src/decorator/active-user.decorator';
+import { ChatRequest, chatRequestSchema } from 'libs/common/src/request-response-type/chatAI/chat.model';
 
 @Controller('services')
 export class ServiceGatewayController {
   constructor(
     @Inject(SERVICE_SERVICE) private readonly serviceClient: ClientProxy,
-  ) {}
+  ) { }
   @ApiQuery({
     name: 'page',
     required: false,
@@ -127,4 +128,14 @@ export class ServiceGatewayController {
       handleZodError(error);
     }
   }
+  @Post("chat")
+  async chat(@Body() body: ChatRequest) {
+    const parsed = chatRequestSchema.safeParse(body);
+    if (!parsed.success) {
+      throw new BadRequestException(parsed.error.flatten());
+    }
+    return firstValueFrom(this.serviceClient.send({ cmd: 'chat' }, parsed.data));
+  }
+
+
 }
