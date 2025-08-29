@@ -13,10 +13,11 @@ import {
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { ApiQuery } from '@nestjs/swagger';
-import { WithdrawalStatus } from '@prisma/client';
+import { ReportStatus, WithdrawalStatus } from '@prisma/client';
 import { handlerErrorResponse, handleZodError } from 'libs/common/helpers';
 import {
   OrderBy,
+  SortByStaff,
   SortByWithDraw,
 } from 'libs/common/src/constants/others.constant';
 import {
@@ -27,6 +28,7 @@ import { ActiveUser } from 'libs/common/src/decorator/active-user.decorator';
 import { IsPublic } from 'libs/common/src/decorator/auth.decorator';
 import { MessageResDTO } from 'libs/common/src/dtos/response.dto';
 import { ChangePasswordDTO } from 'libs/common/src/request-response-type/customer/customer.dto';
+import { CreateBookingReportBodyDTO, GetBookingReportQueryDTO, GetBookingReportsQueryDTO, UpdateBookingReportBodyDTO } from 'libs/common/src/request-response-type/provider/provider/provider.dto';
 import {
   GetMyTxQueryDto,
   LinkBankAccountDTO,
@@ -57,7 +59,7 @@ export class PublicGatewayController {
     @Inject(USER_SERVICE)
     private readonly userRawTcpClient: RawTcpClientService,
     @Inject(PROVIDER_SERVICE) private readonly providerClient: ClientProxy,
-  ) {}
+  ) { }
 
   @Get('get-staff-information/:staffId')
   async getStaffInformation(@Param('staffId') staffId: number) {
@@ -460,7 +462,7 @@ export class PublicGatewayController {
     return data;
   }
 
-  
+
   @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })
   @ApiQuery({ name: 'limit', required: false, type: Number, example: 10 })
   @ApiQuery({ name: 'status', required: false, type: String })
@@ -508,6 +510,107 @@ export class PublicGatewayController {
       };
     } catch (error) {
       if (error instanceof HttpException) throw error;
+      handleZodError(error);
+    }
+  }
+  @Post('report-booking')
+  async cancelBooking(
+    @Body() body: CreateBookingReportBodyDTO,
+    @ActiveUser('userId') userId: number,
+  ) {
+    try {
+      return await lastValueFrom(
+        this.providerClient.send({ cmd: 'report-booking' }, { body, userId }),
+      );
+    } catch (error) {
+      console.log(error);
+
+      handleZodError(error);
+    }
+  }
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    example: 1,
+    description: 'Page number',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    example: 10,
+    description: 'Items per page',
+  })
+  @ApiQuery({
+    name: 'status',
+    required: false,
+    enum: ReportStatus,
+    description: 'Filter by status (partial match)',
+  })
+  @ApiQuery({
+    name: 'orderBy',
+    required: false,
+    enum: OrderBy,
+    description: 'Sort order: Asc or Desc',
+    example: OrderBy.Desc,
+  })
+  @ApiQuery({
+    name: 'sortBy',
+    required: false,
+    enum: SortByStaff,
+    description: 'Sort field: CreatedAt',
+    example: SortByStaff.CreatedAt,
+  })
+  @Get('get-list-report')
+  async getListReport(
+    @Query() query: GetBookingReportsQueryDTO,
+    @ActiveUser('userId') userId: number,
+  ) {
+    console.log(query);
+
+    try {
+      return await lastValueFrom(
+        this.providerClient.send({ cmd: 'get-list-report' }, { query, userId }),
+      );
+    } catch (error) {
+      console.log(error);
+
+      handleZodError(error);
+    }
+  }
+
+  @Patch('update-report-booking')
+  async updateCancelBooking(
+    @Body() body: UpdateBookingReportBodyDTO,
+    @ActiveUser('userId') userId: number,
+  ) {
+    try {
+      return await lastValueFrom(
+        this.providerClient.send(
+          { cmd: 'update-report-booking' },
+          { body, userId },
+        ),
+      );
+    } catch (error) {
+      console.log(error);
+
+      handleZodError(error);
+    }
+  }
+  @Get('get-report-detail/:id')
+  async getReportDetail(
+    @Param() params: GetBookingReportQueryDTO,
+    @ActiveUser('userId') userId: number,
+  ) {
+    try {
+      return await lastValueFrom(
+        this.providerClient.send(
+          { cmd: 'get-report-detail' },
+          { reportId: params.id, userId },
+        ),
+      );
+    } catch (error) {
       handleZodError(error);
     }
   }
