@@ -32,7 +32,15 @@ import {
   ResetPasswordDTO,
   UpdateRoleDTO,
 } from 'libs/common/src/request-response-type/admin/admin.dto';
+class CreateSystemConfigDTO {
+  key: string;
+  value: any;
+}
 
+class UpdateSystemConfigDTO {
+  key?: string;
+  value?: any;
+}
 @Controller('admin')
 @ApiTags('Admin Management')
 @ApiBearerAuth()
@@ -974,4 +982,170 @@ export class AdminGatewayController {
       handleZodError(error);
     }
   }
+@Get('system-configs')
+  @ApiOperation({ summary: 'Get all system configurations with filtering' })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Page number (default: 1)',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Items per page (default: 10)',
+  })
+  @ApiQuery({
+    name: 'key',
+    required: false,
+    type: String,
+    description: 'Filter by config key',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'List of system configurations retrieved successfully',
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - Admin access required',
+  })
+  async listSystemConfigs(
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
+    @Query('key') key?: string,
+  ) {
+    try {
+      const data = await this.adminRawTcpClient.send({
+        type: 'ADMIN_LIST_SYSTEM_CONFIG',
+        data: { page, limit, key },
+      });
+      handlerErrorResponse(data);
+      return data;
+    } catch (error) {
+      if (error instanceof HttpException) throw error;
+      handleZodError(error);
+    }
+  }
+
+  @Get('system-configs/:id')
+  @ApiOperation({ summary: 'Get a system configuration by ID' })
+  @ApiParam({ name: 'id', type: Number, description: 'System config ID' })
+  @ApiResponse({
+    status: 200,
+    description: 'System config retrieved successfully',
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - Admin access required',
+  })
+  @ApiResponse({ status: 404, description: 'System config not found' })
+  async getSystemConfigById(@Param('id', ParseIntPipe) id: number) {
+    try {
+      const data = await this.adminRawTcpClient.send({
+        type: 'ADMIN_GET_SYSTEM_CONFIG_BY_ID',
+        data: { id },
+      });
+      handlerErrorResponse(data);
+      return data;
+    } catch (error) {
+      if (error instanceof HttpException) throw error;
+      handleZodError(error);
+    }
+  }
+
+  @Post('system-configs')
+  @ApiOperation({ summary: 'Create a new system configuration' })
+  @ApiResponse({
+    status: 201,
+    description: 'System config created successfully',
+  })
+  @ApiResponse({ status: 400, description: 'Bad request - Invalid input data' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - Admin access required',
+  })
+  @ApiResponse({ status: 409, description: 'Conflict - Key already exists' })
+  async createSystemConfig(
+    @Body() body: CreateSystemConfigDTO,
+    @ActiveUser('userId') userId: number,
+  ) {
+    try {
+      const data = await this.adminRawTcpClient.send({
+        type: 'ADMIN_CREATE_SYSTEM_CONFIG',
+        data: { ...body, adminId: userId },
+      });
+      handlerErrorResponse(data);
+      return data;
+    } catch (error) {
+      if (error instanceof HttpException) throw error;
+      handleZodError(error);
+    }
+  }
+
+  @Patch('system-configs/:id')
+  @ApiOperation({ summary: 'Update a system configuration by ID' })
+  @ApiParam({ name: 'id', type: Number, description: 'System config ID' })
+  @ApiResponse({
+    status: 200,
+    description: 'System config updated successfully',
+  })
+  @ApiResponse({ status: 400, description: 'Bad request - Invalid input data' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - Admin access required',
+  })
+  @ApiResponse({ status: 404, description: 'System config not found' })
+  async updateSystemConfigById(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() body: UpdateSystemConfigDTO,
+    @ActiveUser('userId') userId: number,
+  ) {
+    try {
+      const data = await this.adminRawTcpClient.send({
+        type: 'ADMIN_UPDATE_SYSTEM_CONFIG_BY_ID',
+        data: { id, data: body, adminId: userId },
+      });
+      handlerErrorResponse(data);
+      return data;
+    } catch (error) {
+      if (error instanceof HttpException) throw error;
+      handleZodError(error);
+    }
+  }
+
+  @Delete('system-configs/:id')
+  @ApiOperation({ summary: 'Delete a system configuration by ID' })
+  @ApiParam({ name: 'id', type: Number, description: 'System config ID' })
+  @ApiResponse({
+    status: 200,
+    description: 'System config deleted successfully',
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - Admin access required',
+  })
+  @ApiResponse({ status: 404, description: 'System config not found' })
+  async deleteSystemConfigById(
+    @Param('id', ParseIntPipe) id: number,
+    @ActiveUser('userId') userId: number,
+  ) {
+    try {
+      const data = await this.adminRawTcpClient.send({
+        type: 'ADMIN_DELETE_SYSTEM_CONFIG_BY_ID',
+        data: { id, adminId: userId },
+      });
+      handlerErrorResponse(data);
+      return data;
+    } catch (error) {
+      if (error instanceof HttpException) throw error;
+      handleZodError(error);
+    }
+  }
 }
+
