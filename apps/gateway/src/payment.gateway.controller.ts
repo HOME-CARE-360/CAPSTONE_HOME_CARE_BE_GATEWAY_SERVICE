@@ -270,11 +270,6 @@ export class PaymentGatewayController {
           example: 123,
           description: 'ID of the service request to pay for',
         },
-        amount: {
-          type: 'number',
-          example: 250000,
-          description: 'Amount to pay in VND',
-        },
         paymentMethod: {
           type: 'string',
           enum: Object.values(PaymentMethod),
