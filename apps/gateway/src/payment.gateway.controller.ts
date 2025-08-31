@@ -289,7 +289,6 @@ export class PaymentGatewayController {
     @Body()
     body: {
       serviceRequestId: number;
-      amount: number;
       paymentMethod?: PaymentMethod;
     },
     @ActiveUser('userId') userId: number,
@@ -300,17 +299,7 @@ export class PaymentGatewayController {
         userId,
         timestamp: new Date().toISOString(),
       });
-
-      if (!body.amount || typeof body.amount !== 'number' || body.amount <= 0) {
-        throw new HttpException(
-          {
-            success: false,
-            message: 'amount is required and must be a positive number',
-            error: 'Validation Error',
-          },
-          400,
-        );
-      }
+    
 
       const data = await this.paymentRawTcpClient.send({
         type: 'PAY_EXISTING_SERVICE_REQUEST',
