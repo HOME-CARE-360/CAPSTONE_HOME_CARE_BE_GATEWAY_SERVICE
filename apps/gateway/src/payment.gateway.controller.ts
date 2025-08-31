@@ -317,7 +317,6 @@ export class PaymentGatewayController {
         data: {
           serviceRequestId: body.serviceRequestId,
           userId,
-          amount: body.amount,
           paymentMethod: body.paymentMethod || PaymentMethod.BANK_TRANSFER,
         },
       });

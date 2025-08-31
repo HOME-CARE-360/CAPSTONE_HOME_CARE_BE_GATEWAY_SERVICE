@@ -12,7 +12,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
-import { ApiQuery } from '@nestjs/swagger';
+import { ApiOperation, ApiQuery, ApiResponse } from '@nestjs/swagger';
 import { ReportStatus, WithdrawalStatus } from '@prisma/client';
 import { handlerErrorResponse, handleZodError } from 'libs/common/helpers';
 import {
@@ -21,6 +21,7 @@ import {
   SortByWithDraw,
 } from 'libs/common/src/constants/others.constant';
 import {
+  ADMIN_SERVICE,
   PROVIDER_SERVICE,
   USER_SERVICE,
 } from 'libs/common/src/constants/service-name.constant';
@@ -58,6 +59,8 @@ export class PublicGatewayController {
   constructor(
     @Inject(USER_SERVICE)
     private readonly userRawTcpClient: RawTcpClientService,
+    @Inject(ADMIN_SERVICE)
+    private readonly adminRawTcpClient: RawTcpClientService,
     @Inject(PROVIDER_SERVICE) private readonly providerClient: ClientProxy,
   ) { }
 
@@ -614,4 +617,53 @@ export class PublicGatewayController {
       handleZodError(error);
     }
   }
+
+  @IsPublic()
+  @Get('system-configs')
+    @ApiOperation({ summary: 'Get all system configurations with filtering' })
+    @ApiQuery({
+      name: 'page',
+      required: false,
+      type: Number,
+      description: 'Page number (default: 1)',
+    })
+    @ApiQuery({
+      name: 'limit',
+      required: false,
+      type: Number,
+      description: 'Items per page (default: 10)',
+    })
+    @ApiQuery({
+      name: 'key',
+      required: false,
+      type: String,
+      description: 'Filter by config key',
+    })
+    @ApiResponse({
+      status: 200,
+      description: 'List of system configurations retrieved successfully',
+    })
+    @ApiResponse({ status: 401, description: 'Unauthorized' })
+    @ApiResponse({
+      status: 403,
+      description: 'Forbidden - Admin access required',
+    })
+    async listSystemConfigs(
+      @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+      @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
+      @Query('key') key?: string,
+    ) {
+      try {
+        const data = await this.adminRawTcpClient.send({
+          type: 'ADMIN_LIST_SYSTEM_CONFIG',
+          data: { page, limit, key },
+        });
+        handlerErrorResponse(data);
+        return data;
+      } catch (error) {
+        if (error instanceof HttpException) throw error;
+        handleZodError(error);
+      }
+    }
+  
 }

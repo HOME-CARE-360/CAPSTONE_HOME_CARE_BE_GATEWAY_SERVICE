@@ -982,6 +982,7 @@ export class AdminGatewayController {
       handleZodError(error);
     }
   }
+  
 @Get('system-configs')
   @ApiOperation({ summary: 'Get all system configurations with filtering' })
   @ApiQuery({
