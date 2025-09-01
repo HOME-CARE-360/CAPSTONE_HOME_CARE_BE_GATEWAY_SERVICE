@@ -604,13 +604,13 @@ export class PublicGatewayController {
   @Get('get-report-detail/:id')
   async getReportDetail(
     @Param() params: GetBookingReportQueryDTO,
-    @ActiveUser('userId') userId: number,
+    @ActiveUser() user: AccessTokenPayload,
   ) {
     try {
       return await lastValueFrom(
         this.providerClient.send(
           { cmd: 'get-report-detail' },
-          { reportId: params.id, userId },
+          { reportId: params.id, userId: user.userId, role: user.roles[0] },
         ),
       );
     } catch (error) {
