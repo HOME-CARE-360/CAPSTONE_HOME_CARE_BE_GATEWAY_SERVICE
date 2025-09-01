@@ -607,12 +607,15 @@ export class PublicGatewayController {
     @ActiveUser() user: AccessTokenPayload,
   ) {
     try {
+      console.log(user);
       return await lastValueFrom(
         this.providerClient.send(
           { cmd: 'get-report-detail' },
-          { reportId: params.id, userId: user.userId, role: user.roles[0] },
+          { reportId: params.id, userId: user.userId, role: user.roles[0].name },
         ),
       );
+
+
     } catch (error) {
       handleZodError(error);
     }
