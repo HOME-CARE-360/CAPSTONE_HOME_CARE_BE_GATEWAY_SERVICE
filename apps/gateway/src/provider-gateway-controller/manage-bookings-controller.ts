@@ -190,7 +190,6 @@ export class ManageBookingsGatewayController {
       );
     } catch (error) {
       console.log(error);
-
       handleZodError(error);
     }
   }
