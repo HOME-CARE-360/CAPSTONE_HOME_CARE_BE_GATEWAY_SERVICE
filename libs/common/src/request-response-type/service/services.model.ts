@@ -1,20 +1,23 @@
 import { z } from 'zod';
 import { ServiceSchema } from '../../models/shared-services.model';
 import { OrderBy, SortBy } from '../../constants/others.constant';
-import { ServiceStatus } from '@prisma/client';
+import { ServiceStatus, Unit } from '@prisma/client';
 
 export const ServiceBodyPrototype = ServiceSchema.pick({
   basePrice: true,
   images: true,
   description: true,
   serviceItemsId: true,
+
   name: true,
   virtualPrice: true,
   durationMinutes: true,
 }).extend({
   categoryId: z.number(),
 });
-export const CreateServiceBodySchema = ServiceBodyPrototype.strict().refine(
+export const CreateServiceBodySchema = ServiceBodyPrototype.strict().extend({
+  unit: z.enum([Unit.PER_HOUR, Unit.PER_HOUR, Unit.PER_JOB, Unit.PER_SQUARE_METER]),
+}).refine(
   (data) => data.virtualPrice <= data.basePrice,
   {
     message: 'Virtual price must be less than or equal base price',
