@@ -39,8 +39,8 @@ class CreateSystemConfigDTO {
 }
 
 class UpdateSystemConfigDTO {
-  key?: string;
-  value?: any;
+  value?: string;
+  type?: any;
 }
 @Controller('admin')
 @ApiTags('Admin Management')
@@ -1169,99 +1169,62 @@ export class AdminGatewayController {
     }
   }
 
-  @Patch('system-configs/:id')
-  @ApiOperation({ summary: 'Update a system configuration by ID' })
-  @ApiParam({ name: 'id', type: Number, description: 'System config ID' })
-  @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        // key is usually immutable; do not expose it here unless you explicitly support renaming
-        value: {
-          type: 'string',
-          example: '2',
-          description:
-            'New raw value (string); service will cast according to valueType',
-        },
-        valueType: {
-          type: 'string',
-          enum: ['STRING', 'NUMBER', 'BOOLEAN', 'JSON', 'CRON', 'DURATION'],
-          example: 'NUMBER',
-          description: 'Optionally change how to cast/validate the value',
-        },
-        description: {
-          type: 'string',
-          example: 'Updated: 2 hours cancel deadline',
-        },
-        isSensitive: {
-          type: 'boolean',
-          example: false,
-        },
-        isActive: {
-          type: 'boolean',
-          example: true,
-        },
-        tags: {
-          type: 'array',
-          items: { type: 'string' },
-          example: ['booking', 'policy'],
-        },
-        scope: {
-          type: 'string',
-          example: 'GLOBAL',
-        },
+@Patch('system-configs/:id')
+@ApiOperation({ summary: 'Update a system configuration by ID' })
+@ApiParam({ name: 'id', type: Number, description: 'System config ID' })
+@ApiBody({
+  schema: {
+    type: 'object',
+    properties: {
+      // key is usually immutable; do not expose it here unless you explicitly support renaming
+      value: {
+        type: 'string',
+        example: '2',
+        description:
+          'New raw value (string); service will cast according to valueType',
       },
-      additionalProperties: false,
-    },
-    examples: {
-      update_deadline: {
-        summary: 'Update cancel deadline to 2 hours',
-        value: {
-          value: '2',
-          valueType: 'NUMBER',
-          description: 'Block cancel if within 2 hours',
-          isActive: true,
-        },
+      type: {
+        type: 'string',
+        enum: ['string', 'number', 'boolean', 'json', 'cron', 'duration'],
+        example: 'number',
+        description: 'Optionally change how to cast/validate the value',
       },
-      deactivate_config: {
-        summary: 'Deactivate a config',
-        value: {
-          isActive: false,
-        },
-      },
-      change_to_cron: {
-        summary: 'Change valueType to CRON',
-        value: {
-          value: '0 0 * * *',
-          valueType: 'CRON',
-          description: 'Run at 00:00 daily',
-        },
+      expiresAt: {
+        type: 'string',
+        format: 'date-time',
+        example: '2024-12-31T23:59:59.000Z',
+        description: 'Optional expiration date for the config',
+        nullable: true,
       },
     },
-  })
-  @ApiResponse({ status: 200, description: 'System config updated successfully' })
-  @ApiResponse({ status: 400, description: 'Bad request - Invalid input data' })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
-  @ApiResponse({ status: 404, description: 'System config not found' })
-  async updateSystemConfigById(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() body: UpdateSystemConfigDTO,
-    @ActiveUser('userId') userId: number,
-  ) {
-    try {
-      const data = await this.adminRawTcpClient.send({
-        type: 'ADMIN_UPDATE_SYSTEM_CONFIG_BY_ID',
-        data: { id, data: body, adminId: userId },
-      });
-      handlerErrorResponse(data);
-      return data;
-    } catch (error) {
-      if (error instanceof HttpException) throw error;
-      handleZodError(error);
-    }
-  }
+    additionalProperties: false,
+  },
+})
+@ApiResponse({ status: 200, description: 'System config updated successfully' })
+@ApiResponse({ status: 400, description: 'Bad request - Invalid input data' })
+@ApiResponse({ status: 401, description: 'Unauthorized' })
+@ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
+@ApiResponse({ status: 404, description: 'System config not found' })
+async updateSystemConfigById(
+  @Param('id', ParseIntPipe) id: number,
+  @Body() body: UpdateSystemConfigDTO,
+  @ActiveUser('userId') userId: number,
+) {
+  try {
+    // Send the data structure that matches what your handler expects
+    const data = await this.adminRawTcpClient.send({
+      type: 'ADMIN_UPDATE_SYSTEM_CONFIG_BY_ID',
+      data: { id, ...body }, // Flatten the structure - id and update fields at same level
+    });
+    
+    handlerErrorResponse(data);
+    return data;
+  } catch (error) {
+    if (error instanceof HttpException) throw error;
+    handleZodError(error);
 
+  }
+}
   @Delete('system-configs/:id')
   @ApiOperation({ summary: 'Delete a system configuration by ID' })
   @ApiParam({ name: 'id', type: Number, description: 'System config ID' })
