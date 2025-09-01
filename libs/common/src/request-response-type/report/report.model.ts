@@ -10,7 +10,6 @@ export const UpdateProviderReportSchema = z.object({
   id: z.number().int(),
   status: z.enum([ReportStatus.PENDING, ReportStatus.REJECTED, ReportStatus.RESOLVED, ReportStatus.UNDER_REVIEW]).optional(),
   reviewedById: z.number().int().optional(),
-  paymentTransactionId: z.number().int().optional(),
   note: z.string().max(1000).optional(),
   amount: z.number().optional(),
   reporterId: z.number().optional(),
