@@ -19,6 +19,7 @@ import {
   ApiBearerAuth,
   ApiTags,
   ApiResponse,
+  ApiBody,
 } from '@nestjs/swagger';
 import { ActiveUser } from 'libs/common/src/decorator/active-user.decorator';
 import { ADMIN_SERVICE } from 'libs/common/src/constants/service-name.constant';
@@ -1057,18 +1058,99 @@ export class AdminGatewayController {
     }
   }
 
-  @Post('system-configs')
+   @Post('system-configs')
   @ApiOperation({ summary: 'Create a new system configuration' })
-  @ApiResponse({
-    status: 201,
-    description: 'System config created successfully',
+  @ApiBody({
+    schema: {
+      type: 'object',
+      required: ['key', 'value', 'valueType'],
+      properties: {
+        key: {
+          type: 'string',
+          example: 'SERVICE_REQUEST_CANCEL_DEADLINE_HOURS',
+          description: 'Unique key for the configuration (immutable identifier)',
+        },
+        value: {
+          type: 'string',
+          example: '1',
+          description: 'Raw value stored as string; backend should cast based on valueType',
+        },
+        valueType: {
+          type: 'string',
+          enum: ['STRING', 'NUMBER', 'BOOLEAN', 'JSON', 'CRON', 'DURATION'],
+          example: 'NUMBER',
+          description: 'How to interpret/cast the value',
+        },
+        description: {
+          type: 'string',
+          example:
+            'Minimum hours before start time that a customer is allowed to cancel.',
+        },
+        isSensitive: {
+          type: 'boolean',
+          example: false,
+          description: 'Hide value in GET responses/logs if true',
+        },
+        isActive: {
+          type: 'boolean',
+          example: true,
+          description: 'Whether this config is currently applied',
+        },
+        tags: {
+          type: 'array',
+          items: { type: 'string' },
+          example: ['booking', 'cancellation', 'policy'],
+          description: 'Optional labels for grouping/search',
+        },
+        scope: {
+          type: 'string',
+          example: 'GLOBAL',
+          description: 'Optional scope (e.g., GLOBAL, TENANT, ENV)',
+        },
+      },
+    },
+    examples: {
+      number_example: {
+        summary: 'Numeric config',
+        value: {
+          key: 'SERVICE_REQUEST_CANCEL_DEADLINE_HOURS',
+          value: '1',
+          valueType: 'NUMBER',
+          description: 'Block cancel if within 1 hour of scheduled time',
+          isSensitive: false,
+          isActive: true,
+          tags: ['booking', 'policy'],
+          scope: 'GLOBAL',
+        },
+      },
+      cron_example: {
+        summary: 'CRON schedule config',
+        value: {
+          key: 'BOOKING_AUTOCOMPLETED_CRON',
+          value: '*/10 * * * *',
+          valueType: 'CRON',
+          description: 'Auto-complete booking cron schedule',
+          isSensitive: false,
+          isActive: true,
+        },
+      },
+      json_example: {
+        summary: 'JSON config (value is a JSON string)',
+        value: {
+          key: 'CANCEL_POLICY_WINDOWS',
+          value: '{"soft":2,"hard":1}',
+          valueType: 'JSON',
+          description: 'Soft/hard windows (hours) before schedule',
+          isSensitive: false,
+          isActive: true,
+        },
+      },
+    },
   })
+  @ApiResponse({ status: 201, description: 'System config created successfully' })
   @ApiResponse({ status: 400, description: 'Bad request - Invalid input data' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiResponse({
-    status: 403,
-    description: 'Forbidden - Admin access required',
-  })
+  @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
   @ApiResponse({ status: 409, description: 'Conflict - Key already exists' })
   async createSystemConfig(
     @Body() body: CreateSystemConfigDTO,
@@ -1090,16 +1172,77 @@ export class AdminGatewayController {
   @Patch('system-configs/:id')
   @ApiOperation({ summary: 'Update a system configuration by ID' })
   @ApiParam({ name: 'id', type: Number, description: 'System config ID' })
-  @ApiResponse({
-    status: 200,
-    description: 'System config updated successfully',
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        // key is usually immutable; do not expose it here unless you explicitly support renaming
+        value: {
+          type: 'string',
+          example: '2',
+          description:
+            'New raw value (string); service will cast according to valueType',
+        },
+        valueType: {
+          type: 'string',
+          enum: ['STRING', 'NUMBER', 'BOOLEAN', 'JSON', 'CRON', 'DURATION'],
+          example: 'NUMBER',
+          description: 'Optionally change how to cast/validate the value',
+        },
+        description: {
+          type: 'string',
+          example: 'Updated: 2 hours cancel deadline',
+        },
+        isSensitive: {
+          type: 'boolean',
+          example: false,
+        },
+        isActive: {
+          type: 'boolean',
+          example: true,
+        },
+        tags: {
+          type: 'array',
+          items: { type: 'string' },
+          example: ['booking', 'policy'],
+        },
+        scope: {
+          type: 'string',
+          example: 'GLOBAL',
+        },
+      },
+      additionalProperties: false,
+    },
+    examples: {
+      update_deadline: {
+        summary: 'Update cancel deadline to 2 hours',
+        value: {
+          value: '2',
+          valueType: 'NUMBER',
+          description: 'Block cancel if within 2 hours',
+          isActive: true,
+        },
+      },
+      deactivate_config: {
+        summary: 'Deactivate a config',
+        value: {
+          isActive: false,
+        },
+      },
+      change_to_cron: {
+        summary: 'Change valueType to CRON',
+        value: {
+          value: '0 0 * * *',
+          valueType: 'CRON',
+          description: 'Run at 00:00 daily',
+        },
+      },
+    },
   })
+  @ApiResponse({ status: 200, description: 'System config updated successfully' })
   @ApiResponse({ status: 400, description: 'Bad request - Invalid input data' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiResponse({
-    status: 403,
-    description: 'Forbidden - Admin access required',
-  })
+  @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
   @ApiResponse({ status: 404, description: 'System config not found' })
   async updateSystemConfigById(
     @Param('id', ParseIntPipe) id: number,
@@ -1122,15 +1265,9 @@ export class AdminGatewayController {
   @Delete('system-configs/:id')
   @ApiOperation({ summary: 'Delete a system configuration by ID' })
   @ApiParam({ name: 'id', type: Number, description: 'System config ID' })
-  @ApiResponse({
-    status: 200,
-    description: 'System config deleted successfully',
-  })
+  @ApiResponse({ status: 200, description: 'System config deleted successfully' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiResponse({
-    status: 403,
-    description: 'Forbidden - Admin access required',
-  })
+  @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
   @ApiResponse({ status: 404, description: 'System config not found' })
   async deleteSystemConfigById(
     @Param('id', ParseIntPipe) id: number,
@@ -1149,4 +1286,3 @@ export class AdminGatewayController {
     }
   }
 }
-
