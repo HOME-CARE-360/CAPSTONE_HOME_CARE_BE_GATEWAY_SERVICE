@@ -12,7 +12,6 @@ export const UpdateProviderReportSchema = z.object({
   reviewedById: z.number().int().optional(),
   note: z.string().max(1000).optional(),
   reporterType: z.string(),
-  paymentTransactionId: z.number().int().optional(),
   amount: z.number().optional(),
   reporterId: z.number().optional(),
 });
